@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@400;500;600&family=Public+Sans:wght@400;500;600;700&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #eceff3; }
+  * { box-sizing: border-box; }
+  *::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  * { scrollbar-width: none; }
+  a { color: #5c8bab; text-decoration: none; }
+  a:hover { color: #40688c; }
+</style>
+</helmet>
+
+<section style="padding:48px 44px 90px; font-family:Manrope, system-ui, sans-serif; color:#1c1d22; display:flex; flex-direction:column; gap:30px">
+  <div style="display:flex; flex-direction:column; gap:6px">
+    <div style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9aa0a8">Turn 2 · Typography</div>
+    <div style="font-size:24px; font-weight:700; letter-spacing:-0.02em">Reading at length on the web screen</div>
+    <div style="font-size:14px; color:#4a5058; max-width:660px; line-height:1.6">Same answer, four pairings, at real reading width. <a href="#2a">2a</a> keeps Manrope for UI and hands the body to a serif; <a href="#2b">2b</a> is one family throughout; <a href="#2c">2c</a> is an all-sans text face; <a href="#2d">2d</a> pairs a grotesque UI with a screen serif. Use the size control to sanity-check comfort.</div>
+    <div style="display:flex; align-items:center; gap:10px; padding-top:8px">
+      <sc-for list="{{ sizes }}" as="z" hint-placeholder-count="3">
+        <div onClick="{{ z.select }}" style="{{ z.style }}">{{ z.label }}</div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:32px">
+    <sc-for list="{{ specimens }}" as="s" hint-placeholder-count="4">
+      <div id="{{ s.id }}" style="width:660px; display:flex; flex-direction:column; gap:12px">
+        <div style="display:flex; align-items:center; gap:10px">
+          <span style="font-family:'JetBrains Mono', monospace; font-size:12px; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">{{ s.id }}</span>
+          <span style="font-size:13.5px; font-weight:600">{{ s.name }}</span>
+          <span style="font-size:12.5px; color:#5c626b">{{ s.note }}</span>
+        </div>
+        <div style="background:#ffffff; border-radius:26px; padding:34px 38px 38px; display:flex; flex-direction:column; gap:20px; box-shadow:0 16px 40px rgba(33,27,47,0.07)">
+          <div style="display:flex; align-items:center; gap:12px">
+            <span style="{{ s.kickerStyle }}">Reactivity</span>
+            <span style="{{ s.metaStyle }}">v1.2.0</span>
+          </div>
+          <h2 style="{{ s.titleStyle }}">How does the framework know when a value has changed?</h2>
+          <p style="{{ s.bodyStyle }}">It compares the value it rendered last time with the value it sees now. That walk over the tree is called <span style="{{ s.refStyle }}">change detection</span>, and everything about performance here is a question of how much of the tree it has to visit rather than how fast any single comparison is.</p>
+          <p style="{{ s.bodyStyle }}">The default strategy checks every component on every pass, which is cheap until the tree is deep. Narrowing the checked surface — through immutable inputs, <span style="{{ s.refStyle }}">OnPush</span>, or reading a signal the renderer can track — turns a whole-tree walk into a handful of visits, and that is the difference you feel on a long list.</p>
+          <pre style="{{ s.codeStyle }}">count = signal(0);
+double = computed(() =&gt; this.count() * 2);</pre>
+          <div style="{{ s.noteStyle }}">
+            <span style="{{ s.noteLabelStyle }}">Note</span>
+            <span style="{{ s.noteTextStyle }}">Interviewers follow up with “when would you still reach for a stream?” — have a concrete answer ready.</span>
+          </div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:1100}}">
+const SPECIMENS = [
+  { id: '2a', name: 'Manrope + Newsreader', note: 'UI stays as-is, body becomes a screen serif', ui: 'Manrope', body: 'Newsreader', bodyWeight: 400, scale: 1.06, lh: 1.75, titleWeight: 700, titleTrack: '-0.02em' },
+  { id: '2b', name: 'IBM Plex Sans + Plex Serif', note: 'One superfamily, technical but warm', ui: "'IBM Plex Sans'", body: "'IBM Plex Serif'", bodyWeight: 400, scale: 1.0, lh: 1.72, titleWeight: 600, titleTrack: '-0.01em' },
+  { id: '2c', name: 'Public Sans', note: 'All sans, humanist, wide apertures', ui: "'Public Sans'", body: "'Public Sans'", bodyWeight: 400, scale: 1.0, lh: 1.75, titleWeight: 700, titleTrack: '-0.015em' },
+  { id: '2d', name: 'Libre Franklin + Source Serif 4', note: 'Grotesque headings, serif built for screens', ui: "'Libre Franklin'", body: "'Source Serif 4'", bodyWeight: 400, scale: 1.04, lh: 1.7, titleWeight: 600, titleTrack: '-0.015em' }
+];
+
+class Component extends DCLogic {
+  state = { size: 16 };
+  componentDidMount() { this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  icons() { if (window.lucide) window.lucide.createIcons(); else setTimeout(() => window.lucide && window.lucide.createIcons(), 300); }
+
+  renderVals() {
+    const base = this.state.size;
+    return {
+      sizes: [['Compact', 15], ['Default', 16], ['Comfortable', 17.5]].map(([l, v]) => ({
+        label: l, select: () => this.setState({ size: v }),
+        style: `padding:7px 14px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; background:${base === v ? '#ffffff' : 'transparent'}; color:${base === v ? '#1c1d22' : '#8b9099'}`
+      })),
+      specimens: SPECIMENS.map(s => {
+        const bs = (base * s.scale).toFixed(2);
+        return {
+          id: s.id, name: s.name, note: s.note,
+          kickerStyle: `font-family:${s.ui}, sans-serif; font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#82a4bd`,
+          metaStyle: `font-family:'JetBrains Mono', monospace; font-size:11px; color:#b4bcc4`,
+          titleStyle: `margin:0; font-family:${s.ui}, sans-serif; font-size:${(base * 1.6).toFixed(1)}px; font-weight:${s.titleWeight}; letter-spacing:${s.titleTrack}; line-height:1.3; text-wrap:pretty`,
+          bodyStyle: `margin:0; font-family:${s.body}, Georgia, serif; font-size:${bs}px; font-weight:${s.bodyWeight}; line-height:${s.lh}; color:#3d424b; text-wrap:pretty`,
+          refStyle: `background:#e9f0f7; color:#3c6c96; border-radius:6px; padding:1px 3px; margin:0 -1px; font-weight:600; cursor:pointer; box-decoration-break:clone; -webkit-box-decoration-break:clone`,
+          codeStyle: `margin:2px 0; background:#f6f8fa; border-radius:14px; padding:16px 18px; font-family:'JetBrains Mono', monospace; font-size:${(base * 0.8).toFixed(1)}px; line-height:1.75; color:#39414a; white-space:pre; overflow-x:auto`,
+          noteStyle: `display:flex; flex-direction:column; gap:7px; padding:16px 18px; border-radius:18px; background:#f3f7fa`,
+          noteLabelStyle: `font-family:${s.ui}, sans-serif; font-size:10.5px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#7d97ad`,
+          noteTextStyle: `font-family:${s.body}, Georgia, serif; font-size:${(base * 0.92).toFixed(1)}px; line-height:1.65; color:#4a5560`
+        };
+      })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #eceff3; }
+  * { box-sizing: border-box; }
+  a { color: #6f93af; text-decoration: none; }
+  a:hover { color: #4d7a9a; }
+  *::-webkit-scrollbar { width: 0; height: 0; display: none; }
+  * { scrollbar-width: none; }
+  @keyframes popIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  @keyframes slideIn { from { transform: translateX(-100%); } to { transform: none; } }
+  @keyframes sheetUp { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</helmet>
+
+<section style="padding:48px 44px 80px; font-family:Manrope, system-ui, sans-serif; color:#1c1d22; display:flex; flex-direction:column; gap:28px">
+  <div style="display:flex; flex-direction:column; gap:6px">
+    <div style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#9aa0a8">Turn 1 · Mobile</div>
+    <div style="font-size:24px; font-weight:700; letter-spacing:-0.02em">Browse takes and ask interactions</div>
+    <div style="font-size:14px; color:#787d86; max-width:620px; line-height:1.6">Three browse treatments (<a href="#1a">1a</a>–<a href="#1c">1c</a>) then three ways to ask about selected text (<a href="#1d">1d</a>–<a href="#1f">1f</a>). Tap a question to expand, tap a tinted term for its card.</div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:36px">
+
+    <div id="1a" style="display:flex; flex-direction:column; gap:12px; width:390px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">1a</span>
+        <span style="font-size:13.5px; font-weight:600">Quiet list</span>
+      </div>
+      <div style="font-size:12.5px; color:#8b9099; line-height:1.55">No cards. Hairline separations, type does the work.</div>
+      <div style="width:390px; height:800px; border-radius:40px; background:#f4f6f8; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 22px 54px rgba(33,27,47,0.10)">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 26px 4px; font-size:13px; font-weight:600">
+          <span>9:41</span>
+          <span style="display:flex; gap:6px; color:#1c1d22"><i data-lucide="signal-high" style="width:15px;height:15px"></i><i data-lucide="wifi" style="width:15px;height:15px"></i><i data-lucide="battery-full" style="width:15px;height:15px"></i></span>
+        </div>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:18px 22px 8px">
+          <div style="display:flex; align-items:center; gap:10px">
+            <div onClick="{{ openNav }}" style="display:flex; padding:9px; border-radius:13px; background:#ffffff; color:#5c626b; cursor:pointer"><i data-lucide="menu" style="width:16px;height:16px"></i></div>
+            <div style="display:flex; flex-direction:column">
+              <span style="font-size:17px; font-weight:700; letter-spacing:-0.02em">Angular</span>
+              <span style="font-size:11px; color:#9aa0a8; font-family:'JetBrains Mono', monospace">v1.2.0 · 24 questions</span>
+            </div>
+          </div>
+          <div style="display:flex; gap:8px">
+            <div onClick="{{ openRefsA }}" style="{{ refHeadStyle }}"><i data-lucide="library" style="width:16px;height:16px"></i></div>
+            <div onClick="{{ toggleBmA }}" style="{{ bmHeadStyle }}"><i data-lucide="bookmark" style="width:16px;height:16px"></i></div>
+            <div style="display:flex; padding:9px; border-radius:13px; background:#ffffff; color:#5c626b"><i data-lucide="search" style="width:16px;height:16px"></i></div>
+          </div>
+        </div>
+        <sc-if value="{{ showQuestionsA }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1; min-height:0; display:flex; flex-direction:column">
+        <div style="display:flex; gap:8px; overflow-x:auto; padding:10px 22px 6px">
+          <sc-for list="{{ chipsA }}" as="c" hint-placeholder-count="4">
+            <div onClick="{{ c.select }}" style="{{ c.style }}">{{ c.label }}</div>
+          </sc-for>
+          <div onClick="{{ toggleBmA }}" style="{{ bmChipStyle }}"><i data-lucide="bookmark" style="width:13px;height:13px"></i><span>Saved</span></div>
+        </div>
+        <div style="flex:1; min-height:0; overflow-y:auto; padding:6px 22px 30px">
+          <sc-for list="{{ listA }}" as="q" hint-placeholder-count="5">
+            <div style="{{ q.rowStyle }}">
+              <div onClick="{{ q.toggle }}" style="display:flex; align-items:flex-start; gap:12px; cursor:pointer">
+                <span style="{{ q.numStyle }}">{{ q.num }}</span>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px">
+                  <div style="font-size:15px; font-weight:600; line-height:1.45; letter-spacing:-0.01em; text-wrap:pretty">{{ q.question }}</div>
+                  <span style="{{ q.tagStyle }}">{{ q.tag }}</span>
+                </div>
+                <div style="{{ q.chevStyle }}"><i data-lucide="chevron-down" style="width:15px;height:15px"></i></div>
+              </div>
+              <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+                <div style="padding:14px 0 4px 30px; font-family:Newsreader, Georgia, serif; font-size:15.5px; line-height:1.75; color:#3d424b">
+                  <span>{{ q.before }}</span><span onClick="{{ q.openRef }}" style="background:#e3ebf3; color:#40688c; border-radius:6px; padding:1px 5px; font-weight:600; cursor:pointer">{{ q.term }}</span><span>{{ q.after }}</span>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        </div>
+        </sc-if>
+        <sc-if value="{{ showRefsA }}" hint-placeholder-val="{{ false }}">
+          <div style="flex:1; min-height:0; overflow-y:auto; padding:14px 22px 30px; display:flex; flex-direction:column; gap:14px">
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#a8b4c0">References · {{ refCount }}</div>
+            <div style="display:flex; flex-wrap:wrap; gap:8px">
+              <sc-for list="{{ refChips }}" as="r" hint-placeholder-count="6">
+                <div onClick="{{ r.open }}" style="padding:10px 16px; border-radius:999px; background:#ffffff; font-size:13.5px; font-weight:600; color:#40688c; cursor:pointer">{{ r.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ navA }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeNav }}" style="position:absolute; inset:0; z-index:20; background:rgba(28,29,34,0.16); animation:fadeIn .18s ease"></div>
+        </sc-if>
+        <sc-if value="{{ navA }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:0; top:0; bottom:0; z-index:21; width:274px; background:#ffffff; border-radius:40px 28px 28px 40px; padding:28px 18px; display:flex; flex-direction:column; gap:22px; animation:slideIn .24s cubic-bezier(.2,.8,.3,1)">
+            <div style="display:flex; align-items:center; gap:10px; padding:0 10px">
+              <div style="width:30px; height:30px; border-radius:10px; background:#82a4bd; display:flex; align-items:center; justify-content:center; color:#ffffff"><i data-lucide="layers" style="width:16px;height:16px"></i></div>
+              <span style="font-size:15px; font-weight:700; letter-spacing:-0.01em">Prep</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:2px">
+              <div style="font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#b4bcc4; padding:0 12px 8px">Topics</div>
+              <sc-for list="{{ navTopics }}" as="t" hint-placeholder-count="3">
+                <div onClick="{{ t.select }}" style="{{ t.style }}">
+                  <span style="font-size:14px; font-weight:600">{{ t.name }}</span>
+                  <span style="margin-left:auto; font-size:11.5px; color:#b4bcc4; font-family:'JetBrains Mono', monospace">{{ t.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:2px">
+              <div style="font-size:10.5px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#b4bcc4; padding:0 12px 8px">Yours</div>
+              <sc-for list="{{ navPersonal }}" as="p" hint-placeholder-count="4">
+                <div onClick="{{ p.select }}" style="display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:14px; cursor:pointer; color:#5c626b" style-hover="background:#f4f6f8">
+                  <i data-lucide="{{ p.icon }}" style="width:16px;height:16px"></i>
+                  <span style="font-size:14px; font-weight:500">{{ p.label }}</span>
+                  <span style="margin-left:auto; font-size:11.5px; color:#b4bcc4; font-family:'JetBrains Mono', monospace">{{ p.count }}</span>
+                </div>
+              </sc-for>
+            </div>
+            <div onClick="{{ closeNav }}" style="margin-top:auto; display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-radius:16px; background:#eef2f6; font-size:13px; font-weight:600; color:#5c7d9e; cursor:pointer">
+              <i data-lucide="download" style="width:15px;height:15px"></i><span>Export personal layer</span>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div id="1b" style="display:flex; flex-direction:column; gap:12px; width:390px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">1b</span>
+        <span style="font-size:13.5px; font-weight:600">Soft cards</span>
+      </div>
+      <div style="font-size:12.5px; color:#8b9099; line-height:1.55">White cards floating on tint. Depth instead of lines.</div>
+      <div style="width:390px; height:800px; border-radius:40px; background:#e7edf3; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 22px 54px rgba(33,27,47,0.10)">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 26px 4px; font-size:13px; font-weight:600">
+          <span>9:41</span>
+          <span style="display:flex; gap:6px"><i data-lucide="signal-high" style="width:15px;height:15px"></i><i data-lucide="wifi" style="width:15px;height:15px"></i><i data-lucide="battery-full" style="width:15px;height:15px"></i></span>
+        </div>
+        <div style="padding:20px 22px 10px; display:flex; flex-direction:column; gap:14px">
+          <div style="display:flex; align-items:center; justify-content:space-between">
+            <span style="font-size:26px; font-weight:800; letter-spacing:-0.03em">Angular</span>
+            <div style="display:flex; padding:10px; border-radius:14px; background:#ffffff; color:#5c626b"><i data-lucide="bookmark" style="width:16px;height:16px"></i></div>
+          </div>
+          <div style="display:flex; gap:8px; overflow-x:auto">
+            <sc-for list="{{ chipsB }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.select }}" style="{{ c.style }}">{{ c.label }}</div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex:1; min-height:0; overflow-y:auto; padding:6px 18px 30px; display:flex; flex-direction:column; gap:10px">
+          <sc-for list="{{ listB }}" as="q" hint-placeholder-count="4">
+            <div style="{{ q.cardStyle }}">
+              <div onClick="{{ q.toggle }}" style="display:flex; align-items:flex-start; gap:12px; cursor:pointer">
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:8px">
+                  <span style="font-size:15px; font-weight:600; line-height:1.45; letter-spacing:-0.01em; text-wrap:pretty">{{ q.question }}</span>
+                  <span style="{{ q.tagStyle }}">{{ q.tag }}</span>
+                </div>
+                <div style="{{ q.chevStyle }}"><i data-lucide="chevron-down" style="width:15px;height:15px"></i></div>
+              </div>
+              <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+                <div style="margin-top:14px; padding-top:14px; border-top:1px solid #f0f3f6; font-size:13.5px; line-height:1.7; color:#4a5058">
+                  <span>{{ q.before }}</span><span onClick="{{ q.openRef }}" style="background:#e3ebf3; color:#40688c; border-radius:6px; padding:1px 5px; font-weight:600; cursor:pointer">{{ q.term }}</span><span>{{ q.after }}</span>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div id="1c" style="display:flex; flex-direction:column; gap:12px; width:390px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">1c</span>
+        <span style="font-size:13.5px; font-weight:600">Reader</span>
+      </div>
+      <div style="font-size:12.5px; color:#8b9099; line-height:1.55">Grouped by theme, white ground, one open answer at a time.</div>
+      <div style="width:390px; height:800px; border-radius:40px; background:#ffffff; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 22px 54px rgba(33,27,47,0.10)">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:16px 26px 4px; font-size:13px; font-weight:600">
+          <span>9:41</span>
+          <span style="display:flex; gap:6px"><i data-lucide="signal-high" style="width:15px;height:15px"></i><i data-lucide="wifi" style="width:15px;height:15px"></i><i data-lucide="battery-full" style="width:15px;height:15px"></i></span>
+        </div>
+        <div style="padding:22px 26px 14px; display:flex; flex-direction:column; gap:4px">
+          <span style="font-size:11px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:#a8b4c0">Topic</span>
+          <span style="font-size:22px; font-weight:700; letter-spacing:-0.02em">Angular</span>
+        </div>
+        <div style="flex:1; min-height:0; overflow-y:auto; padding:0 26px 30px; display:flex; flex-direction:column; gap:22px">
+          <sc-for list="{{ groupsC }}" as="g" hint-placeholder-count="2">
+            <div style="display:flex; flex-direction:column; gap:2px">
+              <div style="position:sticky; top:0; background:#ffffff; padding:8px 0 10px; font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#a8b4c0">{{ g.label }}</div>
+              <sc-for list="{{ g.items }}" as="q" hint-placeholder-count="3">
+                <div style="{{ q.rowStyle }}">
+                  <div onClick="{{ q.toggle }}" style="font-size:15px; font-weight:600; line-height:1.5; letter-spacing:-0.01em; cursor:pointer; text-wrap:pretty">{{ q.question }}</div>
+                  <sc-if value="{{ q.open }}" hint-placeholder-val="{{ false }}">
+                    <div style="padding-top:12px; font-size:13.5px; line-height:1.75; color:#4a5058">
+                      <span>{{ q.before }}</span><span onClick="{{ q.openRef }}" style="background:#e3ebf3; color:#40688c; border-radius:6px; padding:1px 5px; font-weight:600; cursor:pointer">{{ q.term }}</span><span>{{ q.after }}</span>
+                    </div>
+                  </sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div id="1d" style="display:flex; flex-direction:column; gap:12px; width:390px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">1d</span>
+        <span style="font-size:13.5px; font-weight:600">Floating plus</span>
+      </div>
+      <div style="font-size:12.5px; color:#8b9099; line-height:1.55">One small target above the selection. Tap the shaded sentence.</div>
+      <div style="width:390px; height:800px; border-radius:40px; background:#f4f6f8; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 22px 54px rgba(33,27,47,0.10)">
+        <div style="padding:22px 24px 10px; font-size:19px; font-weight:700; letter-spacing:-0.02em">Change detection</div>
+        <div style="padding:0 24px; font-family:Newsreader, Georgia, serif; font-size:16px; line-height:1.8; color:#3d424b">
+          <span>{{ passage.head }}</span><span onClick="{{ tapD }}" style="{{ selStyleD }}">{{ passage.pick }}</span><span>{{ passage.tail }}</span>
+        </div>
+        <sc-if value="{{ showPlusD }}" hint-placeholder-val="{{ true }}">
+          <div onClick="{{ composeD }}" style="position:absolute; left:272px; top:136px; z-index:6; display:flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:10px; background:#ffffff; color:#82a4bd; cursor:pointer; box-shadow:0 4px 14px rgba(33,27,47,0.12); animation:popIn .16s ease"><i data-lucide="plus" style="width:15px;height:15px"></i></div>
+        </sc-if>
+        <sc-if value="{{ dScrim }}" hint-placeholder-val="{{ false }}">
+          <div onClick="{{ closeD }}" style="position:absolute; inset:0; z-index:5"></div>
+        </sc-if>
+        <sc-if value="{{ showComposeD }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:24px; top:136px; z-index:6; width:342px; background:#ffffff; border-radius:16px; padding:12px; display:flex; flex-direction:column; gap:8px; box-shadow:0 6px 20px rgba(33,27,47,0.08); animation:popIn .18s ease">
+            <div style="font-size:12px; line-height:1.45; color:#a0a5ad; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">{{ dQuote }}</div>
+            <div style="height:1px; background:#eef1f4"></div>
+            <textarea onChange="{{ onDInput }}" value="{{ dText }}" placeholder="What do you want to know?" style="width:100%; min-height:104px; resize:none; border:none; outline:none; background:transparent; padding:0; font-family:Manrope, sans-serif; font-size:13.5px; line-height:1.6; color:#1c1d22"></textarea>
+            <div style="display:flex; gap:16px; justify-content:flex-end">
+              <span onClick="{{ cancelD }}" style="font-size:12.5px; font-weight:600; color:#b4b9c0; cursor:pointer">Cancel</span>
+              <span onClick="{{ saveD }}" style="font-size:12.5px; font-weight:600; color:#5c8bab; cursor:pointer">Save</span>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ showViewD }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:24px; top:136px; z-index:6; width:342px; background:#ffffff; border-radius:20px; padding:16px; display:flex; flex-direction:column; gap:10px; box-shadow:0 14px 34px rgba(33,27,47,0.14); animation:popIn .18s ease">
+            <div style="font-size:12.5px; line-height:1.5; color:#8b9099; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden">{{ dQuote }}</div>
+            <div style="display:flex; align-items:flex-start; gap:12px">
+              <div style="flex:1; font-size:13.5px; line-height:1.6; color:#2b3038">{{ dSavedText }}</div>
+              <div onClick="{{ editD }}" style="display:flex; padding:5px; border-radius:9px; color:#a8b4c0; cursor:pointer"><i data-lucide="pencil" style="width:14px;height:14px"></i></div>
+            </div>
+            <div style="font-size:11px; color:#c2c7ce; font-family:'JetBrains Mono', monospace">Today</div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div id="1e" style="display:flex; flex-direction:column; gap:12px; width:390px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">1e</span>
+        <span style="font-size:13.5px; font-weight:600">Bottom sheet composer</span>
+      </div>
+      <div style="font-size:12.5px; color:#8b9099; line-height:1.55">Selection lifts a sheet with room to actually write.</div>
+      <div style="width:390px; height:800px; border-radius:40px; background:#f4f6f8; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 22px 54px rgba(33,27,47,0.10)">
+        <div style="padding:22px 24px 10px; font-size:19px; font-weight:700; letter-spacing:-0.02em">Change detection</div>
+        <div style="padding:0 24px; font-family:Newsreader, Georgia, serif; font-size:16px; line-height:1.8; color:#3d424b">
+          <span>{{ passage.head }}</span><span onClick="{{ toggleE }}" style="{{ selStyleE }}">{{ passage.pick }}</span><span>{{ passage.tail }}</span>
+        </div>
+        <sc-if value="{{ showE }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute; inset:0; background:rgba(28,29,34,0.14); animation:fadeIn .2s ease"></div>
+        </sc-if>
+        <sc-if value="{{ showE }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute; left:0; right:0; bottom:0; background:#ffffff; border-radius:30px 30px 40px 40px; padding:14px 22px 26px; display:flex; flex-direction:column; gap:14px; animation:sheetUp .26s cubic-bezier(.2,.8,.3,1)">
+            <div style="width:38px; height:4px; border-radius:999px; background:#e2e6ea; margin:0 auto"></div>
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#a8b4c0">Ask about this</div>
+            <div style="font-size:13px; line-height:1.55; color:#7d8590; background:#faf6e9; border-radius:12px; padding:10px 12px">“{{ passage.pick }}”</div>
+            <div style="background:#f4f6f8; border-radius:16px; padding:13px 14px; font-size:13.5px; color:#a8b4c0; min-height:86px">What do you actually want to know?</div>
+            <div style="display:flex; gap:10px">
+              <div onClick="{{ toggleE }}" style="flex:1; text-align:center; padding:13px; border-radius:16px; background:#f4f6f8; font-size:13.5px; font-weight:600; color:#8b9099; cursor:pointer">Cancel</div>
+              <div onClick="{{ toggleE }}" style="flex:2; text-align:center; padding:13px; border-radius:16px; background:#82a4bd; font-size:13.5px; font-weight:600; color:#ffffff; cursor:pointer">Save question</div>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+
+    <div id="1f" style="display:flex; flex-direction:column; gap:12px; width:390px">
+      <div style="display:flex; align-items:center; gap:10px">
+        <span style="font-family:'JetBrains Mono', monospace; font-size:12px; font-weight:500; color:#5c7d9e; background:#e3ebf3; border-radius:8px; padding:3px 8px">1f</span>
+        <span style="font-size:13.5px; font-weight:600">Selection toolbar</span>
+      </div>
+      <div style="font-size:12.5px; color:#8b9099; line-height:1.55">Ask, note and save in one bar — and the reference card as a sheet.</div>
+      <div style="width:390px; height:800px; border-radius:40px; background:#f4f6f8; overflow:hidden; position:relative; display:flex; flex-direction:column; box-shadow:0 22px 54px rgba(33,27,47,0.10)">
+        <div style="padding:22px 24px 10px; font-size:19px; font-weight:700; letter-spacing:-0.02em">Change detection</div>
+        <div style="padding:0 24px; font-family:Newsreader, Georgia, serif; font-size:16px; line-height:1.8; color:#3d424b">
+          <span>{{ passage.head }}</span><span onClick="{{ toggleF }}" style="{{ selStyleF }}">{{ passage.pick }}</span><span>{{ passage.tail }}</span>
+        </div>
+        <sc-if value="{{ showF }}" hint-placeholder-val="{{ true }}">
+          <div style="position:absolute; left:24px; top:136px; display:flex; align-items:center; gap:4px; padding:6px; border-radius:18px; background:#2b303a; box-shadow:0 12px 30px rgba(33,27,47,0.26); animation:popIn .18s ease">
+            <div style="display:flex; align-items:center; gap:7px; padding:8px 12px; border-radius:13px; color:#ffffff; font-size:12.5px; font-weight:600; cursor:pointer"><i data-lucide="plus" style="width:14px;height:14px"></i><span>Ask</span></div>
+            <div style="width:1px; height:18px; background:#464c58"></div>
+            <div style="display:flex; align-items:center; gap:7px; padding:8px 12px; border-radius:13px; color:#d6dae1; font-size:12.5px; font-weight:600; cursor:pointer"><i data-lucide="pencil" style="width:14px;height:14px"></i><span>Note</span></div>
+            <div style="display:flex; align-items:center; gap:7px; padding:8px 12px; border-radius:13px; color:#d6dae1; font-size:12.5px; font-weight:600; cursor:pointer"><i data-lucide="bookmark" style="width:14px;height:14px"></i><span>Save</span></div>
+          </div>
+        </sc-if>
+        <div style="margin-top:auto; padding:0 18px 22px">
+          <div style="background:#ffffff; border-radius:28px; padding:22px; display:flex; flex-direction:column; gap:12px; box-shadow:0 -4px 40px rgba(33,27,47,0.06)">
+            <div style="width:38px; height:4px; border-radius:999px; background:#e2e6ea; margin:0 auto 2px"></div>
+            <div style="font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#82a4bd">Reference</div>
+            <div style="font-size:20px; font-weight:700; letter-spacing:-0.02em">Scheduler</div>
+            <div style="font-family:Newsreader, Georgia, serif; font-size:15.5px; line-height:1.75; color:#3d424b">{{ refText }}</div>
+            <div style="display:flex; gap:8px; padding-top:6px">
+              <div style="display:flex; align-items:center; gap:7px; padding:9px 14px; border-radius:14px; background:#f4f6f8; font-size:12.5px; font-weight:600; color:#5c626b"><i data-lucide="bookmark" style="width:14px;height:14px"></i><span>Save</span></div>
+              <div style="display:flex; align-items:center; gap:7px; padding:9px 14px; border-radius:14px; background:#f4f6f8; font-size:12.5px; font-weight:600; color:#5c626b"><i data-lucide="pencil" style="width:14px;height:14px"></i><span>Note</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <sc-if value="{{ sheet }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ closeSheet }}" style="position:fixed; inset:0; z-index:80; background:rgba(28,29,34,0.2); backdrop-filter:blur(4px); display:flex; align-items:center; justify-content:center; animation:fadeIn .18s ease">
+      <div onClick="{{ stop }}" style="width:420px; max-width:88vw; background:#ffffff; border-radius:28px; padding:26px; display:flex; flex-direction:column; gap:14px; box-shadow:0 26px 64px rgba(33,27,47,0.18); animation:popIn .22s cubic-bezier(.2,.8,.3,1)">
+        <div style="display:flex; align-items:center">
+          <span style="font-size:11px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:#82a4bd">Reference</span>
+          <div onClick="{{ closeSheet }}" style="margin-left:auto; display:flex; padding:6px; border-radius:10px; color:#a8b4c0; cursor:pointer"><i data-lucide="x" style="width:16px;height:16px"></i></div>
+        </div>
+        <div style="font-size:22px; font-weight:700; letter-spacing:-0.02em">{{ sheetTerm }}</div>
+        <div style="font-family:Newsreader, Georgia, serif; font-size:16px; line-height:1.75; color:#3d424b">{{ sheetText }}</div>
+      </div>
+    </div>
+  </sc-if>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1400,&quot;height&quot;:1200}}">
+const Q = [
+  { id: 'q1', tag: 'reactivity', theme: 'Reactivity', question: 'How does the framework know when a value has changed?',
+    before: 'It compares the value it rendered last time with the value it sees now. That walk over the tree is called ',
+    term: 'change detection', after: ', and everything about performance here is a question of how much of the tree it has to visit.' },
+  { id: 'q2', tag: 'reactivity', theme: 'Reactivity', question: 'What makes a component re-render more than it should?',
+    before: 'Usually a new object reference passed into an input on every parent render. Reading a ',
+    term: 'signal', after: ' instead narrows the work to the components that actually read the value that changed.' },
+  { id: 'q3', tag: 'structure', theme: 'Structure', question: 'When is it worth splitting a route into its own bundle?',
+    before: 'When the route is large and not on the first path a user takes. ',
+    term: 'lazy loading', after: ' trades a small delay on navigation for a faster first paint, which is almost always the better deal.' },
+  { id: 'q4', tag: 'performance', theme: 'Performance', question: 'How do you keep a list from rebuilding every row?',
+    before: 'Give each row a stable key. With a correct ',
+    term: 'track identity', after: ', rows are moved rather than destroyed and rebuilt when the list is reordered or filtered.' },
+  { id: 'q5', tag: 'structure', theme: 'Structure', question: 'Where should shared state actually live?',
+    before: 'As close to the screens that use it as you can manage. The ',
+    term: 'injector', after: ' hierarchy lets a subtree own its own instance while the rest of the app keeps the shared one.' },
+  { id: 'q6', tag: 'performance', theme: 'Performance', question: 'What does the scheduler do between frames?',
+    before: 'It batches the work queued since the last frame so the browser paints once, not once per write. The ',
+    term: 'scheduler', after: ' is also what makes a burst of updates cost roughly the same as a single one.' }
+];
+
+const REF = {
+  'change detection': 'The pass that walks the component tree and syncs bindings with the DOM. How much of the tree it visits is the whole performance story.',
+  'signal': 'A value container that tracks who reads it, so a write notifies exactly the readers that depend on it — no subscriptions to clean up.',
+  'lazy loading': 'Deferring a bundle until the route that needs it is visited. Smaller first payload, a short fetch on navigation.',
+  'track identity': 'The expression that tells the renderer which item a DOM node belongs to, so rows survive reordering instead of being rebuilt.',
+  'injector': 'The lookup chain for a dependency: the element chain first, then the environment chain. The first provider found wins.',
+  'scheduler': 'The layer that batches queued work into a single frame, so many writes cost about what one write costs.'
+};
+
+class Component extends DCLogic {
+  state = { a: 'q1', b: 'q2', c: 'q4', chip: 'All', chipA: 'All', bmA: false, screenA: 'questions', navA: false, sheet: null,
+            dPhase: 'plus', dText: '', dSaved: null, e: true, f: true };
+
+  componentDidMount() { this.icons(); }
+  componentDidUpdate() { this.icons(); }
+  icons() {
+    if (window.lucide) window.lucide.createIcons();
+    else setTimeout(() => window.lucide && window.lucide.createIcons(), 300);
+  }
+
+  open(term) { this.setState({ sheet: { term, text: REF[term] } }); }
+
+  mk(q, openId, key, rowStyle) {
+    const open = openId === q.id;
+    return {
+      id: q.id, num: '0' + (Q.indexOf(q) + 1), question: q.question, tag: q.tag,
+      before: q.before, term: q.term, after: q.after, open,
+      rowStyle: rowStyle(open),
+      numStyle: `font-family:'JetBrains Mono', monospace; font-size:11.5px; color:${open ? '#82a4bd' : '#c2c7ce'}; padding-top:4px`,
+      chevStyle: `display:flex; padding-top:3px; color:#c2c7ce; transition:transform .22s ease; transform:rotate(${open ? 180 : 0}deg)`,
+      tagStyle: `font-size:11px; font-weight:600; letter-spacing:0.04em; color:${open ? '#82a4bd' : '#a8b4c0'}`,
+      cardStyle: `background:#ffffff; border-radius:${open ? 24 : 20}px; padding:18px; transition:box-shadow .2s ease; box-shadow:${open ? '0 12px 30px rgba(33,27,47,0.08)' : 'none'}`,
+      toggle: () => this.setState({ [key]: open ? null : q.id }),
+      openRef: (e) => { e.stopPropagation(); this.open(q.term); }
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const selected = (on) => `background:${on ? '#dbe7f2' : 'transparent'}; border-radius:7px; padding:2px 3px; cursor:pointer; transition:background .2s ease; box-decoration-break:clone; -webkit-box-decoration-break:clone`;
+    const chipList = ['All', 'reactivity', 'structure', 'performance'];
+    const filtered = s.chip === 'All' ? Q : Q.filter(q => q.tag === s.chip);
+    const themes = ['Reactivity', 'Structure', 'Performance'];
+
+    return {
+      listA: (s.bmA ? Q.filter(q => q.id === 'q2' || q.id === 'q5') : (s.chipA === 'All' ? Q : Q.filter(q => q.tag === s.chipA)))
+        .map(q => this.mk(q, s.a, 'a', (open) => `padding:16px 0; border-bottom:1px solid ${open ? 'transparent' : '#e6eaee'}`)),
+      chipsA: chipList.map(c => ({
+        label: c, select: () => this.setState({ chipA: c, bmA: false }),
+        style: `flex:0 0 auto; padding:8px 15px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; background:${!s.bmA && s.chipA === c ? '#ffffff' : 'transparent'}; color:${!s.bmA && s.chipA === c ? '#1c1d22' : '#8b9099'}`
+      })),
+      toggleBmA: () => this.setState({ bmA: !s.bmA, screenA: 'questions' }),
+      showQuestionsA: s.screenA !== 'references',
+      showRefsA: s.screenA === 'references',
+      openRefsA: () => this.setState({ screenA: s.screenA === 'references' ? 'questions' : 'references' }),
+      refHeadStyle: `display:flex; padding:9px; border-radius:13px; cursor:pointer; background:#ffffff; color:${s.screenA === 'references' ? '#82a4bd' : '#5c626b'}`,
+      refCount: Object.keys(REF).length,
+      refChips: Object.keys(REF).map(t => ({
+        label: t.replace(/^./, c => c.toUpperCase()),
+        open: () => this.open(t)
+      })),
+      navA: s.navA,
+      openNavA: () => this.setState({ navA: true }),
+      closeNav: () => this.setState({ navA: false }),
+      navTopics: [['Angular', 24], ['System Design', '—'], ['TypeScript', '—']].map(([n, c], i) => ({
+        name: n, count: c, select: () => this.setState({ navA: false }),
+        style: `display:flex; align-items:center; padding:11px 12px; border-radius:14px; cursor:pointer; background:${i === 0 ? '#f4f6f8' : 'transparent'}; color:${i === 0 ? '#1c1d22' : '#5c626b'}`
+      })),
+      navPersonal: [
+        { label: 'References', icon: 'library', count: Object.keys(REF).length, select: () => this.setState({ navA: false, screenA: 'references' }) },
+        { label: 'Bookmarks', icon: 'bookmark', count: 2, select: () => this.setState({ navA: false, screenA: 'questions', bmA: true }) },
+        { label: 'My questions', icon: 'message-circle-question', count: s.dSaved ? 3 : 2, select: () => this.setState({ navA: false }) },
+        { label: 'My notes', icon: 'pencil', count: 4, select: () => this.setState({ navA: false }) }
+      ],
+      bmHeadStyle: `display:flex; padding:9px; border-radius:13px; cursor:pointer; background:#ffffff; color:${s.bmA ? '#82a4bd' : '#5c626b'}`,
+      bmChipStyle: `flex:0 0 auto; display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; background:${s.bmA ? '#ffffff' : 'transparent'}; color:${s.bmA ? '#82a4bd' : '#8b9099'}`,
+      listB: filtered.map(q => this.mk(q, s.b, 'b', () => '')),
+      chipsB: chipList.map(c => ({
+        label: c, select: () => this.setState({ chip: c }),
+        style: `flex:0 0 auto; padding:8px 15px; border-radius:999px; font-size:12.5px; font-weight:600; cursor:pointer; background:${s.chip === c ? '#ffffff' : 'transparent'}; color:${s.chip === c ? '#1c1d22' : '#7e8c99'}`
+      })),
+      groupsC: themes.map(t => ({
+        label: t,
+        items: Q.filter(q => q.theme === t).map(q => this.mk(q, s.c, 'c', (open) => `padding:14px 0; border-bottom:1px solid ${open ? 'transparent' : '#f0f2f5'}`))
+      })),
+      passage: {
+        head: 'It compares the value it rendered last time with the value it sees now. ',
+        pick: 'That walk over the tree is called change detection',
+        tail: ', and everything about performance here is a question of how much of the tree it has to visit.'
+      },
+      showE: s.e, showF: s.f,
+      selStyleE: selected(s.e), selStyleF: selected(s.f),
+      showPlusD: s.dPhase === 'plus',
+      showComposeD: s.dPhase === 'compose',
+      showViewD: s.dPhase === 'view',
+      dQuote: '“That walk over the tree is called change detection, and everything about performance here is a question of how much of the tree it has to visit.”',
+      dText: s.dText,
+      dSavedText: s.dSaved || '',
+      selStyleD: s.dSaved
+        ? 'background:#f7f0dc; border-radius:7px; padding:2px 3px; cursor:pointer; box-decoration-break:clone; -webkit-box-decoration-break:clone'
+        : selected(s.dPhase !== 'idle'),
+      tapD: () => this.setState({ dPhase: s.dSaved ? (s.dPhase === 'view' ? 'idle' : 'view') : (s.dPhase === 'idle' ? 'plus' : 'idle') }),
+      composeD: () => this.setState({ dPhase: 'compose' }),
+      onDInput: (e) => this.setState({ dText: e.target.value }),
+      cancelD: () => this.setState({ dPhase: s.dSaved ? 'view' : 'idle' }),
+      saveD: () => this.setState({ dSaved: s.dText || 'What does it actually compare against?', dPhase: 'idle' }),
+      editD: () => this.setState({ dText: s.dSaved, dPhase: 'compose' }),
+      toggleE: () => this.setState({ e: !s.e }),
+      toggleF: () => this.setState({ f: !s.f }),
+      refText: REF['scheduler'],
+      sheet: !!s.sheet,
+      sheetTerm: s.sheet ? s.sheet.term.replace(/^./, c => c.toUpperCase()) : '',
+      sheetText: s.sheet ? s.sheet.text : '',
+      closeSheet: () => this.setState({ sheet: null }),
+      stop: (e) => e.stopPropagation(),
+      openNav: () => this.setState({ navA: true }),
+      dScrim: s.dPhase === 'compose' || s.dPhase === 'view',
+      closeD: () => this.setState({ dPhase: 'idle' })
+    };
+  }
+}
+
+</script>
+</body>
+</html>

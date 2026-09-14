@@ -77,14 +77,14 @@ inlined — the table is a floor, not a ceiling.
 
 **Icons:** switch `components.json` `iconLibrary` from `hugeicons` to
 `lucide`; install `lucide-react`; remove `@hugeicons/react` and
-`@hugeicons/core-free-icons`. `src/lib/icons.ts` re-exports every icon
+`@hugeicons/core-free-icons`. `src/utils/icons.ts` re-exports every icon
 actually used, under our own names (`export { Search as SearchIcon } from
 'lucide-react'`, etc. — or thin wrapper components if per-icon sizing
-becomes repetitive). Every component imports icons from `lib/icons.ts`
+becomes repetitive). Every component imports icons from `utils/icons.ts`
 only, never from `lucide-react` directly — one file to touch if the icon
-library ever changes, matching how `lib/` already isolates other external
-surfaces (ULID gen, localStorage). Icon list per the design handoff's
-Assets section.
+library ever changes, matching how `utils/`/`services/` already isolate
+other external surfaces (ULID gen, browser storage). Icon list per the
+design handoff's Assets section.
 
 **Fonts:** install `@fontsource-variable/manrope`,
 `@fontsource-variable/newsreader`, `@fontsource-variable/jetbrains-mono`;
@@ -99,15 +99,16 @@ family by name directly.
 ## 2a. Internationalization
 
 `src/translate/en.json` — a flat `{ "key": "text" }` map, dot-namespaced
-keys (`"landing.contents"`, `"nav.export"`, `"ask.cancel"`). `src/lib/i18n.ts`
-exposes `t(key: TranslationKey, vars?: Record<string, string | number>)`,
-default/only locale `en` for now. A value needing a runtime value uses
-`{{placeholder}}` tokens (`"landing.summary": "{{topics}} topics ·
-{{questions}} questions · {{references}} references"`), substituted by
-`t()`. No JSX/TSX file contains a literal user-facing string — every label,
-button, placeholder, empty state, aria-label goes through `t()`. Adding a
-language later is adding `translate/<locale>.json` and a locale switch in
-`lib/i18n.ts`; no component changes needed.
+keys (`"landing.contents"`, `"nav.export"`, `"ask.cancel"`).
+`src/utils/i18n.ts` exposes `t(key: TranslationKey, vars?: Record<string,
+string | number>)`, default/only locale `en` for now. A value needing a
+runtime value uses `{{placeholder}}` tokens (`"landing.summary":
+"{{topics}} topics · {{questions}} questions · {{references}}
+references"`), substituted by `t()`. No JSX/TSX file contains a literal
+user-facing string — every label, button, placeholder, empty state,
+aria-label goes through `t()`. Adding a language later is adding
+`translate/<locale>.json` and a locale switch in `utils/i18n.ts`; no
+component changes needed.
 
 `TranslationKey` is a union type generated from `en.json`'s keys (e.g. via
 `keyof typeof en`) so a typo'd or removed key is a compile error, not a
@@ -119,19 +120,33 @@ runtime blank string.
 
 On top of the global engineering rules already governing this repo
 (readability over cleverness, typed errors, minimal deps — see the user's
-`CLAUDE.md`), two conventions specific to this project:
+`CLAUDE.md`), conventions specific to this project:
 
+- **Non-component TypeScript files: kebab-case.** `text-selection.ts`,
+  `rail-section.enum.ts`. Single word wins when it reads clearly on its own
+  (`storage.ts`, not `local-storage.ts`; `highlight.ts`, not
+  `highlight-match.ts`) per the global naming rule's word-over-compound
+  preference — kebab only kicks in once a name genuinely needs two words.
+  **Components stay PascalCase** (folder + file, e.g. `QuestionCard/
+  QuestionCard.tsx`) — that's the React/shadcn convention already in use
+  and isn't changing.
 - **Enums live in their own file**, named `<domain>.enum.ts`, never inline
-  in a component or a shared `types.ts` — e.g. `railSection.enum.ts` for
-  the icon rail's active-section enum, `askPhase.enum.ts` for the ask-popup
-  state machine (`idle`/`plus`/`compose`/`view` from rolling-spec §"UI
-  state"). Colocated next to the module that owns the enum, same pattern as
-  colocated component CSS.
+  in a component or a shared `types.ts` — e.g. `rail-section.enum.ts` for
+  the icon rail's active-section enum, `ask-phase.enum.ts` for the
+  ask-popup state machine (`idle`/`plus`/`compose`/`view` from rolling-spec
+  §"UI state"). Colocated next to the module that owns the enum, same
+  pattern as colocated component CSS.
 - **Clean loops over clever one-liners.** A `for...of` or plainly-named
   `.forEach` with named intermediates is preferred over a compressed
   `.reduce()`/chained-ternary one-liner doing the same work, even when the
   one-liner is shorter — readability wins the trade every time in this
   codebase.
+- **`utils/` vs `services/` split**, replacing the generic `lib/` from
+  rolling-spec §5: `utils/` is pure, stateless, no external lifecycle
+  (id generation, icon re-exports, i18n lookup, text-selection math,
+  highlight matching). `services/` is anything with a lifecycle or an
+  external-system boundary per the global "put external systems behind a
+  boundary" rule — currently just browser storage (`services/storage.ts`).
 
 ---
 
@@ -156,13 +171,14 @@ src/
   topics.config.ts
   translate/
     en.json
-  lib/
+  utils/
     id.ts
     icons.ts
     i18n.ts
-    localStorage.ts
-    textSelection.ts
-    highlightMatch.ts
+    text-selection.ts
+    highlight.ts
+  services/
+    storage.ts
   components/
     ui/                        # shadcn-generated primitives, untouched pattern
     IconRail/
@@ -247,8 +263,8 @@ rolling-spec §6.
 Each phase is independently reviewable/shippable, per user direction.
 
 - **P1 — Foundation.** `variables.css`/`themes.css`/`global.css`/`main.css`
-  token system; font + icon swap; `lib/id.ts` (ULID); `lib/icons.ts`;
-  `lib/i18n.ts` + `translate/en.json`; `topics.config.ts`; seed
+  token system; font + icon swap; `utils/id.ts` (ULID); `utils/icons.ts`;
+  `utils/i18n.ts` + `translate/en.json`; `topics.config.ts`; seed
   `topics/angular.ts` + `references/angular.ts` (one topic first, proves the
   shape before repeating for nodejs); `LandingPage` (web `5b` layout only —
   mobile `5m` deferred to P4); `IconRail` (icons + active state, no flyout
@@ -257,8 +273,8 @@ Each phase is independently reviewable/shippable, per user direction.
   expand/collapse, filter chips, `ReferenceBadge` highlight-and-popover,
   reference modal. Seed `topics/nodejs.ts` + `references/nodejs.ts`. No
   personal layer yet — no ask-flow, no notes, no bookmarks.
-- **P3 — Personal layer.** `lib/localStorage.ts`, `lib/textSelection.ts`,
-  `lib/highlightMatch.ts`; `SelectionPlusButton` → `AskQuestionPopover` →
+- **P3 — Personal layer.** `services/storage.ts`, `utils/text-selection.ts`,
+  `utils/highlight.ts`; `SelectionPlusButton` → `AskQuestionPopover` →
   `PendingHighlight` flow; `PersonalNote` via `NoteEditor` (MDXEditor);
   `BookmarkButton`; personal rail on `TopicPage`; `PendingQuestionsPanel`;
   export/import JSON.

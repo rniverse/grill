@@ -1,0 +1,61 @@
+/*
+ * DialogContent (src/components/ui/dialog.tsx) renders its own internal
+ * DialogPortal + DialogOverlay and already centers the popup itself
+ * (fixed/top-1/2/left-1/2/-translate-*), so this file only overrides the
+ * popup box's own look — not position — and can't reach the overlay at all
+ * (it isn't given a className hook). See ReferenceModal.tsx / task-5-report.md.
+ */
+.reference-modal__content {
+  width: 440px;
+  max-width: 86vw;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-2xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  box-shadow: var(--shadow-modal);
+  z-index: var(--z-modal);
+}
+
+.reference-modal__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.reference-modal__eyebrow {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.reference-modal__close {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+  font-size: var(--text-section-title);
+  line-height: 1;
+}
+
+.reference-modal__term {
+  font-family: var(--font-ui);
+  font-size: var(--text-section-title);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  margin: 0;
+}

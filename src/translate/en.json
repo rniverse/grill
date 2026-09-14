@@ -8,5 +8,7 @@
   "nav.bookmarks": "Bookmarks",
   "nav.myQuestions": "My questions",
   "nav.myNotes": "My notes",
-  "nav.export": "Export personal layer"
+  "nav.export": "Export personal layer",
+  "reference.eyebrow": "Reference",
+  "reference.close": "Close"
 }

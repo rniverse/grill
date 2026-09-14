@@ -1,0 +1,22 @@
+.filter-chips {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.filter-chips__chip {
+  padding: var(--space-xs) var(--space-md);
+  border-radius: var(--radius-chip);
+  border: none;
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filter-chips__chip[data-pressed] {
+  background: var(--color-surface);
+  color: var(--color-ink);
+}

@@ -1,0 +1,14 @@
+.reference-badge {
+  display: inline;
+  border: none;
+  background: var(--color-reference-pill-bg);
+  color: var(--color-reference-pill-text);
+  border-radius: var(--radius-xs);
+  padding: 1px 4px;
+  margin: 0 -1px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}

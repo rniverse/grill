@@ -15,6 +15,7 @@ dist-ssr
 # Fix-wave agent reports (not needed long-term)
 .agent-a-report.md
 .agent-b-report.md
+.fix-wave-report.md
 
 # Editor directories and files
 .vscode/*

@@ -1,13 +1,7 @@
-import { afterEach, describe, expect, test } from 'bun:test'
-import { cleanup, render, screen } from '@testing-library/react'
+import { describe, expect, test } from 'bun:test'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { LandingPage } from './LandingPage'
-
-// @testing-library/react's own auto-cleanup only registers once, in whichever
-// test file happens to import it first (bun:test scopes lifecycle hooks per
-// file) — explicit cleanup here keeps this file's two renders independent
-// regardless of run order relative to other test files.
-afterEach(cleanup)
 
 describe('LandingPage', () => {
   test('renders a row for each configured topic once loaded', async () => {

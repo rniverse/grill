@@ -11,6 +11,9 @@
   --color-ink-body: #3d424b;
   --color-ink-secondary: #6b727b;
   --color-ink-tertiary: #a8b4c0;
+  --color-ink-muted: #8b9099; /* topic version tag, filter/tag secondary text */
+  --color-ink-faint: #9aa0a8; /* question tag labels */
+  --color-ink-blurb: #787d86; /* topic page blurb line */
 
   /* Color — accent */
   --color-accent: #82a4bd;
@@ -24,6 +27,8 @@
   --color-reference-pill-text: #3c6c96;
   --color-personal-highlight: #f7f0dc;
   --color-personal-highlight-alt: #faf6e9;
+  --color-code-bg: #f6f8fa;
+  --color-code-ink: #39414a;
 
   /* Color — hairlines & scrim */
   --color-hairline: #eef1f4;
@@ -60,6 +65,10 @@
   --space-3xl: 30px;
   --space-4xl: 44px;
   --space-card-inline: 58px;
+  --space-topic-header: 10px;
+  --space-card-pad-block: 20px;
+  --space-card-pad-inline: 22px;
+  --space-topic-content-bottom: 80px;
 
   /* Radius */
   --radius-xs: 6px;
@@ -69,6 +78,8 @@
   --radius-row: 16px;
   --radius-card: 24px;
   --radius-chip: 999px;
+  --radius-card-collapsed: 18px;
+  --radius-card-open: 22px;
 
   /* Size */
   --size-rail: 60px;
@@ -88,6 +99,11 @@
   --shadow-popup: 0 6px 20px rgba(33, 27, 47, 0.08);
   --shadow-modal: 0 24px 60px rgba(33, 27, 47, 0.16);
   --shadow-drawer: 14px 0 38px rgba(33, 27, 47, 0.14);
+
+  /* Type scale — topic page */
+  --text-topic-version: 12px;
+  --text-card-ordinal: 12px;
+  --text-tag: 11px;
 
   /* Easing & duration */
   --ease-pop: cubic-bezier(0.2, 0.8, 0.3, 1);

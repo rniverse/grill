@@ -61,7 +61,7 @@
   --shadow-modal: var(--shadow-modal);
   --shadow-drawer: var(--shadow-drawer);
 
-  --breakpoint-mobile: var(--bp-mobile);
-  --breakpoint-nav-panel: var(--bp-nav-panel);
-  --breakpoint-personal-rail: var(--bp-personal-rail);
+  --breakpoint-mobile: 700px;
+  --breakpoint-nav-panel: 980px;
+  --breakpoint-personal-rail: 1140px;
 }

@@ -16,4 +16,12 @@ describe('topicsConfig', () => {
     expect(typeof loaded.meta.version).toBe('string')
     expect(loaded.questions.length).toBeGreaterThan(0)
   })
+
+  test('loadReferences() resolves the real references module', async () => {
+    const entry = topicsConfig[0]
+    const loaded = await entry.loadReferences()
+
+    expect(Array.isArray(loaded.references)).toBe(true)
+    expect(loaded.references.length).toBeGreaterThan(0)
+  })
 })

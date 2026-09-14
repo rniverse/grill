@@ -1,4 +1,4 @@
-import type { FileMeta, Question, Topic } from '@/types/topic.types'
+import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 
 export interface TopicModule {
   topic: Topic
@@ -6,10 +6,15 @@ export interface TopicModule {
   questions: Question[]
 }
 
+export interface ReferencesModule {
+  references: Reference[]
+}
+
 export interface TopicConfigEntry {
   id: string
   name: string
   load: () => Promise<TopicModule>
+  loadReferences: () => Promise<ReferencesModule>
 }
 
 export const topicsConfig: TopicConfigEntry[] = [
@@ -17,5 +22,6 @@ export const topicsConfig: TopicConfigEntry[] = [
     id: 'angular',
     name: 'Angular',
     load: () => import('@/topics/angular'),
+    loadReferences: () => import('@/references/angular'),
   },
 ]

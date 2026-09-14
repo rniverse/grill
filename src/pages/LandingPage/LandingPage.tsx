@@ -16,15 +16,18 @@ interface LoadedTopic {
 
 export function LandingPage() {
   const [loadedTopics, setLoadedTopics] = useState<LoadedTopic[]>([])
+  const [totalReferences, setTotalReferences] = useState(0)
 
   useEffect(() => {
     let cancelled = false
 
     async function loadAllTopics() {
       const modules: TopicModule[] = []
+      let referenceCount = 0
       for (const entry of topicsConfig) {
-        const topicModule = await entry.load()
+        const [topicModule, referencesModule] = await Promise.all([entry.load(), entry.loadReferences()])
         modules.push(topicModule)
+        referenceCount += referencesModule.references.length
       }
 
       if (cancelled) {
@@ -37,6 +40,7 @@ export function LandingPage() {
         questionCount: topicModule.questions.length,
       }))
       setLoadedTopics(nextLoadedTopics)
+      setTotalReferences(referenceCount)
     }
 
     loadAllTopics()
@@ -59,7 +63,7 @@ export function LandingPage() {
               {t('landing.summary', {
                 topics: loadedTopics.length,
                 questions: totalQuestions,
-                references: 0,
+                references: totalReferences,
               })}
             </span>
             <button type="button" className="landing-page__control">

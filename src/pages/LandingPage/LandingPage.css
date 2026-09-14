@@ -59,6 +59,13 @@
   margin-left: auto;
 }
 
+.landing-page__import-error {
+  margin: calc(-1 * var(--space-sm)) 0 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  color: var(--color-ink-secondary);
+}
+
 .landing-page__rows {
   display: flex;
   flex-direction: column;

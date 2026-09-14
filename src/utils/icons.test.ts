@@ -13,6 +13,8 @@ describe('icons', () => {
       'ExportIcon',
       'SearchIcon',
       'ImportIcon',
+      'AskIcon',
+      'BookmarkedIcon',
     ]
 
     for (const name of expectedNames) {

@@ -78,6 +78,9 @@
   --radius-chip: 999px;
   --radius-card-collapsed: 18px;
   --radius-card-open: 22px;
+  --radius-floating-button: 10px;
+  --radius-popover: 16px;
+  --radius-tab: 9px;
 
   /* Size */
   --size-rail: 60px;
@@ -91,6 +94,9 @@
   --size-modal-max-height: 80vh;
   --size-close-button: 24px;
   --size-topic-content-max-width: 760px;
+  --size-floating-button: 30px;
+  --size-ask-popover-width: 340px;
+  --size-personal-rail-width: 330px;
 
   /* Type scale — topic row */
   --text-topic-row-ordinal: 12px;
@@ -102,6 +108,8 @@
   --shadow-popup: 0 6px 20px rgba(33, 27, 47, 0.08);
   --shadow-modal: 0 24px 60px rgba(33, 27, 47, 0.16);
   --shadow-drawer: 14px 0 38px rgba(33, 27, 47, 0.14);
+  --shadow-floating-button: 0 6px 18px rgba(33, 27, 47, 0.18);
+  --shadow-popover: 0 18px 44px rgba(33, 27, 47, 0.16);
 
   /* Type scale — topic page */
   --text-card-ordinal: 12px;

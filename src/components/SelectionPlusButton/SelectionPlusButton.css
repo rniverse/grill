@@ -1,0 +1,20 @@
+.selection-plus-button {
+  position: fixed;
+  z-index: var(--z-popup);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-floating-button);
+  height: var(--size-floating-button);
+  border: none;
+  border-radius: var(--radius-floating-button);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  cursor: pointer;
+  box-shadow: var(--shadow-floating-button);
+  transition: transform var(--duration-fade) ease;
+}
+
+.selection-plus-button:hover {
+  transform: scale(1.08);
+}

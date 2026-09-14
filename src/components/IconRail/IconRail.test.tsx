@@ -1,7 +1,12 @@
-import { describe, expect, test } from 'bun:test'
-import { render, screen } from '@testing-library/react'
+import { beforeEach, describe, expect, test } from 'bun:test'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { IconRail } from './IconRail'
 import { RailSection } from './rail-section.enum'
+import { savePersonalNote } from '@/services/storage'
+
+beforeEach(() => {
+  localStorage.clear()
+})
 
 describe('IconRail', () => {
   test('marks the active section button', () => {
@@ -23,5 +28,38 @@ describe('IconRail', () => {
     expect(screen.getByRole('button', { name: 'My questions' })).toBeDefined()
     expect(screen.getByRole('button', { name: 'My notes' })).toBeDefined()
     expect(screen.getByRole('button', { name: 'Export personal layer' })).toBeDefined()
+  })
+
+  test('clicking export downloads the current personal layer as a JSON blob', () => {
+    savePersonalNote({ kind: 'question', id: 'q1' }, { name: 'nodejs', version: '1.0.0' }, 'a note')
+
+    const createdUrls: string[] = []
+    const revokedUrls: string[] = []
+    const originalCreateObjectURL = URL.createObjectURL
+    const originalRevokeObjectURL = URL.revokeObjectURL
+    let capturedBlob: Blob | null = null
+
+    URL.createObjectURL = (blob: Blob) => {
+      capturedBlob = blob
+      const url = 'blob:mock-url'
+      createdUrls.push(url)
+      return url
+    }
+    URL.revokeObjectURL = (url: string) => {
+      revokedUrls.push(url)
+    }
+
+    try {
+      render(<IconRail activeSection={RailSection.Topics} />)
+      fireEvent.click(screen.getByRole('button', { name: 'Export personal layer' }))
+
+      expect(createdUrls).toHaveLength(1)
+      expect(revokedUrls).toEqual(createdUrls)
+      expect(capturedBlob).not.toBeNull()
+      expect((capturedBlob as unknown as Blob).type).toBe('application/json')
+    } finally {
+      URL.createObjectURL = originalCreateObjectURL
+      URL.revokeObjectURL = originalRevokeObjectURL
+    }
   })
 })

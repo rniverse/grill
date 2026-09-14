@@ -1,7 +1,11 @@
-import { describe, expect, test } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { beforeEach, describe, expect, test } from 'bun:test'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { TopicPage } from './TopicPage'
+
+beforeEach(() => {
+  localStorage.clear()
+})
 
 function renderAt(path: string) {
   render(
@@ -56,5 +60,18 @@ describe('TopicPage', () => {
     expect(
       await screen.findByText(/repeatedly moves through six phases/i),
     ).toBeDefined()
+  })
+
+  test('bookmarking a question surfaces it in the Personal Rail bookmarks tab', async () => {
+    renderAt('/topics/angular')
+    await screen.findByText('Angular')
+    const rail = screen.getByRole('complementary')
+
+    fireEvent.click(within(rail).getByRole('button', { name: 'Bookmarks' }))
+    expect(within(rail).getByText('Nothing bookmarked yet.')).toBeDefined()
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Bookmark' })[0]!)
+
+    expect(within(rail).queryByText('Nothing bookmarked yet.')).toBeNull()
   })
 })

@@ -1,0 +1,118 @@
+.personal-rail {
+  width: var(--size-personal-rail-width);
+  flex: 0 0 var(--size-personal-rail-width);
+  padding: var(--space-2xl) var(--space-lg) var(--space-2xl) 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* @media conditions can't reference custom properties, so this mirrors the
+   --bp-personal-rail value (1140px) in variables.css literally. */
+@media (max-width: 1140px) {
+  .personal-rail {
+    display: none;
+  }
+}
+
+.personal-rail__tabs {
+  display: flex;
+  gap: var(--space-xs);
+  padding: var(--space-2xs);
+  background: var(--color-ground);
+  border-radius: var(--radius-control);
+}
+
+.personal-rail__tab {
+  flex: 1;
+  text-align: center;
+  padding: var(--space-xs) 0;
+  border-radius: var(--radius-tab);
+  border: none;
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.personal-rail__tab[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.personal-rail__items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-base);
+}
+
+.personal-rail__empty {
+  padding: var(--space-2xl) var(--space-base);
+  text-align: center;
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  line-height: 1.6;
+  color: var(--color-ink-tertiary);
+}
+
+.personal-rail__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border-radius: var(--radius-row);
+  background: var(--color-surface-recessed);
+  cursor: pointer;
+  text-align: left;
+}
+
+.personal-rail__item-row {
+  display: flex;
+  align-items: center;
+}
+
+.personal-rail__badge {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-accent-icon);
+}
+
+.personal-rail__remove {
+  margin-left: auto;
+  display: flex;
+  padding: var(--space-2xs);
+  border-radius: var(--radius-xs);
+  border: none;
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.personal-rail__quote {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  line-height: 1.5;
+  color: var(--color-ink-secondary);
+  background: var(--color-personal-highlight-alt);
+  border-radius: var(--radius-xs);
+  padding: var(--space-2xs) var(--space-xs);
+}
+
+.personal-rail__title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-secondary);
+  line-height: 1.55;
+  font-weight: 500;
+  color: var(--color-ink-body);
+}

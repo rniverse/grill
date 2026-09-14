@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { topicsConfig, type TopicModule } from '@/topics.config'
 import { t } from '@/utils/i18n'
 import { SearchIcon, ImportIcon } from '@/utils/icons'
+import { importPersonalLayer } from '@/services/storage'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { RailSection } from '@/components/IconRail/rail-section.enum'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
@@ -17,6 +18,8 @@ interface LoadedTopic {
 export function LandingPage() {
   const [loadedTopics, setLoadedTopics] = useState<LoadedTopic[]>([])
   const [totalReferences, setTotalReferences] = useState(0)
+  const [importError, setImportError] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -50,6 +53,20 @@ export function LandingPage() {
     }
   }, [])
 
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      importPersonalLayer(text)
+      setImportError(false)
+    } catch {
+      setImportError(true)
+    }
+  }
+
   const totalQuestions = loadedTopics.reduce((sum, topic) => sum + topic.questionCount, 0)
 
   return (
@@ -70,11 +87,20 @@ export function LandingPage() {
               <SearchIcon size={15} />
               <span>{t('landing.search')}</span>
             </button>
-            <button type="button" className="landing-page__control">
+            <button type="button" className="landing-page__control" onClick={() => importInputRef.current?.click()}>
               <ImportIcon size={15} />
               <span>{t('landing.import')}</span>
             </button>
+            <input
+              ref={importInputRef}
+              type="file"
+              accept=".json"
+              hidden
+              onChange={handleImportFile}
+              aria-label={t('landing.import')}
+            />
           </div>
+          {importError ? <p className="landing-page__import-error">{t('landing.importError')}</p> : null}
           <div className="landing-page__rows">
             {loadedTopics.map((topic, index) => (
               <TopicRow

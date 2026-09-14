@@ -1,0 +1,15 @@
+.bookmark-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-xs);
+  border-radius: var(--radius-xs);
+  border: none;
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+}
+
+.bookmark-button[aria-pressed='true'] {
+  color: var(--color-accent-icon);
+}

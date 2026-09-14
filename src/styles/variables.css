@@ -59,6 +59,7 @@
   --space-2xl: 26px;
   --space-3xl: 30px;
   --space-4xl: 44px;
+  --space-card-inline: 58px;
 
   /* Radius */
   --radius-xs: 6px;
@@ -72,6 +73,15 @@
   /* Size */
   --size-rail: 60px;
   --size-logo-tile: 32px;
+  --size-hairline: 1px;
+  --size-topic-row-height: 82px;
+  --size-topic-row-ordinal: 26px;
+  --size-topic-row-count: 34px;
+
+  /* Type scale — topic row */
+  --text-topic-row-ordinal: 12px;
+  --text-topic-row-name: 18px;
+  --text-topic-row-blurb: 14.5px;
 
   /* Shadow */
   --shadow-card-raised: 0 10px 34px rgba(33, 27, 47, 0.07);

@@ -1,7 +1,14 @@
 import { useState } from 'react'
 import type { ID, Question, Reference } from '@/types/topic.types'
 import type { Bookmark, LocalTargetRef, PendingQuestion, PersonalNote } from '@/types/personal.types'
-import { deletePendingQuestion, listBookmarks, listPendingQuestions, listPersonalNotes } from '@/services/storage'
+import {
+  deletePendingQuestion,
+  deletePersonalNote,
+  listBookmarks,
+  listPendingQuestions,
+  listPersonalNotes,
+} from '@/services/storage'
+import { locateSelection } from '@/utils/highlight'
 import { t } from '@/utils/i18n'
 import { PersonalRailTab } from './personal-rail-tab.enum'
 import './PersonalRail.css'
@@ -46,6 +53,68 @@ function targetLabel(target: LocalTargetRef['target'], questions: Question[], re
   return references.find((reference) => reference.id === target.id)?.term ?? target.id
 }
 
+// The current text a pending question's selection should still be findable
+// in — the question's answer, or the reference's flashcard text.
+function currentTargetText(target: LocalTargetRef['target'], questions: Question[], references: Reference[]): string {
+  if (target.kind === 'question') {
+    return questions.find((question) => question.id === target.id)?.answer.value ?? ''
+  }
+  return references.find((reference) => reference.id === target.id)?.text.value ?? ''
+}
+
+function isPendingQuestionLocatable(pending: PendingQuestion, questions: Question[], references: Reference[]): boolean {
+  const text = currentTargetText(pending.target, questions, references)
+  return locateSelection(text, pending.selection) !== 'not-found'
+}
+
+interface PendingQuestionItemProps {
+  pending: PendingQuestion
+  references: Reference[]
+  onOpenQuestion: (questionId: ID) => void
+  onOpenReference: (reference: Reference) => void
+  onPersonalLayerChange?: () => void
+}
+
+function PendingQuestionItem({
+  pending,
+  references,
+  onOpenQuestion,
+  onOpenReference,
+  onPersonalLayerChange,
+}: PendingQuestionItemProps) {
+  return (
+    <div
+      className="personal-rail__item"
+      role="button"
+      tabIndex={0}
+      onClick={() => openTarget(pending.target, references, onOpenQuestion, onOpenReference)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          openTarget(pending.target, references, onOpenQuestion, onOpenReference)
+        }
+      }}
+    >
+      <div className="personal-rail__item-row">
+        <span className="personal-rail__badge">{t('personal.railAskedBadge')}</span>
+        <button
+          type="button"
+          className="personal-rail__remove"
+          aria-label={t('personal.railRemove')}
+          onClick={(event) => {
+            event.stopPropagation()
+            deletePendingQuestion(pending.id)
+            onPersonalLayerChange?.()
+          }}
+        >
+          ×
+        </button>
+      </div>
+      <p className="personal-rail__quote">{pending.selection.text}</p>
+      <p className="personal-rail__title">{pending.ask}</p>
+    </div>
+  )
+}
+
 export function PersonalRail({
   topic,
   questions,
@@ -59,6 +128,13 @@ export function PersonalRail({
   const pendingQuestions: PendingQuestion[] = listPendingQuestions().filter(
     (pending) => pending.topic.name === topic.name,
   )
+  const locatablePendingQuestions = pendingQuestions.filter((pending) =>
+    isPendingQuestionLocatable(pending, questions, references),
+  )
+  const needsReviewPendingQuestions = pendingQuestions.filter(
+    (pending) => !isPendingQuestionLocatable(pending, questions, references),
+  )
+
   const bookmarks: Bookmark[] = listBookmarks().filter((bookmark) => bookmark.topic.name === topic.name)
   const notes: PersonalNote[] = listPersonalNotes().filter((note) => note.topic.name === topic.name)
 
@@ -83,38 +159,34 @@ export function PersonalRail({
           pendingQuestions.length === 0 ? (
             <p className="personal-rail__empty">{t('personal.railQuestionsEmpty')}</p>
           ) : (
-            pendingQuestions.map((pending) => (
-              <div
-                key={pending.id}
-                className="personal-rail__item"
-                role="button"
-                tabIndex={0}
-                onClick={() => openTarget(pending.target, references, onOpenQuestion, onOpenReference)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    openTarget(pending.target, references, onOpenQuestion, onOpenReference)
-                  }
-                }}
-              >
-                <div className="personal-rail__item-row">
-                  <span className="personal-rail__badge">{t('personal.railAskedBadge')}</span>
-                  <button
-                    type="button"
-                    className="personal-rail__remove"
-                    aria-label={t('personal.railRemove')}
-                    onClick={(event) => {
-                      event.stopPropagation()
-                      deletePendingQuestion(pending.id)
-                      onPersonalLayerChange?.()
-                    }}
-                  >
-                    ×
-                  </button>
+            <>
+              {locatablePendingQuestions.map((pending) => (
+                <PendingQuestionItem
+                  key={pending.id}
+                  pending={pending}
+                  references={references}
+                  onOpenQuestion={onOpenQuestion}
+                  onOpenReference={onOpenReference}
+                  onPersonalLayerChange={onPersonalLayerChange}
+                />
+              ))}
+
+              {needsReviewPendingQuestions.length > 0 ? (
+                <div className="personal-rail__needs-review">
+                  <p className="personal-rail__section-heading">{t('personal.railNeedsReview')}</p>
+                  {needsReviewPendingQuestions.map((pending) => (
+                    <PendingQuestionItem
+                      key={pending.id}
+                      pending={pending}
+                      references={references}
+                      onOpenQuestion={onOpenQuestion}
+                      onOpenReference={onOpenReference}
+                      onPersonalLayerChange={onPersonalLayerChange}
+                    />
+                  ))}
                 </div>
-                <p className="personal-rail__quote">{pending.selection.text}</p>
-                <p className="personal-rail__title">{pending.ask}</p>
-              </div>
-            ))
+              ) : null}
+            </>
           )
         ) : null}
 
@@ -161,7 +233,21 @@ export function PersonalRail({
                   }
                 }}
               >
-                <span className="personal-rail__badge">{targetLabel(note.target, questions, references)}</span>
+                <div className="personal-rail__item-row">
+                  <span className="personal-rail__badge">{targetLabel(note.target, questions, references)}</span>
+                  <button
+                    type="button"
+                    className="personal-rail__remove"
+                    aria-label={t('personal.railRemove')}
+                    onClick={(event) => {
+                      event.stopPropagation()
+                      deletePersonalNote(note.id)
+                      onPersonalLayerChange?.()
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
                 <p className="personal-rail__title">
                   {note.text.length > NOTE_PREVIEW_LENGTH ? `${note.text.slice(0, NOTE_PREVIEW_LENGTH)}…` : note.text}
                 </p>

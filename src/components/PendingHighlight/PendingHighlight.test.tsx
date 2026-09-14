@@ -29,6 +29,20 @@ function Harness({ pendingQuestions }: { pendingQuestions: PendingQuestion[] }) 
   )
 }
 
+// A nested inline element (standing in for a P2 ReferenceBadge span) inside
+// the paragraph text, so a located range can cross into it.
+function HarnessWithNestedSpan({ pendingQuestions }: { pendingQuestions: PendingQuestion[] }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  return (
+    <div ref={containerRef} data-testid="container">
+      <p>
+        The quick <span className="reference-badge">brown</span> fox jumps over the lazy dog.
+      </p>
+      <PendingHighlight containerRef={containerRef} pendingQuestions={pendingQuestions} />
+    </div>
+  )
+}
+
 describe('PendingHighlight', () => {
   test('wraps the stored range when it still matches (fast path)', () => {
     const text = 'The quick brown fox jumps over the lazy dog.'
@@ -80,5 +94,25 @@ describe('PendingHighlight', () => {
     const marks = getByTestId('container').querySelectorAll('mark.pending-highlight')
     expect(marks.length).toBe(2)
     expect(Array.from(marks).map((mark) => mark.textContent)).toEqual(['quick', 'lazy dog'])
+  })
+
+  test('skips a highlight whose located range crosses into a nested element instead of splitting it', () => {
+    const text = 'The quick brown fox jumps over the lazy dog.'
+    const start = text.indexOf('quick brown')
+    const { getByTestId } = render(
+      <HarnessWithNestedSpan
+        pendingQuestions={[
+          pendingQuestion({ selection: { text: 'quick brown', range: { start, end: start + 'quick brown'.length } } }),
+        ]}
+      />,
+    )
+
+    const container = getByTestId('container')
+    expect(container.querySelector('mark.pending-highlight')).toBeNull()
+
+    // the nested span survives intact — not split or duplicated
+    const badges = container.querySelectorAll('span.reference-badge')
+    expect(badges.length).toBe(1)
+    expect(badges[0]?.textContent).toBe('brown')
   })
 })

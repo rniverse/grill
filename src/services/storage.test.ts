@@ -176,6 +176,96 @@ describe('export/import', () => {
   test('throws when the parsed shape is missing expected arrays', () => {
     expect(() => importPersonalLayer(JSON.stringify({ pendingQuestions: [] }))).toThrow()
   })
+
+  test('round-trips a well-formed export through import', () => {
+    savePendingQuestion({
+      topic,
+      target: questionTarget,
+      selection: { text: 'Event Loop', range: { start: 4, end: 14 } },
+      ask: 'Why?',
+    })
+    savePersonalNote(questionTarget, topic, 'a note')
+    toggleBookmark(referenceTarget, topic)
+
+    const exported = exportPersonalLayer()
+    localStorage.clear()
+    importPersonalLayer(exported)
+
+    expect(JSON.parse(exportPersonalLayer())).toEqual(JSON.parse(exported))
+  })
+
+  test('rejects an import where one pending question element is malformed, without writing anything', () => {
+    toggleBookmark(questionTarget, topic) // pre-existing data that must survive the rejected import
+
+    const snapshot = {
+      pendingQuestions: [
+        {
+          id: 'pq-1',
+          topic,
+          target: questionTarget,
+          selection: { text: 'Event Loop', range: { start: 4, end: 14 } },
+          ask: 'Why?',
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'pq-2',
+          topic,
+          target: questionTarget,
+          // missing selection — malformed
+          ask: 'Why again?',
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      personalNotes: [],
+      bookmarks: [],
+    }
+
+    expect(() => importPersonalLayer(JSON.stringify(snapshot))).toThrow()
+    expect(listPendingQuestions()).toEqual([])
+    expect(isBookmarked(questionTarget)).toBe(true)
+  })
+
+  test('rejects an import where one personal note element is malformed, without writing anything', () => {
+    const snapshot = {
+      pendingQuestions: [],
+      personalNotes: [
+        {
+          id: 'note-1',
+          topic,
+          target: referenceTarget,
+          text: 'restored note',
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+        {
+          id: 'note-2',
+          topic,
+          target: referenceTarget,
+          text: 123, // not a string — malformed
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      bookmarks: [],
+    }
+
+    expect(() => importPersonalLayer(JSON.stringify(snapshot))).toThrow()
+    expect(listPersonalNotes()).toEqual([])
+  })
+
+  test('rejects an import where one bookmark element is malformed, without writing anything', () => {
+    const snapshot = {
+      pendingQuestions: [],
+      personalNotes: [],
+      bookmarks: [
+        { id: 'b1', topic, target: questionTarget, createdAt: '2024-01-01T00:00:00.000Z' },
+        { id: 'b2', topic, target: { kind: 'not-a-kind', id: 'x' }, createdAt: '2024-01-01T00:00:00.000Z' },
+      ],
+    }
+
+    expect(() => importPersonalLayer(JSON.stringify(snapshot))).toThrow()
+    expect(listBookmarks()).toEqual([])
+  })
 })
 
 describe('corrupt storage', () => {

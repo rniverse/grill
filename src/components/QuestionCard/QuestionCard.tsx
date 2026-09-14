@@ -1,5 +1,6 @@
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { Question, Reference } from '@/types/topic.types'
+import type { PendingQuestion } from '@/types/personal.types'
 import { getPersonalNote, listPendingQuestions, savePersonalNote } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
@@ -44,8 +45,22 @@ export function QuestionCard({
   }
 
   const personalNote = getPersonalNote(target)
-  const pendingQuestions = listPendingQuestions().filter(
+
+  const matchingPendingQuestions = listPendingQuestions().filter(
     (pending) => pending.target.kind === 'question' && pending.target.id === question.id,
+  )
+  // A content fingerprint of this question's pending questions. Serializing
+  // to JSON and parsing it back inside the memo below (rather than depending
+  // on matchingPendingQuestions directly, which is a fresh array literal on
+  // every render) means PendingHighlight only receives a new array reference
+  // when a pending question for *this* target was actually added, removed,
+  // or edited — not on every unrelated re-render (opening a different card,
+  // changing a filter, etc.) that would otherwise re-trigger its DOM effect.
+  const pendingQuestionsFingerprint = JSON.stringify(matchingPendingQuestions)
+
+  const pendingQuestions = useMemo(
+    () => JSON.parse(pendingQuestionsFingerprint) as PendingQuestion[],
+    [pendingQuestionsFingerprint],
   )
 
   return (

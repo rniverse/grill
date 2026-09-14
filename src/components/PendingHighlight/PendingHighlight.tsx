@@ -18,7 +18,6 @@ function unwrapExistingHighlights(container: HTMLElement): void {
     }
     parent.removeChild(mark)
   }
-  container.normalize()
 }
 
 // Inverse of the offset walk in utils/text-selection.ts: given a character
@@ -81,6 +80,12 @@ export function PendingHighlight({ containerRef, pendingQuestions }: PendingHigh
 
       const range = findRangeForOffsets(container, located.start, located.end)
       if (!range) continue
+
+      // If the range's start and end fall in different DOM nodes, it crosses
+      // an element boundary (e.g. a ReferenceBadge span nested in the text).
+      // extractContents() can split that element, so skip wrapping rather
+      // than risk leaving a corrupted or duplicated fragment behind.
+      if (range.startContainer !== range.endContainer) continue
 
       const mark = document.createElement('mark')
       mark.dataset[HIGHLIGHT_MARKER] = 'true'

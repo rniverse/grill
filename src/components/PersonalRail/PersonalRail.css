@@ -108,6 +108,25 @@
   padding: var(--space-2xs) var(--space-xs);
 }
 
+.personal-rail__needs-review {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: var(--size-hairline) solid var(--color-hairline);
+}
+
+.personal-rail__section-heading {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--color-ink-tertiary);
+}
+
 .personal-rail__title {
   margin: 0;
   font-family: var(--font-ui);

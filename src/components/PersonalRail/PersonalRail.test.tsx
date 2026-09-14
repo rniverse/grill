@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { PersonalRail } from './PersonalRail'
-import { listPendingQuestions, savePendingQuestion, savePersonalNote, toggleBookmark } from '@/services/storage'
+import {
+  listPendingQuestions,
+  listPersonalNotes,
+  savePendingQuestion,
+  savePersonalNote,
+  toggleBookmark,
+} from '@/services/storage'
 import type { Question, Reference } from '@/types/topic.types'
 
 const topic = { name: 'nodejs', version: '1.0.0' }
@@ -131,6 +137,72 @@ describe('PersonalRail', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Notes' }))
 
     expect(screen.getByText('A fairly short personal note.')).toBeDefined()
+  })
+
+  test('renders a pending question whose selection can no longer be located under a needs-review heading', () => {
+    savePendingQuestion({
+      topic,
+      target: { kind: 'question', id: 'q1' },
+      selection: { text: 'this text is nowhere in the answer', range: { start: 0, end: 5 } },
+      ask: 'Where did this go?',
+    })
+
+    render(
+      <PersonalRail
+        topic={topic}
+        questions={questions}
+        references={references}
+        onOpenQuestion={() => {}}
+        onOpenReference={() => {}}
+      />,
+    )
+
+    expect(screen.getByText('Needs review')).toBeDefined()
+    const heading = screen.getByText('Needs review')
+    const item = screen.getByText('Where did this go?')
+    // the needs-review item renders after the heading, inside its section
+    expect(heading.compareDocumentPosition(item) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  test('a locatable pending question does not render under the needs-review heading', () => {
+    savePendingQuestion({
+      topic,
+      target: { kind: 'question', id: 'q1' },
+      selection: { text: 'callbacks', range: { start: 0, end: 9 } },
+      ask: 'When do these run?',
+    })
+
+    render(
+      <PersonalRail
+        topic={topic}
+        questions={questions}
+        references={references}
+        onOpenQuestion={() => {}}
+        onOpenReference={() => {}}
+      />,
+    )
+
+    expect(screen.getByText('When do these run?')).toBeDefined()
+    expect(screen.queryByText('Needs review')).toBeNull()
+  })
+
+  test('removing a note deletes it from storage', () => {
+    savePersonalNote({ kind: 'question', id: 'q1' }, topic, 'temporary note')
+
+    render(
+      <PersonalRail
+        topic={topic}
+        questions={questions}
+        references={references}
+        onOpenQuestion={() => {}}
+        onOpenReference={() => {}}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Notes' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
+
+    expect(listPersonalNotes()).toEqual([])
   })
 
   test('shows the bookmarks and notes empty states', () => {

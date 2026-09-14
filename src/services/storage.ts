@@ -1,5 +1,5 @@
 import { generateId } from '@/utils/id'
-import type { Bookmark, LocalTargetRef, PendingQuestion, PersonalNote } from '@/types/personal.types'
+import type { Bookmark, LocalTargetRef, PendingQuestion, PersonalNote, TextSelection } from '@/types/personal.types'
 import type { ID } from '@/types/topic.types'
 
 const KEY = {
@@ -125,13 +125,71 @@ interface PersonalLayerExport {
   bookmarks: Bookmark[]
 }
 
-function isPersonalLayerExport(value: unknown): value is PersonalLayerExport {
-  if (typeof value !== 'object' || value === null) return false
-  const candidate = value as Record<string, unknown>
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function isLocalTargetRefShape(value: unknown): value is LocalTargetRef {
+  if (!isRecord(value)) return false
+
+  const topic = value.topic
+  if (!isRecord(topic) || typeof topic.name !== 'string' || typeof topic.version !== 'string') return false
+
+  const target = value.target
+  if (!isRecord(target)) return false
+  if (target.kind !== 'question' && target.kind !== 'reference') return false
+  if (typeof target.id !== 'string') return false
+
+  return true
+}
+
+function isTextSelectionShape(value: unknown): value is TextSelection {
+  if (!isRecord(value)) return false
+  if (typeof value.text !== 'string') return false
+
+  const range = value.range
+  if (!isRecord(range)) return false
+  return typeof range.start === 'number' && typeof range.end === 'number'
+}
+
+function isPendingQuestionShape(value: unknown): value is PendingQuestion {
+  if (!isLocalTargetRefShape(value)) return false
+  const candidate = value as unknown as Record<string, unknown>
   return (
-    Array.isArray(candidate.pendingQuestions) &&
-    Array.isArray(candidate.personalNotes) &&
-    Array.isArray(candidate.bookmarks)
+    typeof candidate.id === 'string' &&
+    typeof candidate.createdAt === 'string' &&
+    typeof candidate.ask === 'string' &&
+    isTextSelectionShape(candidate.selection)
+  )
+}
+
+function isPersonalNoteShape(value: unknown): value is PersonalNote {
+  if (!isLocalTargetRefShape(value)) return false
+  const candidate = value as unknown as Record<string, unknown>
+  return (
+    typeof candidate.id === 'string' &&
+    typeof candidate.createdAt === 'string' &&
+    typeof candidate.updatedAt === 'string' &&
+    typeof candidate.text === 'string'
+  )
+}
+
+function isBookmarkShape(value: unknown): value is Bookmark {
+  if (!isLocalTargetRefShape(value)) return false
+  const candidate = value as unknown as Record<string, unknown>
+  return typeof candidate.id === 'string' && typeof candidate.createdAt === 'string'
+}
+
+function isPersonalLayerExport(value: unknown): value is PersonalLayerExport {
+  if (!isRecord(value)) return false
+
+  return (
+    Array.isArray(value.pendingQuestions) &&
+    value.pendingQuestions.every(isPendingQuestionShape) &&
+    Array.isArray(value.personalNotes) &&
+    value.personalNotes.every(isPersonalNoteShape) &&
+    Array.isArray(value.bookmarks) &&
+    value.bookmarks.every(isBookmarkShape)
   )
 }
 

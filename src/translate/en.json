@@ -37,6 +37,7 @@
   "personal.railNotesEmpty": "No notes yet.",
   "personal.railAskedBadge": "Asked",
   "personal.railRemove": "Remove",
+  "personal.railNeedsReview": "Needs review",
   "personal.railQuestionBadge": "Question",
   "personal.railReferenceBadge": "Reference"
 }

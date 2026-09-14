@@ -34,7 +34,7 @@ const lifecycleAnswer: Answer = {
 
 const signalsAnswer: Answer = {
   id: '01M2FC6B5CG3GM162HVK0X2R8Q',
-  text: 'A Signal is a reactive container around a value that tracks exactly which template bindings read it. When it changes, Angular updates only those specific bindings — fine-grained reactivity — rather than walking the component tree. Observables model async streams over time; Signals model synchronous, glitch-free state. Rule of thumb: use Signals for local/component state, RxJS for async orchestration.',
+  text: "A Signal is a reactive container around a value that tracks exactly which template bindings read it. When it changes, Angular updates only those specific bindings — fine-grained reactivity — rather than walking the component tree. Observables model async *streams* over time (HTTP calls, WebSocket events, combining multiple sources); Signals model synchronous, glitch-free *state*. Rule of thumb interviewers like: use Signals for local/component state, RxJS for async orchestration — and `toSignal()`/`toObservable()` bridge the two when needed.",
   references: [signalRef.id],
   related: [],
 }

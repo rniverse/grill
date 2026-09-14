@@ -12,15 +12,17 @@ repeat what they already settle.
 ## 1. What this doc adds
 
 The rolling spec and design handoff answer "what to build." This doc answers
-three things they leave open:
+four things they leave open:
 
 1. How the CSS/design-token system is structured (user requirement: no magic
    values anywhere — every color/space/font/radius/shadow/duration/breakpoint
    is a named token in one place, consumed everywhere else).
-2. The concrete folder layout, updated for that token system and for pieces
+2. How icons and user-facing text are sourced (single icon-library boundary;
+   no hardcoded strings, everything through an i18n key).
+3. The concrete folder layout, updated for that token system and for pieces
    the design handoff introduced that the original rolling-spec folder list
    (§5) didn't have (nav rail, flyout panel, landing page).
-3. Build phasing and content-seeding approach, so the first implementation
+4. Build phasing and content-seeding approach, so the first implementation
    plan has a bounded scope instead of the whole app at once.
 
 ---
@@ -75,8 +77,14 @@ inlined — the table is a floor, not a ceiling.
 
 **Icons:** switch `components.json` `iconLibrary` from `hugeicons` to
 `lucide`; install `lucide-react`; remove `@hugeicons/react` and
-`@hugeicons/core-free-icons`. Icon list per the design handoff's Assets
-section.
+`@hugeicons/core-free-icons`. `src/lib/icons.ts` re-exports every icon
+actually used, under our own names (`export { Search as SearchIcon } from
+'lucide-react'`, etc. — or thin wrapper components if per-icon sizing
+becomes repetitive). Every component imports icons from `lib/icons.ts`
+only, never from `lucide-react` directly — one file to touch if the icon
+library ever changes, matching how `lib/` already isolates other external
+surfaces (ULID gen, localStorage). Icon list per the design handoff's
+Assets section.
 
 **Fonts:** install `@fontsource-variable/manrope`,
 `@fontsource-variable/newsreader`, `@fontsource-variable/jetbrains-mono`;
@@ -85,6 +93,25 @@ remove `@fontsource-variable/inter`. Font-family tokens
 mapped in `themes.css` to `--font-sans`/`--font-serif`/`--font-mono` (or
 equivalent named Tailwind theme keys) — no component references a font
 family by name directly.
+
+---
+
+## 2a. Internationalization
+
+`src/translate/en.json` — a flat `{ "key": "text" }` map, dot-namespaced
+keys (`"landing.contents"`, `"nav.export"`, `"ask.cancel"`). `src/lib/i18n.ts`
+exposes `t(key: TranslationKey, vars?: Record<string, string | number>)`,
+default/only locale `en` for now. A value needing a runtime value uses
+`{{placeholder}}` tokens (`"landing.summary": "{{topics}} topics ·
+{{questions}} questions · {{references}} references"`), substituted by
+`t()`. No JSX/TSX file contains a literal user-facing string — every label,
+button, placeholder, empty state, aria-label goes through `t()`. Adding a
+language later is adding `translate/<locale>.json` and a locale switch in
+`lib/i18n.ts`; no component changes needed.
+
+`TranslationKey` is a union type generated from `en.json`'s keys (e.g. via
+`keyof typeof en`) so a typo'd or removed key is a compile error, not a
+runtime blank string.
 
 ---
 
@@ -107,8 +134,12 @@ src/
     angular.ts
     nodejs.ts
   topics.config.ts
+  translate/
+    en.json
   lib/
     id.ts
+    icons.ts
+    i18n.ts
     localStorage.ts
     textSelection.ts
     highlightMatch.ts
@@ -196,11 +227,12 @@ rolling-spec §6.
 Each phase is independently reviewable/shippable, per user direction.
 
 - **P1 — Foundation.** `variables.css`/`themes.css`/`global.css`/`main.css`
-  token system; font + icon swap; `lib/id.ts` (ULID); `topics.config.ts`;
-  seed `topics/angular.ts` + `references/angular.ts` (one topic first,
-  proves the shape before repeating for nodejs); `LandingPage` (web `5b`
-  layout only — mobile `5m` deferred to P4); `IconRail` (icons + active
-  state, no flyout panel logic yet).
+  token system; font + icon swap; `lib/id.ts` (ULID); `lib/icons.ts`;
+  `lib/i18n.ts` + `translate/en.json`; `topics.config.ts`; seed
+  `topics/angular.ts` + `references/angular.ts` (one topic first, proves the
+  shape before repeating for nodejs); `LandingPage` (web `5b` layout only —
+  mobile `5m` deferred to P4); `IconRail` (icons + active state, no flyout
+  panel logic yet).
 - **P2 — Topic screen, read-only.** `TopicPage` web layout, `QuestionCard`
   expand/collapse, filter chips, `ReferenceBadge` highlight-and-popover,
   reference modal. Seed `topics/nodejs.ts` + `references/nodejs.ts`. No

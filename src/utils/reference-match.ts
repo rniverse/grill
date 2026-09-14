@@ -20,6 +20,10 @@ export function findReferenceMatches(text: string, references: Reference[]): Ref
   const matches: ReferenceMatch[] = []
 
   for (const reference of referencesByLength) {
+    if (reference.term.length === 0) {
+      continue
+    }
+
     const lowerTerm = reference.term.toLowerCase()
     let searchFrom = 0
 

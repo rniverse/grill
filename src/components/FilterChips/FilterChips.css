@@ -5,6 +5,7 @@
 }
 
 .filter-chips__chip {
+  height: auto;
   padding: var(--space-xs) var(--space-md);
   border-radius: var(--radius-chip);
   border: none;

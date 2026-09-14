@@ -11,9 +11,7 @@
   --color-ink-body: #3d424b;
   --color-ink-secondary: #6b727b;
   --color-ink-tertiary: #a8b4c0;
-  --color-ink-muted: #8b9099; /* topic version tag, filter/tag secondary text */
   --color-ink-faint: #9aa0a8; /* question tag labels */
-  --color-ink-blurb: #787d86; /* topic page blurb line */
 
   /* Color — accent */
   --color-accent: #82a4bd;
@@ -106,7 +104,6 @@
   --shadow-drawer: 14px 0 38px rgba(33, 27, 47, 0.14);
 
   /* Type scale — topic page */
-  --text-topic-version: 12px;
   --text-card-ordinal: 12px;
   --text-tag: 11px;
 

@@ -3,8 +3,6 @@ import { references } from '@/references/nodejs'
 
 const eventLoopRef = references.find((r) => r.term === 'Event Loop')!
 const libuvRef = references.find((r) => r.term === 'libuv')!
-const clusterRef = references.find((r) => r.term === 'Cluster')!
-const workerThreadsRef = references.find((r) => r.term === 'Worker Threads')!
 const bufferRef = references.find((r) => r.term === 'Buffer')!
 
 export const topic: Topic = {
@@ -28,7 +26,7 @@ const eventLoopPhasesAnswer: Answer = {
 const nextTickPriorityAnswer: Answer = {
   id: '01M2G5XCM09ZBNZ53SXYPJ4ZTZ',
   text: "`process.nextTick` queue → Promise microtask queue → current phase's macrotask callback → repeat. Both queues are drained *fully* before the loop proceeds, and callbacks added while draining still run in the same drain — which is exactly why a recursive `process.nextTick()` can starve the event loop entirely (I/O never gets a turn).\n\n**Trace this:**\n```js\nconsole.log(\"1: sync start\");\nsetTimeout(() => console.log(\"2: setTimeout\"), 0);\nsetImmediate(() => console.log(\"3: setImmediate\"));\nPromise.resolve().then(() => console.log(\"4: promise\"));\nprocess.nextTick(() => console.log(\"5: nextTick\"));\nconsole.log(\"6: sync end\");\n```\n**Answer:** `1, 6, 5, 4, 2, 3` — sync code first, then nextTick drains, then promise microtasks drain, then the loop proceeds to phases (timers before check, at the top level).",
-  references: [],
+  references: [eventLoopRef.id],
   related: [],
 }
 
@@ -49,7 +47,7 @@ const singleThreadedHalfTruthAnswer: Answer = {
 const avoidBlockingLoopAnswer: Answer = {
   id: '01M2G5XCNDTG1X0WSW0AYTSMN2',
   text: "Break the work into chunks and yield control back to the loop between chunks, e.g. via `setImmediate`:\n\n```js\nfunction processChunk(items, i = 0) {\n  const end = Math.min(i + 1000, items.length);\n  for (; i < end; i++) heavyWork(items[i]);\n  if (i < items.length) setImmediate(() => processChunk(items, i));\n}\n```\n\nFor genuinely CPU-bound work, prefer offloading to a worker thread (see §3) rather than chunking indefinitely.",
-  references: [workerThreadsRef.id],
+  references: [],
   related: [],
 }
 
@@ -77,14 +75,14 @@ const requireEsmAnswer: Answer = {
 const clusterAnswer: Answer = {
   id: '01M2G5XCQ8HGMHJBF3YET9YFAZ',
   text: "`cluster` forks multiple **worker processes** that share the same server port (via round-robin or OS-level load balancing), so a single-threaded runtime can use multiple CPU cores for handling more concurrent connections, and supports rolling restarts with zero downtime. It does **not** give you shared memory — each worker has its own heap, event loop, and module cache, so in-memory caches/state must be externalized (Redis, etc.) or replicated per worker.",
-  references: [clusterRef.id],
+  references: [],
   related: [],
 }
 
 const workerThreadsVsClusterAnswer: Answer = {
   id: '01M2G5XCQQK9TVR8J2GMS6AAG9',
   text: "`worker_threads` run in the same process and can share memory via `SharedArrayBuffer`, making them the right tool for **CPU-bound work** (image processing, heavy parsing, crypto) that needs to run off the main thread without the overhead of a full process fork or losing shared state. `cluster`/multiple processes are better for **scaling request throughput** across cores for I/O-bound workloads.",
-  references: [workerThreadsRef.id, clusterRef.id],
+  references: [],
   related: [],
 }
 
@@ -105,7 +103,7 @@ const streamsVsMemoryAnswer: Answer = {
 const pipeBackpressureAnswer: Answer = {
   id: '01M2G5XCS47QRAK9F6N2KQ6KN8',
   text: "**Backpressure.** If the writable side is slower than the readable side, `.pipe()` automatically pauses the readable stream until the writable's internal buffer drains, preventing unbounded memory growth. Manually wiring `data`/`write` events requires you to check the boolean return value of `.write()` and pause/resume yourself.",
-  references: [],
+  references: [bufferRef.id],
   related: [],
 }
 

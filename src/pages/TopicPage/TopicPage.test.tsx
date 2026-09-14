@@ -43,4 +43,18 @@ describe('TopicPage', () => {
     renderAt('/topics/does-not-exist')
     expect(await screen.findByText('Topic not found.')).toBeDefined()
   })
+
+  test('clicking a reference badge in an answer opens the modal for that reference', async () => {
+    renderAt('/topics/nodejs')
+    const toggle = await screen.findByRole('button', { name: /priority order between/i })
+    fireEvent.click(toggle)
+
+    const badge = await screen.findByText('event loop', { selector: '.reference-badge' })
+    fireEvent.click(badge)
+
+    expect(await screen.findByText('Event Loop')).toBeDefined()
+    expect(
+      await screen.findByText(/repeatedly moves through six phases/i),
+    ).toBeDefined()
+  })
 })

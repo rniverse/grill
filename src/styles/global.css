@@ -45,3 +45,14 @@ body {
     transform: translateY(0);
   }
 }
+
+/*
+ * Base UI's data-slot attributes are a stable public styling hook (see
+ * src/components/ui/dialog.tsx). DialogContent renders its own internal
+ * DialogOverlay without exposing a className for it, so this is the one
+ * consistent, token-based scrim for any Dialog consumer in the app.
+ */
+[data-slot='dialog-overlay'] {
+  background: var(--color-scrim);
+  z-index: var(--z-modal);
+}

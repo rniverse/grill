@@ -29,4 +29,12 @@ describe('ReferenceModal', () => {
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(closed).toBe(true)
   })
+
+  // The overlay's scrim/z-index come from a global rule in src/styles/global.css
+  // keyed off this data-slot (DialogContent's internal DialogOverlay exposes no
+  // className hook) — this pins the attribute our selector depends on.
+  test('renders an overlay carrying the dialog-overlay data-slot', () => {
+    render(<ReferenceModal reference={bufferRef} onClose={() => {}} />)
+    expect(document.querySelector('[data-slot="dialog-overlay"]')).not.toBeNull()
+  })
 })

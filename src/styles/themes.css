@@ -61,6 +61,9 @@
   --shadow-modal: var(--shadow-modal);
   --shadow-drawer: var(--shadow-drawer);
 
+  /* Breakpoint values duplicated from variables.css (--bp-mobile, --bp-nav-panel, --bp-personal-rail).
+     Tailwind v4 + Lightning CSS requires static px values in @theme breakpoint keys; cannot reference var().
+     Source of truth is variables.css — keep these two locations in sync when updating breakpoints. */
   --breakpoint-mobile: 700px;
   --breakpoint-nav-panel: 980px;
   --breakpoint-personal-rail: 1140px;

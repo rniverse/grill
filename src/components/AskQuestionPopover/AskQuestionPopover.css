@@ -26,7 +26,7 @@
 
 .ask-question-popover__input {
   width: 100%;
-  min-height: 104px;
+  min-height: var(--size-ask-popover-min-height);
   resize: none;
   border: none;
   outline: none;

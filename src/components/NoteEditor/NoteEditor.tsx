@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import {
   MDXEditor,
   type MDXEditorMethods,
@@ -23,12 +23,15 @@ export interface NoteEditorProps {
 // MDXEditor's own plugin/ref API.
 export function NoteEditor({ initialValue, onSave, onCancel }: NoteEditorProps) {
   const editorRef = useRef<MDXEditorMethods>(null)
+  const [markdown, setMarkdown] = useState(initialValue)
+  const trimmedMarkdown = markdown.trim()
 
   return (
     <div className="note-editor">
       <MDXEditor
         ref={editorRef}
         markdown={initialValue}
+        onChange={setMarkdown}
         contentEditableClassName="note-editor__content"
         placeholder={t('personal.notePlaceholder')}
         plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), thematicBreakPlugin(), markdownShortcutPlugin()]}
@@ -40,6 +43,7 @@ export function NoteEditor({ initialValue, onSave, onCancel }: NoteEditorProps) 
         <button
           type="button"
           className="note-editor__save"
+          disabled={trimmedMarkdown.length === 0}
           onClick={() => onSave(editorRef.current?.getMarkdown() ?? '')}
         >
           {t('personal.noteSave')}

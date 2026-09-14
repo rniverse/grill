@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Fix-wave agent reports (not needed long-term)
+.agent-a-report.md
+.agent-b-report.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

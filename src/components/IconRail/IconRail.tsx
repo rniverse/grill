@@ -38,7 +38,9 @@ function downloadPersonalLayer(): void {
   link.click()
   document.body.removeChild(link)
 
-  URL.revokeObjectURL(url)
+  // Revoking synchronously right after click() is flaky outside Chrome —
+  // give the browser a tick to start the download first.
+  setTimeout(() => URL.revokeObjectURL(url), 0)
 }
 
 export interface IconRailProps {

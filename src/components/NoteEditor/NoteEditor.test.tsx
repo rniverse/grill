@@ -29,4 +29,26 @@ describe('NoteEditor', () => {
 
     expect(captured.saved).toBe('A first draft note.')
   })
+
+  test('save is disabled when the note is empty', async () => {
+    render(<NoteEditor initialValue="" onSave={() => {}} onCancel={() => {}} />)
+    const saveButton = await screen.findByRole('button', { name: 'Save' })
+
+    expect(saveButton.hasAttribute('disabled')).toBe(true)
+  })
+
+  test('save is disabled when the note is only whitespace', async () => {
+    render(<NoteEditor initialValue="   " onSave={() => {}} onCancel={() => {}} />)
+    const saveButton = await screen.findByRole('button', { name: 'Save' })
+
+    expect(saveButton.hasAttribute('disabled')).toBe(true)
+  })
+
+  test('save is enabled once the note has non-whitespace content', async () => {
+    render(<NoteEditor initialValue="A first draft note." onSave={() => {}} onCancel={() => {}} />)
+    await screen.findByText('A first draft note.', { exact: false })
+    const saveButton = screen.getByRole('button', { name: 'Save' })
+
+    expect(saveButton.hasAttribute('disabled')).toBe(false)
+  })
 })

@@ -30,7 +30,7 @@ describe('IconRail', () => {
     expect(screen.getByRole('button', { name: 'Export personal layer' })).toBeDefined()
   })
 
-  test('clicking export downloads the current personal layer as a JSON blob', () => {
+  test('clicking export downloads the current personal layer as a JSON blob', async () => {
     savePersonalNote({ kind: 'question', id: 'q1' }, { name: 'nodejs', version: '1.0.0' }, 'a note')
 
     const createdUrls: string[] = []
@@ -54,9 +54,12 @@ describe('IconRail', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Export personal layer' }))
 
       expect(createdUrls).toHaveLength(1)
-      expect(revokedUrls).toEqual(createdUrls)
       expect(capturedBlob).not.toBeNull()
       expect((capturedBlob as unknown as Blob).type).toBe('application/json')
+
+      // revokeObjectURL is deferred with setTimeout — let it fire.
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(revokedUrls).toEqual(createdUrls)
     } finally {
       URL.createObjectURL = originalCreateObjectURL
       URL.revokeObjectURL = originalRevokeObjectURL

@@ -96,6 +96,7 @@
   --size-topic-content-max-width: 760px;
   --size-floating-button: 30px;
   --size-ask-popover-width: 340px;
+  --size-ask-popover-min-height: 104px;
   --size-personal-rail-width: 330px;
 
   /* Type scale — topic row */

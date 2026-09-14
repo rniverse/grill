@@ -1,3 +1,5 @@
+import type { AnswerType } from './answer-type.enum'
+
 export type ID = string // ULID
 
 export interface FileMeta {
@@ -11,23 +13,23 @@ export interface Topic {
   name: string
 }
 
-export interface Answer {
-  id: ID
-  text: string // markdown, may include mermaid fences
-  references: ID[] // Reference ids cited in this answer
-  related: ID[] // other Question ids worth reading alongside this one
+export interface AnswerContent {
+  type: AnswerType
+  value: string // markdown when type is 'md-text', plain text when 'text'; may include mermaid fences
 }
 
 export interface Question {
   id: ID
   question: string
-  answer: Answer
+  answer: AnswerContent
+  references: ID[] // Reference ids cited in the answer
+  related: ID[] // other Question ids worth reading alongside this one
   notes?: string // single shipped note, markdown
   tags?: string[]
 }
 
 export interface Reference {
-  id: ID // what Answer.references points to
+  id: ID // what Question.references points to
   term: string // display label + auto-highlight match string in answer text
   text: string // markdown — the flashcard content shown on click
   notes?: string

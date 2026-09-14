@@ -13,7 +13,7 @@ export interface QuestionCardProps {
 
 export function QuestionCard({ ordinal, question, references, open, onToggle, onReferenceSelect }: QuestionCardProps) {
   const citedReferences: Reference[] = []
-  for (const referenceId of question.answer.references) {
+  for (const referenceId of question.references) {
     const reference = references.find((candidate) => candidate.id === referenceId)
     if (reference) {
       citedReferences.push(reference)
@@ -48,7 +48,7 @@ export function QuestionCard({ ordinal, question, references, open, onToggle, on
       </button>
       {open ? (
         <div className="question-card__body">
-          <AnswerBody text={question.answer.text} references={citedReferences} onReferenceSelect={onReferenceSelect} />
+          <AnswerBody text={question.answer.value} references={citedReferences} onReferenceSelect={onReferenceSelect} />
         </div>
       ) : null}
     </div>

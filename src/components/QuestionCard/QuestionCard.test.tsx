@@ -7,7 +7,9 @@ const question: Question = {
   id: 'q1',
   question: 'What is a Buffer?',
   tags: ['core'],
-  answer: { id: 'a1', text: 'A Buffer holds raw bytes.', references: ['r1'], related: [] },
+  references: ['r1'],
+  related: [],
+  answer: { type: 'md-text', value: 'A Buffer holds raw bytes.' },
 }
 const references: Reference[] = [{ id: 'r1', term: 'Buffer', text: 'Raw memory container.' }]
 

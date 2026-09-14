@@ -26,10 +26,10 @@ describe('angular topic content', () => {
     }
   })
 
-  test('every Answer.references id resolves to a real reference', () => {
+  test('every Question.references id resolves to a real reference', () => {
     const referenceIds = new Set(references.map((r) => r.id))
     for (const question of questions) {
-      for (const referenceId of question.answer.references) {
+      for (const referenceId of question.references) {
         expect(referenceIds.has(referenceId)).toBe(true)
       }
     }

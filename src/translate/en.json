@@ -10,5 +10,8 @@
   "nav.myNotes": "My notes",
   "nav.export": "Export personal layer",
   "reference.eyebrow": "Reference",
-  "reference.close": "Close"
+  "reference.close": "Close",
+  "topic.filterAll": "All",
+  "topic.notFound": "Topic not found.",
+  "topic.backToTopics": "Back to topics"
 }

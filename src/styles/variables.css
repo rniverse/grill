@@ -92,6 +92,7 @@
   --size-modal-max-width: 86vw;
   --size-modal-max-height: 80vh;
   --size-close-button: 24px;
+  --size-topic-content-max-width: 760px;
 
   /* Type scale — topic row */
   --text-topic-row-ordinal: 12px;

@@ -12,7 +12,7 @@
 }
 
 .topic-page__content {
-  max-width: 760px;
+  max-width: var(--size-topic-content-max-width);
   margin: 0 auto;
   display: flex;
   flex-direction: column;

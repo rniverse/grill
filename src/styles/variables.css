@@ -1,0 +1,95 @@
+:root {
+  /* Color — ground & surface */
+  --color-ground: #f4f6f8;
+  --color-surface: #ffffff;
+  --color-surface-recessed: #fafbfc;
+  --color-surface-tinted: #eaf0f6;
+  --color-surface-tinted-alt: #eef2f6;
+
+  /* Color — ink */
+  --color-ink: #1c1d22;
+  --color-ink-body: #3d424b;
+  --color-ink-secondary: #6b727b;
+  --color-ink-tertiary: #a8b4c0;
+
+  /* Color — accent */
+  --color-accent: #82a4bd;
+  --color-accent-icon: #5c7d9e;
+  --color-accent-text: #3f6285;
+  --color-accent-link: #4a7fb5;
+  --color-accent-link-hover: #2f5d86;
+
+  /* Color — reference pill, personal highlight */
+  --color-reference-pill-bg: #e9f0f7;
+  --color-reference-pill-text: #3c6c96;
+  --color-personal-highlight: #f7f0dc;
+  --color-personal-highlight-alt: #faf6e9;
+
+  /* Color — hairlines & scrim */
+  --color-hairline: #eef1f4;
+  --color-hairline-alt: #f0f3f6;
+  --color-hairline-mobile: #e6eaee;
+  --color-scrim: rgba(28, 29, 34, 0.16);
+
+  /* Font families (fontsource-variable naming convention) */
+  --font-ui: 'Manrope Variable', system-ui, sans-serif;
+  --font-reading: 'Newsreader Variable', Georgia, serif;
+  --font-mono: 'JetBrains Mono Variable', monospace;
+
+  /* Type scale */
+  --text-page-title: 28px;
+  --text-section-title: 22px;
+  --text-question: 15.5px;
+  --text-body-reading: 16.5px;
+  --text-body-reading-mobile: 15.5px;
+  --text-secondary: 13.5px;
+  --text-meta: 13px;
+  --text-label: 11px;
+  --text-mono-meta: 12.5px;
+
+  /* Spacing (4px-scale steps from the design handoff) */
+  --space-2xs: 4px;
+  --space-xs: 6px;
+  --space-sm: 8px;
+  --space-ms: 10px;
+  --space-md: 14px;
+  --space-base: 16px;
+  --space-lg: 18px;
+  --space-xl: 22px;
+  --space-2xl: 26px;
+  --space-3xl: 30px;
+  --space-4xl: 44px;
+
+  /* Radius */
+  --radius-xs: 6px;
+  --radius-logo-tile: 11px;
+  --radius-icon: 13px;
+  --radius-control: 14px;
+  --radius-row: 16px;
+  --radius-card: 24px;
+  --radius-chip: 999px;
+
+  /* Shadow */
+  --shadow-card-raised: 0 10px 34px rgba(33, 27, 47, 0.07);
+  --shadow-popup: 0 6px 20px rgba(33, 27, 47, 0.08);
+  --shadow-modal: 0 24px 60px rgba(33, 27, 47, 0.16);
+  --shadow-drawer: 14px 0 38px rgba(33, 27, 47, 0.14);
+
+  /* Easing & duration */
+  --ease-pop: cubic-bezier(0.2, 0.8, 0.3, 1);
+  --duration-pop: 0.2s;
+  --duration-fade: 0.18s;
+  --duration-slide: 0.24s;
+  --duration-sheet: 0.26s;
+
+  /* Breakpoints (px) — nav rail responsive rules */
+  --bp-mobile: 700px;
+  --bp-nav-panel: 980px;
+  --bp-personal-rail: 1140px;
+
+  /* Z-index */
+  --z-overlay: 40;
+  --z-drawer: 50;
+  --z-popup: 60;
+  --z-modal: 70;
+}

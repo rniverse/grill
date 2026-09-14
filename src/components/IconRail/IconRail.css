@@ -1,5 +1,5 @@
 .icon-rail {
-  width: 60px;
+  width: var(--size-rail);
   padding: var(--space-xl) 0;
   display: flex;
   flex-direction: column;
@@ -9,8 +9,8 @@
 }
 
 .icon-rail__logo {
-  width: 32px;
-  height: 32px;
+  width: var(--size-logo-tile);
+  height: var(--size-logo-tile);
   border-radius: var(--radius-logo-tile);
   background: var(--color-accent);
   color: var(--color-surface);

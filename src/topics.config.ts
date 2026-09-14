@@ -24,4 +24,10 @@ export const topicsConfig: TopicConfigEntry[] = [
     load: () => import('@/topics/angular'),
     loadReferences: () => import('@/references/angular'),
   },
+  {
+    id: 'nodejs',
+    name: 'Node.js',
+    load: () => import('@/topics/nodejs'),
+    loadReferences: () => import('@/references/nodejs'),
+  },
 ]

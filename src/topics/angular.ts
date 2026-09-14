@@ -224,43 +224,44 @@ const ngrxAnswer: Answer = {
 // Section 12 ("Senior/Scenario-Style Questions") departs from the **Q:**/A:
 // pattern used elsewhere in data/angular.md — it's a bullet list of prompts
 // with one shared framing for how to structure an answer, not discrete
-// per-item answers. Each bullet is transcribed as its own question, paired
-// with that shared framing text (quoted verbatim from the source) as the
-// answer, rather than inventing a distinct answer per bullet.
-const scenarioFramingText =
-  "Interviewers are shifting from definition recall to trade-off reasoning. Be ready to talk through, out loud, a debugging story rather than a textbook definition. Structure your answer as: symptom → hypothesis → tool used to confirm → fix → how you'd prevent recurrence. Interviewers are explicitly listening for whether you can reason about *why*, not just recite the fix."
+// per-item answers. Each bullet is transcribed as its own question; each
+// answer restates that bullet's own scenario plus the shared framing
+// sentence (quoted verbatim from the source), rather than inventing a
+// specific technical fix that neither the source nor we can verify.
+const scenarioStructureFraming =
+  "Structure your answer as: symptom → hypothesis → tool used to confirm → fix → how you'd prevent recurrence. Interviewers are explicitly listening for whether you can reason about *why*, not just recite the fix."
 
 const perfDiagnosedAnswer: Answer = {
   id: '01M2FC6B5DSBG0TXXMT4BH0G86',
-  text: scenarioFramingText,
+  text: `This is an open scenario prompt: describe a real performance problem you diagnosed in an Angular app, and what you changed. There's no single expected fix here — the interviewer wants your own debugging story. ${scenarioStructureFraming}`,
   references: [],
   related: [],
 }
 
 const standaloneMigrationAnswer: Answer = {
   id: '01M2FC6B5DVGQ8PKN1CYNAY19K',
-  text: scenarioFramingText,
+  text: `This is an open scenario prompt: your team is migrating a large NgModule-based app toward standalone components, and you're asked how you'd sequence that migration safely. There's no single expected answer — talk through how you'd stage it (module by module, leaf components first, etc.) and what risk you'd watch for at each step. ${scenarioStructureFraming}`,
   references: [],
   related: [],
 }
 
 const whenNotSignalsAnswer: Answer = {
   id: '01M2FC6B5DGCKK7P43Q8XXT3B6',
-  text: scenarioFramingText,
+  text: `This is an open scenario prompt: when would you deliberately *not* use Signals, even in a green-field v18+ app? There's no single expected answer — the interviewer wants your own reasoning about the trade-off, not a rule you memorized. ${scenarioStructureFraming}`,
   references: [],
   related: [],
 }
 
 const rerenders40xAnswer: Answer = {
   id: '01M2FC6B5DK2RR5X8J1XXAJPTC',
-  text: scenarioFramingText,
+  text: `This is an open scenario prompt: a component re-renders 40 times a second on a production dashboard, and you're asked to walk through your investigation. There's no single expected fix — the interviewer wants to hear how you'd narrow it down, not the answer itself. ${scenarioStructureFraming}`,
   references: [],
   related: [],
 }
 
 const signalVsObservableVsNgrxStoreAnswer: Answer = {
   id: '01M2FC6Q71JX5CHB05W6TX6Q1N',
-  text: scenarioFramingText,
+  text: `This is an open scenario prompt: how do you decide what should live in a Signal vs an Observable vs an NgRx store in a medium-sized app? There's no single expected answer — the interviewer wants your own criteria for that trade-off. ${scenarioStructureFraming}`,
   references: [],
   related: [],
 }

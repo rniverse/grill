@@ -43,7 +43,6 @@
 }
 
 .landing-page__control {
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: var(--space-ms);
@@ -54,6 +53,10 @@
   font-size: var(--text-meta);
   border: none;
   cursor: pointer;
+}
+
+.landing-page__control:first-of-type {
+  margin-left: auto;
 }
 
 .landing-page__rows {

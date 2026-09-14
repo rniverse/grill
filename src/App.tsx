@@ -1,13 +1,10 @@
+import { Route, Routes } from 'react-router'
+import { LandingPage } from '@/pages/LandingPage/LandingPage'
 
-function App() {
-
+export function App() {
   return (
-    <>
-          <h1 className="text-3xl font-bold underline">
-            Get started
-          </h1>
-    </>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+    </Routes>
   )
 }
-
-export default App

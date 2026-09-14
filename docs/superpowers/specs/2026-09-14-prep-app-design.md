@@ -136,6 +136,20 @@ On top of the global engineering rules already governing this repo
   ask-popup state machine (`idle`/`plus`/`compose`/`view` from rolling-spec
   §"UI state"). Colocated next to the module that owns the enum, same
   pattern as colocated component CSS.
+  **Correction found during planning:** `tsconfig.app.json` already sets
+  `erasableSyntaxOnly: true` (Node type-stripping compatibility), which
+  makes the real `enum` keyword a compile error. "Enum" in this codebase
+  means the standard erasable-safe substitute in an `<domain>.enum.ts`
+  file — a `const` object plus a derived union type:
+  ```ts
+  export const RailSection = {
+    Topics: 'topics',
+    References: 'references',
+  } as const
+  export type RailSection = (typeof RailSection)[keyof typeof RailSection]
+  ```
+  Same file convention and same call-site shape (`RailSection.Topics`),
+  just without the disallowed keyword.
 - **Clean loops over clever one-liners.** A `for...of` or plainly-named
   `.forEach` with named intermediates is preferred over a compressed
   `.reduce()`/chained-ternary one-liner doing the same work, even when the
@@ -147,6 +161,23 @@ On top of the global engineering rules already governing this repo
   highlight matching). `services/` is anything with a lifecycle or an
   external-system boundary per the global "put external systems behind a
   boundary" rule — currently just browser storage (`services/storage.ts`).
+
+---
+
+## 2c. Testing
+
+Not covered by rolling-spec's tech stack table — resolved during planning.
+`bun test` (Bun's built-in runner, no extra dependency) for pure logic:
+`utils/id.ts`, `utils/i18n.ts`, `topics.config.ts`, content-shape
+integrity for seeded `topics/*.ts`/`references/*.ts`, and later
+`text-selection.ts`/`highlight.ts`. For interactive components, add
+`@testing-library/react` + `@happy-dom/global-registrator` (Bun's
+documented testing-library setup: a `bunfig.toml` `[test].preload`
+registering happy-dom's globals) — both are widely-maintained,
+minimal, and this app has enough real interaction logic (expand/collapse,
+active states, later the ask-flow) to be worth real render/interaction
+tests rather than visual-only checks. `package.json` gets a
+`"test": "bun test"` script.
 
 ---
 

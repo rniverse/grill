@@ -115,6 +115,26 @@ runtime blank string.
 
 ---
 
+## 2b. Coding Conventions
+
+On top of the global engineering rules already governing this repo
+(readability over cleverness, typed errors, minimal deps — see the user's
+`CLAUDE.md`), two conventions specific to this project:
+
+- **Enums live in their own file**, named `<domain>.enum.ts`, never inline
+  in a component or a shared `types.ts` — e.g. `railSection.enum.ts` for
+  the icon rail's active-section enum, `askPhase.enum.ts` for the ask-popup
+  state machine (`idle`/`plus`/`compose`/`view` from rolling-spec §"UI
+  state"). Colocated next to the module that owns the enum, same pattern as
+  colocated component CSS.
+- **Clean loops over clever one-liners.** A `for...of` or plainly-named
+  `.forEach` with named intermediates is preferred over a compressed
+  `.reduce()`/chained-ternary one-liner doing the same work, even when the
+  one-liner is shorter — readability wins the trade every time in this
+  codebase.
+
+---
+
 ## 3. Folder Structure
 
 Extends rolling-spec §5. Everything not listed here is unchanged from that

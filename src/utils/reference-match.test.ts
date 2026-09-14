@@ -3,7 +3,7 @@ import { findReferenceMatches } from './reference-match'
 import type { Reference } from '@/types/topic.types'
 
 function ref(term: string): Reference {
-  return { id: `id-${term}`, term, text: `definition of ${term}` }
+  return { id: `id-${term}`, term, text: { type: 'markdown.text', value: `definition of ${term}` } }
 }
 
 describe('findReferenceMatches', () => {

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react'
 import { AnswerBody } from './AnswerBody'
 import type { Reference } from '@/types/topic.types'
 
-const bufferRef: Reference = { id: 'r1', term: 'Buffer', text: 'A raw-memory container.' }
+const bufferRef: Reference = { id: 'r1', term: 'Buffer', text: { type: 'markdown.text', value: 'A raw-memory container.' } }
 
 describe('AnswerBody', () => {
   test('renders markdown paragraphs', () => {

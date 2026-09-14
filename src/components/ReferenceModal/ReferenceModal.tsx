@@ -24,7 +24,7 @@ export function ReferenceModal({ reference, onClose }: ReferenceModalProps) {
           </DialogClose>
         </div>
         <DialogTitle className="reference-modal__term">{reference.term}</DialogTitle>
-        <AnswerBody text={reference.text} references={[]} onReferenceSelect={() => {}} />
+        <AnswerBody text={reference.text.value} references={[]} onReferenceSelect={() => {}} />
       </DialogContent>
     </Dialog>
   )

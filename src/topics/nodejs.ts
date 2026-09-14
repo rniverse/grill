@@ -23,7 +23,7 @@ export const questions: Question[] = [
     tags: ['event-loop', 'core'],
     references: [eventLoopRef.id, libuvRef.id],
     related: [],
-    answer: { type: 'md-text', value: "Each loop iteration (\"tick\") passes through six phases, run by libuv:\n\n1. **Timers** — runs expired `setTimeout`/`setInterval` callbacks.\n2. **Pending callbacks** — deferred system-level callbacks (e.g. some TCP errors).\n3. **Idle, prepare** — internal, not user-facing.\n4. **Poll** — retrieves new I/O events and runs their callbacks; blocks here if empty (unless something is scheduled for the check phase).\n5. **Check** — runs `setImmediate` callbacks.\n6. **Close callbacks** — e.g. `socket.on('close', ...)`.\n\nCritically: **microtasks are not a phase.** The nextTick queue and the Promise microtask queue drain completely *between every single callback*, not just between phases." },
+    answer: { type: 'markdown.text', value: "Each loop iteration (\"tick\") passes through six phases, run by libuv:\n\n1. **Timers** — runs expired `setTimeout`/`setInterval` callbacks.\n2. **Pending callbacks** — deferred system-level callbacks (e.g. some TCP errors).\n3. **Idle, prepare** — internal, not user-facing.\n4. **Poll** — retrieves new I/O events and runs their callbacks; blocks here if empty (unless something is scheduled for the check phase).\n5. **Check** — runs `setImmediate` callbacks.\n6. **Close callbacks** — e.g. `socket.on('close', ...)`.\n\nCritically: **microtasks are not a phase.** The nextTick queue and the Promise microtask queue drain completely *between every single callback*, not just between phases." },
   },
   {
     id: '01M2G5XCM87YVVRMCFRM5TDXW0',
@@ -31,7 +31,7 @@ export const questions: Question[] = [
     tags: ['event-loop'],
     references: [eventLoopRef.id],
     related: [],
-    answer: { type: 'md-text', value: "`process.nextTick` queue → Promise microtask queue → current phase's macrotask callback → repeat. Both queues are drained *fully* before the loop proceeds, and callbacks added while draining still run in the same drain — which is exactly why a recursive `process.nextTick()` can starve the event loop entirely (I/O never gets a turn).\n\n**Trace this:**\n```js\nconsole.log(\"1: sync start\");\nsetTimeout(() => console.log(\"2: setTimeout\"), 0);\nsetImmediate(() => console.log(\"3: setImmediate\"));\nPromise.resolve().then(() => console.log(\"4: promise\"));\nprocess.nextTick(() => console.log(\"5: nextTick\"));\nconsole.log(\"6: sync end\");\n```\n**Answer:** `1, 6, 5, 4, 2, 3` — sync code first, then nextTick drains, then promise microtasks drain, then the loop proceeds to phases (timers before check, at the top level)." },
+    answer: { type: 'markdown.text', value: "`process.nextTick` queue → Promise microtask queue → current phase's macrotask callback → repeat. Both queues are drained *fully* before the loop proceeds, and callbacks added while draining still run in the same drain — which is exactly why a recursive `process.nextTick()` can starve the event loop entirely (I/O never gets a turn).\n\n**Trace this:**\n```js\nconsole.log(\"1: sync start\");\nsetTimeout(() => console.log(\"2: setTimeout\"), 0);\nsetImmediate(() => console.log(\"3: setImmediate\"));\nPromise.resolve().then(() => console.log(\"4: promise\"));\nprocess.nextTick(() => console.log(\"5: nextTick\"));\nconsole.log(\"6: sync end\");\n```\n**Answer:** `1, 6, 5, 4, 2, 3` — sync code first, then nextTick drains, then promise microtasks drain, then the loop proceeds to phases (timers before check, at the top level)." },
   },
   {
     id: '01M2G5XCMQGWXEQZW7ZJGGNM6G',
@@ -39,7 +39,7 @@ export const questions: Question[] = [
     tags: ['event-loop'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "At the top level, it's *not guaranteed* — it depends on process startup timing relative to the ~1ms timer resolution. But **inside an I/O callback, `setImmediate` always wins**, because the loop is already past the timers phase and reaches check (poll → check) before it would loop back around to timers.\n\n```js\nconst fs = require(\"fs\");\nfs.readFile(__filename, () => {\n  setTimeout(() => console.log(\"timeout\"), 0);\n  setImmediate(() => console.log(\"immediate\"));\n});\n// Always: immediate → timeout\n```" },
+    answer: { type: 'markdown.text', value: "At the top level, it's *not guaranteed* — it depends on process startup timing relative to the ~1ms timer resolution. But **inside an I/O callback, `setImmediate` always wins**, because the loop is already past the timers phase and reaches check (poll → check) before it would loop back around to timers.\n\n```js\nconst fs = require(\"fs\");\nfs.readFile(__filename, () => {\n  setTimeout(() => console.log(\"timeout\"), 0);\n  setImmediate(() => console.log(\"immediate\"));\n});\n// Always: immediate → timeout\n```" },
   },
   {
     id: '01M2G5XCN652W4KXJ9X1G74NSD',
@@ -47,7 +47,7 @@ export const questions: Question[] = [
     tags: ['event-loop'],
     references: [libuvRef.id],
     related: [],
-    answer: { type: 'md-text', value: "The JS execution thread (your callback code) is single-threaded, but Node uses a libuv-managed **thread pool** (default size 4) for things the OS doesn't offer async APIs for — DNS lookups (`dns.lookup`), some filesystem operations, crypto (`pbkdf2`, `scrypt`), and zlib compression. Network I/O itself is handled by the OS's async I/O (epoll/kqueue/IOCP), not the thread pool." },
+    answer: { type: 'markdown.text', value: "The JS execution thread (your callback code) is single-threaded, but Node uses a libuv-managed **thread pool** (default size 4) for things the OS doesn't offer async APIs for — DNS lookups (`dns.lookup`), some filesystem operations, crypto (`pbkdf2`, `scrypt`), and zlib compression. Network I/O itself is handled by the OS's async I/O (epoll/kqueue/IOCP), not the thread pool." },
   },
   {
     id: '01M2G5XCNN61E5ETCM0BDJ01GF',
@@ -55,7 +55,7 @@ export const questions: Question[] = [
     tags: ['event-loop'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "Break the work into chunks and yield control back to the loop between chunks, e.g. via `setImmediate`:\n\n```js\nfunction processChunk(items, i = 0) {\n  const end = Math.min(i + 1000, items.length);\n  for (; i < end; i++) heavyWork(items[i]);\n  if (i < items.length) setImmediate(() => processChunk(items, i));\n}\n```\n\nFor genuinely CPU-bound work, prefer offloading to a worker thread (see §3) rather than chunking indefinitely." },
+    answer: { type: 'markdown.text', value: "Break the work into chunks and yield control back to the loop between chunks, e.g. via `setImmediate`:\n\n```js\nfunction processChunk(items, i = 0) {\n  const end = Math.min(i + 1000, items.length);\n  for (; i < end; i++) heavyWork(items[i]);\n  if (i < items.length) setImmediate(() => processChunk(items, i));\n}\n```\n\nFor genuinely CPU-bound work, prefer offloading to a worker thread (see §3) rather than chunking indefinitely." },
   },
   {
     id: '01M2G5XCP3YY8HP5XG01CHKHC1',
@@ -63,7 +63,7 @@ export const questions: Question[] = [
     tags: ['modules', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: 'CJS (`require`/`module.exports`) loads and evaluates modules **synchronously at runtime**, resolving `require()` calls dynamically. ESM (`import`/`export`) is **parsed statically before execution**, which is what enables top-level `await`, live bindings, better tree-shaking, and a shared module system with browsers.' },
+    answer: { type: 'markdown.text', value: 'CJS (`require`/`module.exports`) loads and evaluates modules **synchronously at runtime**, resolving `require()` calls dynamically. ESM (`import`/`export`) is **parsed statically before execution**, which is what enables top-level `await`, live bindings, better tree-shaking, and a shared module system with browsers.' },
   },
   {
     id: '01M2G5XCPJYH7RR31NVT0EJPND',
@@ -71,7 +71,7 @@ export const questions: Question[] = [
     tags: ['modules'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "By extension first: `.mjs` is always ESM, `.cjs` is always CJS. For `.js`, Node looks at the nearest `package.json`'s `\"type\"` field (`\"module\"` → ESM, default/`\"commonjs\"` → CJS)." },
+    answer: { type: 'markdown.text', value: "By extension first: `.mjs` is always ESM, `.cjs` is always CJS. For `.js`, Node looks at the nearest `package.json`'s `\"type\"` field (`\"module\"` → ESM, default/`\"commonjs\"` → CJS)." },
   },
   {
     id: '01M2G5XCQ1H4BBB26D1K5C14Z3',
@@ -79,7 +79,7 @@ export const questions: Question[] = [
     tags: ['modules'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "CJS can `import()` (dynamic, async) an ESM module but not `require()` it directly (as of the LTS lines still in wide use). ESM can `import` a CJS module — it gets the CJS `module.exports` as the default export, with limited named-export interop via static analysis." },
+    answer: { type: 'markdown.text', value: "CJS can `import()` (dynamic, async) an ESM module but not `require()` it directly (as of the LTS lines still in wide use). ESM can `import` a CJS module — it gets the CJS `module.exports` as the default export, with limited named-export interop via static analysis." },
   },
   {
     id: '01M2G5XCQGJFFMECQJ6F274S05',
@@ -87,7 +87,7 @@ export const questions: Question[] = [
     tags: ['concurrency', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "`cluster` forks multiple **worker processes** that share the same server port (via round-robin or OS-level load balancing), so a single-threaded runtime can use multiple CPU cores for handling more concurrent connections, and supports rolling restarts with zero downtime. It does **not** give you shared memory — each worker has its own heap, event loop, and module cache, so in-memory caches/state must be externalized (Redis, etc.) or replicated per worker." },
+    answer: { type: 'markdown.text', value: "`cluster` forks multiple **worker processes** that share the same server port (via round-robin or OS-level load balancing), so a single-threaded runtime can use multiple CPU cores for handling more concurrent connections, and supports rolling restarts with zero downtime. It does **not** give you shared memory — each worker has its own heap, event loop, and module cache, so in-memory caches/state must be externalized (Redis, etc.) or replicated per worker." },
   },
   {
     id: '01M2G5XCQZXPPTQQFN7HBVQPWY',
@@ -95,7 +95,7 @@ export const questions: Question[] = [
     tags: ['concurrency'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "`worker_threads` run in the same process and can share memory via `SharedArrayBuffer`, making them the right tool for **CPU-bound work** (image processing, heavy parsing, crypto) that needs to run off the main thread without the overhead of a full process fork or losing shared state. `cluster`/multiple processes are better for **scaling request throughput** across cores for I/O-bound workloads." },
+    answer: { type: 'markdown.text', value: "`worker_threads` run in the same process and can share memory via `SharedArrayBuffer`, making them the right tool for **CPU-bound work** (image processing, heavy parsing, crypto) that needs to run off the main thread without the overhead of a full process fork or losing shared state. `cluster`/multiple processes are better for **scaling request throughput** across cores for I/O-bound workloads." },
   },
   {
     id: '01M2G5XCRE2H17WKQPFMJCT7GH',
@@ -103,7 +103,7 @@ export const questions: Question[] = [
     tags: ['concurrency'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "`spawn()` launches any command and streams stdout/stderr; it doesn't set up IPC by default. `fork()` is specifically for spawning new Node.js processes and automatically sets up an IPC channel so parent and child can `.send()` messages to each other — it's essentially `spawn()` specialized for Node-to-Node communication." },
+    answer: { type: 'markdown.text', value: "`spawn()` launches any command and streams stdout/stderr; it doesn't set up IPC by default. `fork()` is specifically for spawning new Node.js processes and automatically sets up an IPC channel so parent and child can `.send()` messages to each other — it's essentially `spawn()` specialized for Node-to-Node communication." },
   },
   {
     id: '01M2G5XCRW3175E4RABHE2274K',
@@ -111,7 +111,7 @@ export const questions: Question[] = [
     tags: ['streams', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "Streams process data in chunks, so memory usage stays flat regardless of input size — critical for large files, video, or proxying HTTP responses. The four stream types: **Readable** (source, e.g. `fs.createReadStream`), **Writable** (sink), **Duplex** (both, e.g. a TCP socket), **Transform** (duplex that modifies data in transit, e.g. `zlib.createGzip()`)." },
+    answer: { type: 'markdown.text', value: "Streams process data in chunks, so memory usage stays flat regardless of input size — critical for large files, video, or proxying HTTP responses. The four stream types: **Readable** (source, e.g. `fs.createReadStream`), **Writable** (sink), **Duplex** (both, e.g. a TCP socket), **Transform** (duplex that modifies data in transit, e.g. `zlib.createGzip()`)." },
   },
   {
     id: '01M2G5XCSBB2JA2ZD1G5EAYMNK',
@@ -119,7 +119,7 @@ export const questions: Question[] = [
     tags: ['streams'],
     references: [bufferRef.id],
     related: [],
-    answer: { type: 'md-text', value: "**Backpressure.** If the writable side is slower than the readable side, `.pipe()` automatically pauses the readable stream until the writable's internal buffer drains, preventing unbounded memory growth. Manually wiring `data`/`write` events requires you to check the boolean return value of `.write()` and pause/resume yourself." },
+    answer: { type: 'markdown.text', value: "**Backpressure.** If the writable side is slower than the readable side, `.pipe()` automatically pauses the readable stream until the writable's internal buffer drains, preventing unbounded memory growth. Manually wiring `data`/`write` events requires you to check the boolean return value of `.write()` and pause/resume yourself." },
   },
   {
     id: '01M2G5XCSTFRWACPFNMFZNPG0C',
@@ -127,7 +127,7 @@ export const questions: Question[] = [
     tags: ['streams'],
     references: [bufferRef.id],
     related: [],
-    answer: { type: 'md-text', value: "A `Buffer` is a fixed-length chunk of raw binary memory allocated outside the V8 heap, used for handling binary data (file contents, TCP packets, image bytes) that isn't naturally representable as UTF-16 strings. Buffers avoid the encoding/decoding overhead and memory bloat of forcing binary data through the string type." },
+    answer: { type: 'markdown.text', value: "A `Buffer` is a fixed-length chunk of raw binary memory allocated outside the V8 heap, used for handling binary data (file contents, TCP packets, image bytes) that isn't naturally representable as UTF-16 strings. Buffers avoid the encoding/decoding overhead and memory bloat of forcing binary data through the string type." },
   },
   {
     id: '01M2G5XCT9K57HQZWWQ765M20Q',
@@ -135,7 +135,7 @@ export const questions: Question[] = [
     tags: ['performance', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "Take heap snapshots at intervals — via `node --inspect` + Chrome DevTools' Memory tab, or the `heapdump` package — and compare them to spot objects whose retained size keeps growing across snapshots (\"comparison view\"). Common culprits:\n\n- Unbounded in-memory caches (no TTL/eviction)\n- Event listeners registered but never removed (`emitter.on` without `.off`, especially in per-request handlers)\n- Closures unintentionally retaining large objects in scope\n- Global arrays/maps used as ad-hoc queues that are never drained" },
+    answer: { type: 'markdown.text', value: "Take heap snapshots at intervals — via `node --inspect` + Chrome DevTools' Memory tab, or the `heapdump` package — and compare them to spot objects whose retained size keeps growing across snapshots (\"comparison view\"). Common culprits:\n\n- Unbounded in-memory caches (no TTL/eviction)\n- Event listeners registered but never removed (`emitter.on` without `.off`, especially in per-request handlers)\n- Closures unintentionally retaining large objects in scope\n- Global arrays/maps used as ad-hoc queues that are never drained" },
   },
   {
     id: '01M2G5XCTR8HT7C97J5BW7WWXQ',
@@ -143,7 +143,7 @@ export const questions: Question[] = [
     tags: ['performance'],
     references: [bufferRef.id, libuvRef.id],
     related: [],
-    answer: { type: 'md-text', value: "`rss` (Resident Set Size) is total memory allocated for the process including the V8 heap, C++ objects, and code — the number the OS sees. `heapUsed` is just the portion of the V8 JS heap actively in use. A leak that's growing `rss` but not `heapUsed` often points outside JS — native addons, Buffers, or the libuv thread pool." },
+    answer: { type: 'markdown.text', value: "`rss` (Resident Set Size) is total memory allocated for the process including the V8 heap, C++ objects, and code — the number the OS sees. `heapUsed` is just the portion of the V8 JS heap actively in use. A leak that's growing `rss` but not `heapUsed` often points outside JS — native addons, Buffers, or the libuv thread pool." },
   },
   {
     id: '01M2G5XCV7G53QHPT500WTX85C',
@@ -151,7 +151,7 @@ export const questions: Question[] = [
     tags: ['performance'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "`node --prof app.js`, generate load, then `node --prof-process` on the resulting log to get a flame-graph-style breakdown, or use `0x`/Clinic.js for a visual flame graph directly. Look for functions with high **self time** (not just total time), which points to the actual bottleneck rather than a caller that's just waiting." },
+    answer: { type: 'markdown.text', value: "`node --prof app.js`, generate load, then `node --prof-process` on the resulting log to get a flame-graph-style breakdown, or use `0x`/Clinic.js for a visual flame graph directly. Look for functions with high **self time** (not just total time), which points to the actual bottleneck rather than a caller that's just waiting." },
   },
   {
     id: '01M2G5XCVPCJQM1CNS1HNSKMNR',
@@ -159,7 +159,7 @@ export const questions: Question[] = [
     tags: ['error-handling', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "`uncaughtException` fires when a synchronous throw escapes all try/catch blocks; `unhandledRejection` fires when a Promise rejects with no `.catch()` attached. Neither should be used to \"resume\" normal operation — the process state is considered corrupted at that point. Best practice: log with full context, then exit gracefully (`process.exit(1)`) and let a process manager (PM2, Kubernetes) restart it." },
+    answer: { type: 'markdown.text', value: "`uncaughtException` fires when a synchronous throw escapes all try/catch blocks; `unhandledRejection` fires when a Promise rejects with no `.catch()` attached. Neither should be used to \"resume\" normal operation — the process state is considered corrupted at that point. Best practice: log with full context, then exit gracefully (`process.exit(1)`) and let a process manager (PM2, Kubernetes) restart it." },
   },
   {
     id: '01M2G5XCW5P46QP8VH4AA46BNW',
@@ -167,7 +167,7 @@ export const questions: Question[] = [
     tags: ['error-handling'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "Listen for `SIGTERM`, stop accepting new connections (`server.close()`), let in-flight requests finish (with a timeout), close DB/Redis connections, then exit:\n\n```js\nprocess.on(\"SIGTERM\", async () => {\n  server.close(() => {\n    db.close().then(() => process.exit(0));\n  });\n  setTimeout(() => process.exit(1), 10_000).unref(); // force-exit fallback\n});\n```" },
+    answer: { type: 'markdown.text', value: "Listen for `SIGTERM`, stop accepting new connections (`server.close()`), let in-flight requests finish (with a timeout), close DB/Redis connections, then exit:\n\n```js\nprocess.on(\"SIGTERM\", async () => {\n  server.close(() => {\n    db.close().then(() => process.exit(0));\n  });\n  setTimeout(() => process.exit(1), 10_000).unref(); // force-exit fallback\n});\n```" },
   },
   {
     id: '01M2G5XCWMHB5VZ3VYEN8ZF7MT',
@@ -175,7 +175,7 @@ export const questions: Question[] = [
     tags: ['error-handling'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "Callbacks use the \"error-first\" convention (`(err, data) => {}`), which nests badly (\"callback hell\") and makes error propagation manual. `async/await` lets you use ordinary `try/catch`, and errors propagate up the promise chain automatically — but a stray unawaited async call still produces an unhandled rejection, so consistent `await`ing (or explicit `.catch()`) matters." },
+    answer: { type: 'markdown.text', value: "Callbacks use the \"error-first\" convention (`(err, data) => {}`), which nests badly (\"callback hell\") and makes error propagation manual. `async/await` lets you use ordinary `try/catch`, and errors propagate up the promise chain automatically — but a stray unawaited async call still produces an unhandled rejection, so consistent `await`ing (or explicit `.catch()`) matters." },
   },
   {
     id: '01M2G5XCX3495DGR7Y16SA9PYT',
@@ -183,7 +183,7 @@ export const questions: Question[] = [
     tags: ['security', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "- **XSS:** escape/sanitize any user input rendered into HTML (templating engines auto-escape by default — don't disable it); set a `Content-Security-Policy` header (`helmet` package handles common headers).\n- **CSRF:** use `SameSite=Strict/Lax` cookies, CSRF tokens on state-changing forms, and verify the `Origin`/`Referer` header on mutating requests. CSRF mainly matters for cookie-based auth; token-based auth (Bearer tokens not auto-sent by the browser) is inherently less exposed." },
+    answer: { type: 'markdown.text', value: "- **XSS:** escape/sanitize any user input rendered into HTML (templating engines auto-escape by default — don't disable it); set a `Content-Security-Policy` header (`helmet` package handles common headers).\n- **CSRF:** use `SameSite=Strict/Lax` cookies, CSRF tokens on state-changing forms, and verify the `Origin`/`Referer` header on mutating requests. CSRF mainly matters for cookie-based auth; token-based auth (Bearer tokens not auto-sent by the browser) is inherently less exposed." },
   },
   {
     id: '01M2G5XCXK6VK1SVZ52G1GEQCY',
@@ -191,7 +191,7 @@ export const questions: Question[] = [
     tags: ['security'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "`npm ci` deletes `node_modules` first and installs **exactly** what's in `package-lock.json`, failing if the lockfile is out of sync with `package.json` — no silent version drift. `npm install` can modify the lockfile. `ci` is the right choice for CI/CD pipelines and production builds where deterministic, auditable installs matter." },
+    answer: { type: 'markdown.text', value: "`npm ci` deletes `node_modules` first and installs **exactly** what's in `package-lock.json`, failing if the lockfile is out of sync with `package.json` — no silent version drift. `npm install` can modify the lockfile. `ci` is the right choice for CI/CD pipelines and production builds where deterministic, auditable installs matter." },
   },
   {
     id: '01M2G5XCY2JDNEEFC2ZC61TB5A',
@@ -199,7 +199,7 @@ export const questions: Question[] = [
     tags: ['security'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: 'Always use parameterized queries / prepared statements (never string-concatenate user input into a query), and for NoSQL (e.g. MongoDB) explicitly reject query operators from user input (`$where`, `$gt`, etc.) — libraries like `mongo-sanitize` strip keys starting with `$`.' },
+    answer: { type: 'markdown.text', value: 'Always use parameterized queries / prepared statements (never string-concatenate user input into a query), and for NoSQL (e.g. MongoDB) explicitly reject query operators from user input (`$where`, `$gt`, etc.) — libraries like `mongo-sanitize` strip keys starting with `$`.' },
   },
   {
     id: '01M2G5XCYHDTAGT95F9WVWTHJG',
@@ -207,7 +207,7 @@ export const questions: Question[] = [
     tags: ['testing', 'core'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "Inject the dependency (constructor/function param) so a test double can be substituted, or use a library-level mock (`nock` for HTTP, `jest.mock()`/`vi.mock()` for modules). The goal is isolating the unit under test from network/database flakiness and speed cost." },
+    answer: { type: 'markdown.text', value: "Inject the dependency (constructor/function param) so a test double can be substituted, or use a library-level mock (`nock` for HTTP, `jest.mock()`/`vi.mock()` for modules). The goal is isolating the unit under test from network/database flakiness and speed cost." },
   },
   {
     id: '01M2G5XCZ0TCQ2SX544RNVWR4T',
@@ -215,6 +215,6 @@ export const questions: Question[] = [
     tags: ['testing'],
     references: [],
     related: [],
-    answer: { type: 'md-text', value: "**Unit** — a single function/class, all dependencies mocked, fast. **Integration** — real DB/queue via test containers, verifies your code + a real dependency interact correctly. **Contract** — verifies your service's request/response shape matches what a consumer service expects (e.g. Pact), catching breaking API changes without needing the consumer service running." },
+    answer: { type: 'markdown.text', value: "**Unit** — a single function/class, all dependencies mocked, fast. **Integration** — real DB/queue via test containers, verifies your code + a real dependency interact correctly. **Contract** — verifies your service's request/response shape matches what a consumer service expects (e.g. Pact), catching breaking API changes without needing the consumer service running." },
   },
 ]

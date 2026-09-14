@@ -3,7 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { ReferenceModal } from './ReferenceModal'
 import type { Reference } from '@/types/topic.types'
 
-const bufferRef: Reference = { id: 'r1', term: 'Buffer', text: 'A raw-memory container.' }
+const bufferRef: Reference = { id: 'r1', term: 'Buffer', text: { type: 'markdown.text', value: 'A raw-memory container.' } }
 
 describe('ReferenceModal', () => {
   test('renders nothing when there is no reference', () => {

@@ -9,9 +9,9 @@ const question: Question = {
   tags: ['core'],
   references: ['r1'],
   related: [],
-  answer: { type: 'md-text', value: 'A Buffer holds raw bytes.' },
+  answer: { type: 'markdown.text', value: 'A Buffer holds raw bytes.' },
 }
-const references: Reference[] = [{ id: 'r1', term: 'Buffer', text: 'Raw memory container.' }]
+const references: Reference[] = [{ id: 'r1', term: 'Buffer', text: { type: 'markdown.text', value: 'Raw memory container.' } }]
 
 describe('QuestionCard', () => {
   test('shows the question text and ordinal always', () => {

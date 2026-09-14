@@ -51,6 +51,15 @@ body {
  * src/components/ui/dialog.tsx). DialogContent renders its own internal
  * DialogOverlay without exposing a className for it, so this is the one
  * consistent, token-based scrim for any Dialog consumer in the app.
+ *
+ * This rule reliably beats Tailwind's own bg-black/80 and z-50 utilities on
+ * the same element even though it's a plain attribute selector with no
+ * higher specificity: Tailwind's utilities are compiled into `@layer
+ * utilities`, while this file's imports (main.css -> global.css) are never
+ * wrapped in an `@layer`. Per the CSS Cascade Layers spec, unlayered
+ * declarations always win over layered ones, regardless of specificity or
+ * source order. Don't wrap this file's import chain in an `@layer` later
+ * without accounting for that — doing so would silently break the scrim.
  */
 [data-slot='dialog-overlay'] {
   background: var(--color-scrim);

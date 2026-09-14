@@ -88,6 +88,10 @@
   --size-topic-row-height: 82px;
   --size-topic-row-ordinal: 26px;
   --size-topic-row-count: 34px;
+  --size-modal-width: 440px;
+  --size-modal-max-width: 86vw;
+  --size-modal-max-height: 80vh;
+  --size-close-button: 24px;
 
   /* Type scale — topic row */
   --text-topic-row-ordinal: 12px;

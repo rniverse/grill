@@ -1,0 +1,12 @@
+{
+  "landing.contents": "Contents",
+  "landing.summary": "{{topics}} topics · {{questions}} questions · {{references}} references",
+  "landing.search": "Search",
+  "landing.import": "Import",
+  "nav.topics": "Topics",
+  "nav.references": "References",
+  "nav.bookmarks": "Bookmarks",
+  "nav.myQuestions": "My questions",
+  "nav.myNotes": "My notes",
+  "nav.export": "Export personal layer"
+}

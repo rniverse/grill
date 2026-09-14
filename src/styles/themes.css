@@ -1,0 +1,67 @@
+@theme inline {
+  --color-ground: var(--color-ground);
+  --color-surface: var(--color-surface);
+  --color-surface-recessed: var(--color-surface-recessed);
+  --color-surface-tinted: var(--color-surface-tinted);
+  --color-surface-tinted-alt: var(--color-surface-tinted-alt);
+  --color-ink: var(--color-ink);
+  --color-ink-body: var(--color-ink-body);
+  --color-ink-secondary: var(--color-ink-secondary);
+  --color-ink-tertiary: var(--color-ink-tertiary);
+  --color-accent: var(--color-accent);
+  --color-accent-icon: var(--color-accent-icon);
+  --color-accent-text: var(--color-accent-text);
+  --color-accent-link: var(--color-accent-link);
+  --color-accent-link-hover: var(--color-accent-link-hover);
+  --color-reference-pill-bg: var(--color-reference-pill-bg);
+  --color-reference-pill-text: var(--color-reference-pill-text);
+  --color-personal-highlight: var(--color-personal-highlight);
+  --color-personal-highlight-alt: var(--color-personal-highlight-alt);
+  --color-hairline: var(--color-hairline);
+  --color-hairline-alt: var(--color-hairline-alt);
+  --color-hairline-mobile: var(--color-hairline-mobile);
+  --color-scrim: var(--color-scrim);
+
+  --font-ui: var(--font-ui);
+  --font-reading: var(--font-reading);
+  --font-mono: var(--font-mono);
+
+  --text-page-title: var(--text-page-title);
+  --text-section-title: var(--text-section-title);
+  --text-question: var(--text-question);
+  --text-body-reading: var(--text-body-reading);
+  --text-body-reading-mobile: var(--text-body-reading-mobile);
+  --text-secondary: var(--text-secondary);
+  --text-meta: var(--text-meta);
+  --text-label: var(--text-label);
+  --text-mono-meta: var(--text-mono-meta);
+
+  --spacing-2xs: var(--space-2xs);
+  --spacing-xs: var(--space-xs);
+  --spacing-sm: var(--space-sm);
+  --spacing-ms: var(--space-ms);
+  --spacing-md: var(--space-md);
+  --spacing-base: var(--space-base);
+  --spacing-lg: var(--space-lg);
+  --spacing-xl: var(--space-xl);
+  --spacing-2xl: var(--space-2xl);
+  --spacing-3xl: var(--space-3xl);
+  --spacing-4xl: var(--space-4xl);
+
+  --radius-xs: var(--radius-xs);
+  --radius-logo-tile: var(--radius-logo-tile);
+  --radius-icon: var(--radius-icon);
+  --radius-control: var(--radius-control);
+  --radius-row: var(--radius-row);
+  --radius-card: var(--radius-card);
+  --radius-chip: var(--radius-chip);
+
+  --shadow-card-raised: var(--shadow-card-raised);
+  --shadow-popup: var(--shadow-popup);
+  --shadow-modal: var(--shadow-modal);
+  --shadow-drawer: var(--shadow-drawer);
+
+  --breakpoint-mobile: var(--bp-mobile);
+  --breakpoint-nav-panel: var(--bp-nav-panel);
+  --breakpoint-personal-rail: var(--bp-personal-rail);
+}

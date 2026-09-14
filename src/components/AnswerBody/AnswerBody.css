@@ -1,0 +1,40 @@
+.answer-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+  font-family: var(--font-reading);
+  font-size: var(--text-body-reading);
+  line-height: 1.78;
+  color: var(--color-ink-body);
+}
+
+.answer-body__paragraph {
+  margin: 0;
+}
+
+.answer-body__inline-code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--color-code-bg);
+  color: var(--color-code-ink);
+  border-radius: var(--radius-xs);
+  padding: 1px 5px;
+}
+
+.answer-body__code-block {
+  margin: 0;
+  background: var(--color-code-bg);
+  color: var(--color-code-ink);
+  border-radius: var(--radius-row);
+  padding: var(--space-md) var(--space-base);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-meta);
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.answer-body__code-block code {
+  background: none;
+  padding: 0;
+}

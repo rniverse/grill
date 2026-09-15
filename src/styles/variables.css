@@ -34,6 +34,10 @@
   --color-hairline-mobile: #e6eaee;
   --color-scrim: rgba(28, 29, 34, 0.16);
 
+  /* Color — ink, quaternary (flyout panel counts/empty states, mobile nav
+     section labels/counts — one notch lighter than --color-ink-tertiary) */
+  --color-ink-quaternary: #b4bcc4;
+
   /* Font families (fontsource-variable naming convention) */
   --font-ui: 'Manrope Variable', system-ui, sans-serif;
   --font-reading: 'Newsreader Variable', Georgia, serif;
@@ -98,10 +102,14 @@
   --size-ask-popover-width: 340px;
   --size-ask-popover-min-height: 104px;
   --size-personal-rail-width: 330px;
+  --size-flyout-panel-width: 232px;
+  --size-flyout-panel-width-floating: 236px;
+  --size-drawer-width: 274px;
 
   /* Type scale — topic row */
   --text-topic-row-ordinal: 12px;
   --text-topic-row-name: 18px;
+  --text-topic-row-name-mobile: 16.5px;
   --text-topic-row-blurb: 14.5px;
 
   /* Shadow */
@@ -115,6 +123,14 @@
   /* Type scale — topic page */
   --text-card-ordinal: 12px;
   --text-tag: 11px;
+  --text-topic-title-mobile: 17px;
+
+  /* Type scale — flyout panel & mobile nav */
+  --text-panel-title: 13px;
+  --text-panel-count: 11.5px;
+  --text-nav-label: 10.5px;
+  --text-nav-item: 14px;
+  --text-nav-brand: 15px;
 
   /* Easing & duration */
   --ease-pop: cubic-bezier(0.2, 0.8, 0.3, 1);

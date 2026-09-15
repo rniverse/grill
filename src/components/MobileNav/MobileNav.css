@@ -1,0 +1,164 @@
+.mobile-nav {
+  display: none;
+}
+
+/* @media conditions can't reference custom properties, so this mirrors the
+   --bp-mobile value (700px) in variables.css literally. */
+@media (max-width: 700px) {
+  .mobile-nav {
+    display: block;
+  }
+}
+
+.mobile-nav__trigger {
+  display: flex;
+  padding: var(--space-sm);
+  border-radius: var(--radius-icon);
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-ink-secondary);
+  cursor: pointer;
+}
+
+.mobile-nav__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--color-scrim);
+  animation: fadeIn var(--duration-fade) ease;
+}
+
+.mobile-nav__drawer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: var(--z-drawer);
+  width: var(--size-drawer-width);
+  max-width: var(--size-modal-max-width);
+  background: var(--color-surface);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+  box-shadow: var(--shadow-drawer);
+  padding: var(--space-xl) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xl);
+  overflow-y: auto;
+  animation: slideIn var(--duration-slide) var(--ease-pop);
+}
+
+.mobile-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0 var(--space-xs);
+}
+
+.mobile-nav__brand-icon {
+  flex: 0 0 auto;
+  width: var(--size-logo-tile);
+  height: var(--size-logo-tile);
+  border-radius: var(--radius-logo-tile);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav__brand-name {
+  font-family: var(--font-ui);
+  font-size: var(--text-nav-brand);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+}
+
+.mobile-nav__close {
+  margin-left: auto;
+  display: flex;
+  padding: var(--space-xs);
+  border-radius: var(--radius-tab);
+  border: none;
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+}
+
+.mobile-nav__section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mobile-nav__section-label {
+  font-family: var(--font-ui);
+  font-size: var(--text-nav-label);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-quaternary);
+  padding: 0 var(--space-sm) var(--space-2xs);
+}
+
+.mobile-nav__topic,
+.mobile-nav__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-ms);
+  padding: var(--space-ms) var(--space-sm);
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--color-ink-secondary);
+  border: none;
+  background: transparent;
+  font-family: var(--font-ui);
+  width: 100%;
+  text-align: left;
+}
+
+.mobile-nav__topic:hover,
+.mobile-nav__item:hover {
+  background: var(--color-ground);
+}
+
+.mobile-nav__topic[aria-current='true'] {
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
+.mobile-nav__topic-name {
+  font-size: var(--text-nav-item);
+  font-weight: 600;
+}
+
+.mobile-nav__item-label {
+  font-size: var(--text-nav-item);
+  font-weight: 500;
+}
+
+.mobile-nav__topic-count,
+.mobile-nav__item-count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: var(--text-panel-count);
+  color: var(--color-ink-quaternary);
+}
+
+.mobile-nav__export {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  border-radius: var(--radius-row);
+  border: none;
+  background: var(--color-surface-tinted-alt);
+  color: var(--color-accent-icon);
+  font-family: var(--font-ui);
+  font-size: var(--text-panel-title);
+  font-weight: 600;
+  cursor: pointer;
+}

@@ -44,11 +44,11 @@ export function QuestionsPage() {
   return (
     <div className="questions-page">
       <IconRail />
-      <div className="questions-page__mobile-header">
-        <MobileNav />
-      </div>
       <div className="questions-page__content">
         <div className="questions-page__card">
+          <div className="questions-page__mobile-header">
+            <MobileNav />
+          </div>
           <h1 className="questions-page__title">{t('questions.title')}</h1>
           <div className="questions-page__items">
             {pendingQuestions.length === 0 ? (

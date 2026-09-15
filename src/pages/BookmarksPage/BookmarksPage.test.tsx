@@ -50,6 +50,13 @@ describe('BookmarksPage', () => {
     expect(link.getAttribute('href')).toBe('/topics/angular')
   })
 
+  test('renders a MobileNav trigger for phone widths', async () => {
+    renderPage()
+    await act(async () => {})
+
+    expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
+  })
+
   test('renders an IconRail with the Bookmarks section current', async () => {
     render(
       <MemoryRouter initialEntries={['/bookmarks']}>

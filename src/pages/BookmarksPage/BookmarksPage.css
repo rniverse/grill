@@ -87,8 +87,19 @@
 }
 
 @media (max-width: 700px) {
+  .bookmarks-page__content {
+    padding: 0;
+  }
+
+  .bookmarks-page__card {
+    border-radius: 0;
+    background: transparent;
+    padding: var(--space-xl) var(--space-xl) var(--space-ms);
+  }
+
   .bookmarks-page__mobile-header {
     display: flex;
-    padding: var(--space-lg);
+    align-items: center;
+    padding-bottom: var(--space-md);
   }
 }

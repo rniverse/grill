@@ -62,11 +62,11 @@ export function BookmarksPage() {
   return (
     <div className="bookmarks-page">
       <IconRail />
-      <div className="bookmarks-page__mobile-header">
-        <MobileNav />
-      </div>
       <div className="bookmarks-page__content">
         <div className="bookmarks-page__card">
+          <div className="bookmarks-page__mobile-header">
+            <MobileNav />
+          </div>
           <h1 className="bookmarks-page__title">{t('bookmarks.title')}</h1>
           <div className="bookmarks-page__items">
             {bookmarks.length === 0 ? (

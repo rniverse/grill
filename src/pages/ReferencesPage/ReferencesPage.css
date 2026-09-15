@@ -100,8 +100,32 @@
 }
 
 @media (max-width: 700px) {
+  /* .references-page is display:flex (row) so IconRail and __content sit
+     side by side on desktop. Below --bp-mobile, IconRail hides itself and
+     __mobile-header takes over as a full-width bar instead of a second
+     column — same flattening LandingPage/TopicPage do for their own
+     mobile headers. */
+  .references-page {
+    flex-direction: column;
+  }
+
   .references-page__mobile-header {
     display: flex;
+    align-items: center;
     padding: var(--space-lg);
+  }
+
+  .references-page__content {
+    padding: 0 var(--space-xl) var(--space-xl);
+  }
+
+  .references-page__card {
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .references-page__not-found {
+    padding: 0 var(--space-xl);
   }
 }

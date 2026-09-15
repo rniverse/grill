@@ -48,6 +48,13 @@ describe('ReferencesPage', () => {
       expect(await screen.findByRole('button', { name: 'Signal' })).toBeDefined()
       expect(screen.getByRole('button', { name: 'NgRx' })).toBeDefined()
     })
+
+    test('renders a MobileNav trigger for phone widths', async () => {
+      renderAt('/references')
+      await screen.findByText('Angular')
+
+      expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
+    })
   })
 
   describe('topic references (/references/:topicId)', () => {
@@ -72,6 +79,16 @@ describe('ReferencesPage', () => {
       renderAt('/references/does-not-exist')
       expect(await screen.findByText('Topic not found.')).toBeDefined()
       expect(screen.getByRole('link', { name: 'Back to references' })).toBeDefined()
+    })
+
+    test('renders a MobileNav trigger for phone widths, including on the not-found screen', async () => {
+      renderAt('/references/nodejs')
+      await screen.findByRole('button', { name: 'Event Loop' })
+      expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
+
+      renderAt('/references/does-not-exist')
+      expect(await screen.findByText('Topic not found.')).toBeDefined()
+      expect(screen.getAllByRole('button', { name: 'Menu' }).length).toBeGreaterThan(0)
     })
   })
 })

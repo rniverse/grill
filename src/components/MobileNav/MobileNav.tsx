@@ -106,10 +106,12 @@ export function MobileNav() {
           <div className="mobile-nav__scrim" onClick={() => setOpen(false)} />
           <div className="mobile-nav__drawer">
             <div className="mobile-nav__brand">
-              <span className="mobile-nav__brand-icon">
-                <LogoIcon size={16} />
-              </span>
-              <span className="mobile-nav__brand-name">{t('nav.brand')}</span>
+              <Link to="/" className="mobile-nav__brand-link" onClick={() => setOpen(false)}>
+                <span className="mobile-nav__brand-icon">
+                  <LogoIcon size={16} />
+                </span>
+                <span className="mobile-nav__brand-name">{t('nav.brand')}</span>
+              </Link>
               <button
                 type="button"
                 className="mobile-nav__close"

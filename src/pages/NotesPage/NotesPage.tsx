@@ -50,11 +50,11 @@ export function NotesPage() {
   return (
     <div className="notes-page">
       <IconRail />
-      <div className="notes-page__mobile-header">
-        <MobileNav />
-      </div>
       <div className="notes-page__content">
         <div className="notes-page__card">
+          <div className="notes-page__mobile-header">
+            <MobileNav />
+          </div>
           <h1 className="notes-page__title">{t('notes.title')}</h1>
           <div className="notes-page__items">
             {notes.length === 0 ? (

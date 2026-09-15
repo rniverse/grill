@@ -78,6 +78,7 @@
 }
 
 .topic-page__mobile-title {
+  margin: 0;
   font-family: var(--font-ui);
   font-size: var(--text-topic-title-mobile);
   font-weight: 700;
@@ -137,8 +138,12 @@
   color: var(--color-accent);
 }
 
+/* Mobile references view — like .topic-page__mobile-header, this is always
+   mounted in JSX; display: none at desktop (regardless of the --active
+   modifier below) means a viewport crossing back over --bp-mobile while
+   this view is toggled on can never strand the desktop question list. */
 .topic-page__mobile-references {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: var(--space-md);
 }
@@ -212,5 +217,18 @@
      their own vertical padding as separation — no extra gap between them. */
   .topic-page__cards {
     gap: 0;
+  }
+
+  /* The References toggle only swaps content within mobile widths — these
+     modifiers are meaningless outside this media query, so crossing back
+     over --bp-mobile un-hides the filter row/cards automatically with no
+     JS width tracking. */
+  .topic-page__mobile-references--active {
+    display: flex;
+  }
+
+  .topic-page__filter-row--hidden-mobile,
+  .topic-page__cards--hidden-mobile {
+    display: none;
   }
 }

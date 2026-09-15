@@ -81,7 +81,7 @@ export function LandingPage() {
       <div className="landing-page__content">
         <div className="landing-page__card">
           <div className="landing-page__header">
-            <span className="landing-page__label">{t('landing.contents')}</span>
+            <h1 className="landing-page__label">{t('landing.contents')}</h1>
             <span className="landing-page__summary">{summaryText}</span>
             <button type="button" className="landing-page__control">
               <SearchIcon size={15} />
@@ -97,7 +97,7 @@ export function LandingPage() {
             <div className="landing-page__mobile-logo">
               <LogoIcon size={16} />
             </div>
-            <h1 className="landing-page__mobile-title">{t('landing.contents')}</h1>
+            <span className="landing-page__mobile-title">{t('landing.contents')}</span>
             <div className="landing-page__mobile-actions">
               <button
                 type="button"

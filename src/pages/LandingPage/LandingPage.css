@@ -28,6 +28,7 @@
 }
 
 .landing-page__label {
+  margin: 0;
   font-family: var(--font-ui);
   font-size: var(--text-meta);
   font-weight: 700;

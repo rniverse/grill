@@ -130,7 +130,7 @@ export function TopicPage() {
                 <div className="topic-page__mobile-header-left">
                   <MobileNav activeTopicId={topic.id} />
                   <div className="topic-page__mobile-title-group">
-                    <span className="topic-page__mobile-title">{topic.name}</span>
+                    <h1 className="topic-page__mobile-title">{topic.name}</h1>
                     <span className="topic-page__mobile-meta">
                       {t('topic.mobileMeta', { version: meta.version, count: questions.length })}
                     </span>
@@ -161,55 +161,76 @@ export function TopicPage() {
                 </div>
               </div>
             </div>
-            {mobileScreen === MobileScreen.References ? (
-              <div className="topic-page__mobile-references">
-                <span className="topic-page__mobile-references-heading">
-                  {t('topic.mobileReferencesHeading', { count: references.length })}
-                </span>
-                <div className="topic-page__mobile-reference-chips">
-                  {references.map((reference) => (
-                    <button
-                      key={reference.id}
-                      type="button"
-                      className="topic-page__mobile-reference-chip"
-                      onClick={() => setOpenReference(reference)}
-                    >
-                      {reference.term}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="topic-page__filter-row">
-                  <FilterChips tags={collectTags(questions)} active={activeFilter} onSelect={selectFilter} />
+            {/* Both the mobile-references view and the question-list view are
+                always mounted; CSS (not JSX) decides which is visible per
+                breakpoint, so rotating past --bp-mobile while either mobile
+                toggle is on can never strand the desktop layout. */}
+            <div
+              className={
+                mobileScreen === MobileScreen.References
+                  ? 'topic-page__mobile-references topic-page__mobile-references--active'
+                  : 'topic-page__mobile-references'
+              }
+            >
+              <span className="topic-page__mobile-references-heading">
+                {t('topic.mobileReferencesHeading', { count: references.length })}
+              </span>
+              <div className="topic-page__mobile-reference-chips">
+                {references.map((reference) => (
                   <button
+                    key={reference.id}
                     type="button"
-                    className="topic-page__saved-chip"
-                    aria-pressed={bookmarkFilter}
-                    onClick={toggleBookmarkFilter}
+                    className="topic-page__mobile-reference-chip"
+                    onClick={() => setOpenReference(reference)}
                   >
-                    <BookmarksIcon size={13} />
-                    <span>{t('topic.savedChip')}</span>
+                    {reference.term}
                   </button>
-                </div>
-                <div className="topic-page__cards">
-                  {visibleQuestions.map((question, index) => (
-                    <QuestionCard
-                      key={question.id}
-                      ordinal={String(index + 1).padStart(2, '0')}
-                      question={question}
-                      references={references}
-                      topic={{ name: topic.name, version: meta.version }}
-                      open={openQuestionId === question.id}
-                      onToggle={() => setOpenQuestionId(openQuestionId === question.id ? null : question.id)}
-                      onReferenceSelect={setOpenReference}
-                      onPersonalLayerChange={onPersonalLayerChange}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+                ))}
+              </div>
+            </div>
+            <div
+              className={
+                mobileScreen === MobileScreen.References
+                  ? 'topic-page__filter-row topic-page__filter-row--hidden-mobile'
+                  : 'topic-page__filter-row'
+              }
+            >
+              <FilterChips
+                tags={collectTags(questions)}
+                active={bookmarkFilter ? '' : activeFilter}
+                onSelect={selectFilter}
+              />
+              <button
+                type="button"
+                className="topic-page__saved-chip"
+                aria-pressed={bookmarkFilter}
+                onClick={toggleBookmarkFilter}
+              >
+                <BookmarksIcon size={13} />
+                <span>{t('topic.savedChip')}</span>
+              </button>
+            </div>
+            <div
+              className={
+                mobileScreen === MobileScreen.References
+                  ? 'topic-page__cards topic-page__cards--hidden-mobile'
+                  : 'topic-page__cards'
+              }
+            >
+              {visibleQuestions.map((question, index) => (
+                <QuestionCard
+                  key={question.id}
+                  ordinal={String(index + 1).padStart(2, '0')}
+                  question={question}
+                  references={references}
+                  topic={{ name: topic.name, version: meta.version }}
+                  open={openQuestionId === question.id}
+                  onToggle={() => setOpenQuestionId(openQuestionId === question.id ? null : question.id)}
+                  onReferenceSelect={setOpenReference}
+                  onPersonalLayerChange={onPersonalLayerChange}
+                />
+              ))}
+            </div>
           </div>
         ) : null}
       </main>

@@ -19,7 +19,9 @@ describe('routes', () => {
   test('renders TopicPage at /topics/:topicId', async () => {
     renderAt('/topics/angular')
 
-    const topicHeading = await screen.findByRole('heading', { name: 'Angular' })
-    expect(topicHeading).toBeDefined()
+    // Desktop and mobile each render their own <h1>, CSS-hidden at the other
+    // width — both share the accessible name here.
+    await screen.findAllByRole('heading', { name: 'Angular' })
+    expect(screen.getAllByRole('heading', { name: 'Angular' }).length).toBeGreaterThan(0)
   })
 })

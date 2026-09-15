@@ -56,7 +56,9 @@ describe('TopicPage', () => {
     const badge = await screen.findByText('event loop', { selector: '.reference-badge' })
     fireEvent.click(badge)
 
-    expect(await screen.findByText('Event Loop')).toBeDefined()
+    // 'Event Loop' also labels the (unconditionally-mounted, CSS-hidden at
+    // desktop) mobile reference chip now — disambiguate to the modal's title.
+    expect(await screen.findByText('Event Loop', { selector: '.reference-modal__term' })).toBeDefined()
     expect(
       await screen.findByText(/repeatedly moves through six phases/i),
     ).toBeDefined()
@@ -81,7 +83,7 @@ describe('TopicPage', () => {
     expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
   })
 
-  test('the References icon swaps the question list for a flat reference chip list, and back', async () => {
+  test('the References icon shows the mobile reference chip list, and back, without unmounting the question list', async () => {
     renderAt('/topics/angular')
     await screen.findAllByText('Angular')
     const questionButtons = await screen.findAllByRole('button', { name: /standalone/i })
@@ -90,11 +92,23 @@ describe('TopicPage', () => {
     const referencesToggle = screen.getByRole('button', { name: 'Show references' })
     fireEvent.click(referencesToggle)
 
-    expect(screen.queryByRole('button', { name: /standalone/i })).toBeNull()
+    // This is a CSS-driven visibility swap, not a JSX unmount/remount — the
+    // exact same question-card DOM nodes (referential identity, not just
+    // matching content) must still be present so that rotating back over
+    // --bp-mobile recovers the desktop layout with no JS width tracking
+    // (see TopicPage.css's --active/--hidden-mobile pair).
+    const questionButtonsAfterToggle = screen.getAllByRole('button', { name: /standalone/i })
+    expect(questionButtonsAfterToggle.length).toBe(questionButtons.length)
+    questionButtonsAfterToggle.forEach((button, index) => {
+      expect(button).toBe(questionButtons[index])
+    })
     expect(screen.getByText(/References ·/)).toBeDefined()
 
     fireEvent.click(referencesToggle)
-    expect(await screen.findAllByRole('button', { name: /standalone/i })).not.toHaveLength(0)
+    const questionButtonsAfterToggleBack = screen.getAllByRole('button', { name: /standalone/i })
+    questionButtonsAfterToggleBack.forEach((button, index) => {
+      expect(button).toBe(questionButtons[index])
+    })
   })
 
   test('tapping a reference chip in the mobile references view opens the reference modal', async () => {
@@ -137,5 +151,19 @@ describe('TopicPage', () => {
       .getAllByRole('button')
       .filter((button) => button.className.includes('question-card__header'))
     expect(filteredButtons.length).toBe(1)
+  })
+
+  test('turning on the bookmark filter clears the active state on every tag chip', async () => {
+    renderAt('/topics/angular')
+    await screen.findAllByText('Angular')
+
+    // A tag chip is active (the default "All" filter) before the bookmark
+    // filter is turned on.
+    expect(document.querySelectorAll('.filter-chips__chip[aria-pressed="true"]').length).toBe(1)
+
+    const bookmarkFilterToggle = screen.getByRole('button', { name: 'Show bookmarked questions only' })
+    fireEvent.click(bookmarkFilterToggle)
+
+    expect(document.querySelectorAll('.filter-chips__chip[aria-pressed="true"]').length).toBe(0)
   })
 })

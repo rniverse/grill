@@ -141,7 +141,7 @@
   }
 
   .question-card__body {
-    padding-top: 0;
+    padding-top: var(--space-md);
     margin-top: 0;
     border-top: none;
     padding-left: var(--space-3xl);

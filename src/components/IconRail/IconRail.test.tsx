@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { IconRail } from './IconRail'
 import { RailSection } from './rail-section.enum'
@@ -81,42 +81,59 @@ describe('IconRail', () => {
     expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
   })
 
-  test('clicking a rail button opens its panel', () => {
+  test('clicking a rail button opens its panel', async () => {
     renderRail()
 
     fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
 
-    expect(screen.getByText('Bookmarks')).toBeDefined()
+    expect(await screen.findByText('Bookmarks')).toBeDefined()
     expect(screen.getByRole('button', { name: 'Bookmarks' }).getAttribute('aria-expanded')).toBe('true')
   })
 
-  test('clicking the same rail button again closes its panel', () => {
+  test('clicking the same rail button again closes its panel', async () => {
     renderRail()
 
     const bookmarksButton = screen.getByRole('button', { name: 'Bookmarks' })
     fireEvent.click(bookmarksButton)
     fireEvent.click(bookmarksButton)
+    await act(async () => {})
 
     expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
     expect(bookmarksButton.getAttribute('aria-expanded')).toBe('false')
   })
 
-  test('clicking a different rail button switches the open panel', () => {
+  test('clicking a different rail button switches the open panel', async () => {
     renderRail()
 
     fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
     fireEvent.click(screen.getByRole('button', { name: 'My notes' }))
+    await act(async () => {})
 
     expect(screen.getByRole('button', { name: 'Bookmarks' }).getAttribute('aria-expanded')).toBe('false')
     expect(screen.getByRole('button', { name: 'My notes' }).getAttribute('aria-expanded')).toBe('true')
   })
 
-  test("the panel's close button closes it", () => {
+  test("the panel's close button closes it", async () => {
     renderRail()
 
     fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
+    await act(async () => {})
     fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
 
     expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
+  })
+
+  test('pressing Escape closes the panel and returns focus to the rail button that opened it', async () => {
+    renderRail()
+
+    const bookmarksButton = screen.getByRole('button', { name: 'Bookmarks' })
+    fireEvent.click(bookmarksButton)
+    await act(async () => {})
+    expect(await screen.findByText('Bookmarks')).toBeDefined()
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
+    expect(document.activeElement).toBe(bookmarksButton)
   })
 })

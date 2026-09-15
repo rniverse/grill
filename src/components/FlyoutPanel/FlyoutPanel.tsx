@@ -76,6 +76,19 @@ export function FlyoutPanel({ section, topicId, onClose }: FlyoutPanelProps) {
     }
   }, [])
 
+  // Below --bp-nav-panel this becomes a scrim-backed floating overlay, same
+  // as MobileNav's drawer — Escape should close it there too. Harmless to
+  // run unconditionally above that breakpoint too, where it's an inline
+  // (non-overlay) panel.
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') onClose()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onClose])
+
   function topicByName(name: string): LoadedTopicSummary | undefined {
     return loadedTopics.find((topic) => topic.name === name)
   }

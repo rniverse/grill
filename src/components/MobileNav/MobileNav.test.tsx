@@ -69,6 +69,29 @@ describe('MobileNav', () => {
     expect(screen.queryByText('Topics')).toBeNull()
   })
 
+  test('pressing Escape closes the drawer and returns focus to the hamburger trigger', async () => {
+    renderNav()
+    const trigger = screen.getByRole('button', { name: 'Menu' })
+    fireEvent.click(trigger)
+    await screen.findByText('Topics')
+
+    fireEvent.keyDown(window, { key: 'Escape' })
+
+    expect(screen.queryByText('Topics')).toBeNull()
+    expect(document.activeElement).toBe(trigger)
+  })
+
+  test('closing the drawer via the close button also returns focus to the hamburger trigger', async () => {
+    renderNav()
+    const trigger = screen.getByRole('button', { name: 'Menu' })
+    fireEvent.click(trigger)
+    await screen.findByText('Topics')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close menu' }))
+
+    expect(document.activeElement).toBe(trigger)
+  })
+
   test('clicking a topic closes the drawer', async () => {
     renderNav()
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }))

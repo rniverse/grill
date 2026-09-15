@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { FlyoutPanel } from './FlyoutPanel'
 import { RailSection } from '@/components/IconRail/rail-section.enum'
@@ -42,10 +42,10 @@ describe('FlyoutPanel', () => {
     expect(closeCalls).toBe(1)
   })
 
-  test('References section prompts for a topic when none is given', () => {
+  test('References section prompts for a topic when none is given', async () => {
     renderPanel(RailSection.References)
 
-    expect(screen.getByText('Open a topic to see its references.')).toBeDefined()
+    expect(await screen.findByText('Open a topic to see its references.')).toBeDefined()
   })
 
   test('References section lists the current topic\'s references when topicId is given', async () => {
@@ -55,10 +55,10 @@ describe('FlyoutPanel', () => {
     expect(await screen.findByText('OnPush')).toBeDefined()
   })
 
-  test('Bookmarks section shows the empty state with no bookmarks', () => {
+  test('Bookmarks section shows the empty state with no bookmarks', async () => {
     renderPanel(RailSection.Bookmarks)
 
-    expect(screen.getByText('Nothing bookmarked yet.')).toBeDefined()
+    expect(await screen.findByText('Nothing bookmarked yet.')).toBeDefined()
   })
 
   test('Bookmarks section resolves a bookmarked question to its text, across topics', async () => {
@@ -72,7 +72,7 @@ describe('FlyoutPanel', () => {
     expect(await screen.findByText(angularQuestion.question)).toBeDefined()
   })
 
-  test('Questions section shows a pending question\'s own ask text', () => {
+  test('Questions section shows a pending question\'s own ask text', async () => {
     savePendingQuestion({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'question', id: angularQuestion.id },
@@ -82,10 +82,10 @@ describe('FlyoutPanel', () => {
 
     renderPanel(RailSection.Questions)
 
-    expect(screen.getByText('What does this mean in practice?')).toBeDefined()
+    expect(await screen.findByText('What does this mean in practice?')).toBeDefined()
   })
 
-  test('Notes section shows a truncated preview of long notes', () => {
+  test('Notes section shows a truncated preview of long notes', async () => {
     const longText = 'a'.repeat(100)
     savePersonalNote(
       { kind: 'question', id: angularQuestion.id },
@@ -95,13 +95,22 @@ describe('FlyoutPanel', () => {
 
     renderPanel(RailSection.Notes)
 
-    expect(screen.getByText(`${'a'.repeat(80)}…`)).toBeDefined()
+    expect(await screen.findByText(`${'a'.repeat(80)}…`)).toBeDefined()
   })
 
-  test('clicking the close button calls onClose', () => {
+  test('clicking the close button calls onClose', async () => {
     renderPanel(RailSection.Topics)
+    await act(async () => {})
 
     fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+    expect(closeCalls).toBe(1)
+  })
+
+  test('pressing Escape calls onClose', async () => {
+    renderPanel(RailSection.Topics)
+    await act(async () => {})
+
+    fireEvent.keyDown(window, { key: 'Escape' })
     expect(closeCalls).toBe(1)
   })
 })

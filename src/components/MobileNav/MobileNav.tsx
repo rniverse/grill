@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import { listBookmarks, listPendingQuestions, listPersonalNotes } from '@/services/storage'
@@ -35,6 +35,8 @@ export function MobileNav({ activeTopicId }: MobileNavProps) {
   const [open, setOpen] = useState(false)
   const [loadedTopics, setLoadedTopics] = useState<LoadedTopicSummary[]>([])
   const [totalReferences, setTotalReferences] = useState(0)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const wasOpenRef = useRef(open)
 
   useEffect(() => {
     if (!open) return
@@ -75,6 +77,16 @@ export function MobileNav({ activeTopicId }: MobileNavProps) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [open])
 
+  // Return focus to the hamburger trigger whichever way the drawer closed
+  // (Escape, scrim click, close button, or picking a topic/item) — a plain
+  // "open just went false" transition covers all of those in one place.
+  useEffect(() => {
+    if (wasOpenRef.current && !open) {
+      triggerRef.current?.focus()
+    }
+    wasOpenRef.current = open
+  }, [open])
+
   const yourItems = [
     { label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
     { label: t('nav.bookmarks'), Icon: BookmarksIcon, count: listBookmarks().length },
@@ -84,7 +96,13 @@ export function MobileNav({ activeTopicId }: MobileNavProps) {
 
   return (
     <div className="mobile-nav">
-      <button type="button" className="mobile-nav__trigger" aria-label={t('nav.menuOpen')} onClick={() => setOpen(true)}>
+      <button
+        type="button"
+        ref={triggerRef}
+        className="mobile-nav__trigger"
+        aria-label={t('nav.menuOpen')}
+        onClick={() => setOpen(true)}
+      >
         <MenuIcon size={16} />
       </button>
 

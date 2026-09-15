@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   BookmarksIcon,
   ExportIcon,
@@ -31,16 +31,24 @@ const railSectionButtons: RailSectionButton[] = [
 export interface IconRailProps {
   activeSection: RailSection
   // The topic currently in view, if any — threaded down to FlyoutPanel so
-  // its References section knows which topic's references to show. Neither
-  // LandingPage nor TopicPage passes this yet (see .agent-a-report.md).
+  // its References section knows which topic's references to show.
   topicId?: string
 }
 
 export function IconRail({ activeSection, topicId }: IconRailProps) {
   const [openSection, setOpenSection] = useState<RailSection | null>(null)
+  const sectionButtonRefs = useRef<Partial<Record<RailSection, HTMLButtonElement | null>>>({})
 
   function toggleSection(section: RailSection): void {
     setOpenSection((current) => (current === section ? null : section))
+  }
+
+  // FlyoutPanel closes itself (Escape, scrim click, its own close button, or
+  // picking an item) purely by calling onClose — funnel all of those through
+  // here so focus reliably returns to the rail button that opened it.
+  function closePanel(section: RailSection): void {
+    setOpenSection(null)
+    sectionButtonRefs.current[section]?.focus()
   }
 
   return (
@@ -54,6 +62,9 @@ export function IconRail({ activeSection, topicId }: IconRailProps) {
           <button
             key={section}
             type="button"
+            ref={(el) => {
+              sectionButtonRefs.current[section] = el
+            }}
             className="icon-rail__button"
             aria-label={label}
             aria-current={section === activeSection ? 'true' : undefined}
@@ -70,7 +81,7 @@ export function IconRail({ activeSection, topicId }: IconRailProps) {
       </nav>
 
       {openSection ? (
-        <FlyoutPanel section={openSection} topicId={topicId} onClose={() => setOpenSection(null)} />
+        <FlyoutPanel section={openSection} topicId={topicId} onClose={() => closePanel(openSection)} />
       ) : null}
     </>
   )

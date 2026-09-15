@@ -35,7 +35,10 @@
   .flyout-panel__scrim {
     display: block;
     position: fixed;
-    inset: 0;
+    /* Starts right of the rail (not full-viewport) so the rail stays
+       clickable — switching to a different section's panel shouldn't
+       require closing this one first. */
+    inset: 0 0 0 var(--size-rail);
     z-index: var(--z-overlay);
     background: var(--color-scrim);
     animation: fadeIn var(--duration-fade) ease;

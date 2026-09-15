@@ -7,11 +7,16 @@ export interface TopicRowProps {
   name: string
   blurb?: string
   questionCount: number
+  // Link target override — defaults to the topics route so existing callers
+  // (LandingPage) are unaffected. ReferencesPage passes /references/:topicId
+  // instead, reusing the row for its own topic-picker with a reference count
+  // in place of a question count.
+  to?: string
 }
 
-export function TopicRow({ ordinal, topicId, name, blurb, questionCount }: TopicRowProps) {
+export function TopicRow({ ordinal, topicId, name, blurb, questionCount, to }: TopicRowProps) {
   return (
-    <Link to={`/topics/${topicId}`} className="topic-row">
+    <Link to={to ?? `/topics/${topicId}`} className="topic-row">
       <span className="topic-row__ordinal">{ordinal}</span>
       <span className="topic-row__label">
         <span className="topic-row__name">{name}</span>

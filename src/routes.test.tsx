@@ -24,4 +24,34 @@ describe('routes', () => {
     await screen.findAllByRole('heading', { name: 'Angular' })
     expect(screen.getAllByRole('heading', { name: 'Angular' }).length).toBeGreaterThan(0)
   })
+
+  test('renders ReferencesPage topic picker at /references', async () => {
+    renderAt('/references')
+
+    expect(await screen.findByText('Angular')).toBeDefined()
+  })
+
+  test('renders ReferencesPage topic view at /references/:topicId', async () => {
+    renderAt('/references/angular')
+
+    expect(await screen.findByText('Signal')).toBeDefined()
+  })
+
+  test('renders BookmarksPage at /bookmarks', async () => {
+    renderAt('/bookmarks')
+
+    expect(await screen.findByText('Bookmarks')).toBeDefined()
+  })
+
+  test('renders QuestionsPage at /questions', async () => {
+    renderAt('/questions')
+
+    expect(await screen.findByText('My questions')).toBeDefined()
+  })
+
+  test('renders NotesPage at /notes', async () => {
+    renderAt('/notes')
+
+    expect(await screen.findByText('My notes')).toBeDefined()
+  })
 })

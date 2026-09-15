@@ -5,6 +5,7 @@ import type { PendingQuestion } from '@/types/personal.types'
 import { listPendingQuestions } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
+import { MobileNav } from '@/components/MobileNav/MobileNav'
 import './QuestionsPage.css'
 
 interface LoadedTopicSummary {
@@ -43,6 +44,9 @@ export function QuestionsPage() {
   return (
     <div className="questions-page">
       <IconRail />
+      <div className="questions-page__mobile-header">
+        <MobileNav />
+      </div>
       <div className="questions-page__content">
         <div className="questions-page__card">
           <h1 className="questions-page__title">{t('questions.title')}</h1>

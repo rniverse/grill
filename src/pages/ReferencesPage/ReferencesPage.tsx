@@ -4,6 +4,7 @@ import { topicsConfig } from '@/topics.config'
 import type { Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
+import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
 import './ReferencesPage.css'
@@ -51,6 +52,9 @@ function ReferencesPicker() {
   return (
     <div className="references-page">
       <IconRail />
+      <div className="references-page__mobile-header">
+        <MobileNav />
+      </div>
       <div className="references-page__content">
         <div className="references-page__card">
           <h1 className="references-page__label">{t('references.title')}</h1>
@@ -111,6 +115,9 @@ function TopicReferences({ topicId }: { topicId: string }) {
     return (
       <div className="references-page">
         <IconRail />
+        <div className="references-page__mobile-header">
+          <MobileNav />
+        </div>
         <div className="references-page__not-found">
           <p>{t('references.notFound')}</p>
           <Link to="/references">{t('references.backToReferences')}</Link>
@@ -122,6 +129,9 @@ function TopicReferences({ topicId }: { topicId: string }) {
   return (
     <div className="references-page">
       <IconRail />
+      <div className="references-page__mobile-header">
+        <MobileNav />
+      </div>
       <div className="references-page__content">
         {topic ? (
           <div className="references-page__card">

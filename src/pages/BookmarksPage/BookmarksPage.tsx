@@ -6,6 +6,7 @@ import type { Bookmark, LocalTargetRef } from '@/types/personal.types'
 import { listBookmarks } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
+import { MobileNav } from '@/components/MobileNav/MobileNav'
 import './BookmarksPage.css'
 
 interface LoadedTopicSummary {
@@ -61,6 +62,9 @@ export function BookmarksPage() {
   return (
     <div className="bookmarks-page">
       <IconRail />
+      <div className="bookmarks-page__mobile-header">
+        <MobileNav />
+      </div>
       <div className="bookmarks-page__content">
         <div className="bookmarks-page__card">
           <h1 className="bookmarks-page__title">{t('bookmarks.title')}</h1>

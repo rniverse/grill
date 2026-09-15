@@ -5,6 +5,7 @@ import type { PersonalNote } from '@/types/personal.types'
 import { listPersonalNotes } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
+import { MobileNav } from '@/components/MobileNav/MobileNav'
 import './NotesPage.css'
 
 const NOTE_PREVIEW_LENGTH = 80
@@ -49,6 +50,9 @@ export function NotesPage() {
   return (
     <div className="notes-page">
       <IconRail />
+      <div className="notes-page__mobile-header">
+        <MobileNav />
+      </div>
       <div className="notes-page__content">
         <div className="notes-page__card">
           <h1 className="notes-page__title">{t('notes.title')}</h1>

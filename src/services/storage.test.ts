@@ -12,6 +12,7 @@ import {
   savePendingQuestion,
   savePersonalNote,
   toggleBookmark,
+  updatePersonalNote,
 } from './storage'
 import type { LocalTargetRef } from '@/types/personal.types'
 
@@ -60,8 +61,8 @@ describe('personal notes', () => {
     expect(getPersonalNote(questionTarget)).toBeUndefined()
   })
 
-  test('creates a note on first save', () => {
-    const note = savePersonalNote(questionTarget, topic, 'first draft')
+  test('creates a note with a target', () => {
+    const note = savePersonalNote('first draft', { target: questionTarget, topic })
 
     expect(note.id).toHaveLength(26)
     expect(note.text).toBe('first draft')
@@ -69,19 +70,39 @@ describe('personal notes', () => {
     expect(getPersonalNote(questionTarget)).toEqual(note)
   })
 
-  test('upserts: a second save for the same target updates text and keeps id/createdAt', () => {
-    const first = savePersonalNote(questionTarget, topic, 'first draft')
-    const second = savePersonalNote(questionTarget, topic, 'revised draft')
+  test('creates a standalone note with no target', () => {
+    const note = savePersonalNote('a freeform note')
 
-    expect(second.id).toBe(first.id)
-    expect(second.createdAt).toBe(first.createdAt)
-    expect(second.text).toBe('revised draft')
+    expect(note.topic).toBeUndefined()
+    expect(note.target).toBeUndefined()
+    expect(listPersonalNotes()).toEqual([note])
+  })
+
+  test('saving twice for the same target creates two separate notes — save always creates', () => {
+    savePersonalNote('first draft', { target: questionTarget, topic })
+    savePersonalNote('second draft', { target: questionTarget, topic })
+
+    expect(listPersonalNotes()).toHaveLength(2)
+  })
+
+  test('updatePersonalNote updates text and updatedAt, keeps id and createdAt', () => {
+    const note = savePersonalNote('first draft', { target: questionTarget, topic })
+
+    const updated = updatePersonalNote(note.id, 'revised draft')
+
+    expect(updated?.id).toBe(note.id)
+    expect(updated?.createdAt).toBe(note.createdAt)
+    expect(updated?.text).toBe('revised draft')
     expect(listPersonalNotes()).toHaveLength(1)
   })
 
+  test('updatePersonalNote returns undefined for an id that does not exist', () => {
+    expect(updatePersonalNote('nonexistent', 'text')).toBeUndefined()
+  })
+
   test('keeps notes for different targets independent', () => {
-    savePersonalNote(questionTarget, topic, 'about the question')
-    savePersonalNote(referenceTarget, topic, 'about the reference')
+    savePersonalNote('about the question', { target: questionTarget, topic })
+    savePersonalNote('about the reference', { target: referenceTarget, topic })
 
     expect(listPersonalNotes()).toHaveLength(2)
     expect(getPersonalNote(questionTarget)?.text).toBe('about the question')
@@ -89,7 +110,7 @@ describe('personal notes', () => {
   })
 
   test('deletes a note by id', () => {
-    const note = savePersonalNote(questionTarget, topic, 'temporary')
+    const note = savePersonalNote('temporary', { target: questionTarget, topic })
 
     deletePersonalNote(note.id)
 
@@ -135,7 +156,7 @@ describe('export/import', () => {
       selection: { text: 'Event Loop', range: { start: 4, end: 14 } },
       ask: 'Why?',
     })
-    savePersonalNote(questionTarget, topic, 'a note')
+    savePersonalNote('a note', { target: questionTarget, topic })
     toggleBookmark(referenceTarget, topic)
 
     const exported = JSON.parse(exportPersonalLayer())
@@ -184,7 +205,7 @@ describe('export/import', () => {
       selection: { text: 'Event Loop', range: { start: 4, end: 14 } },
       ask: 'Why?',
     })
-    savePersonalNote(questionTarget, topic, 'a note')
+    savePersonalNote('a note', { target: questionTarget, topic })
     toggleBookmark(referenceTarget, topic)
 
     const exported = exportPersonalLayer()
@@ -242,6 +263,40 @@ describe('export/import', () => {
           topic,
           target: referenceTarget,
           text: 123, // not a string — malformed
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+      bookmarks: [],
+    }
+
+    expect(() => importPersonalLayer(JSON.stringify(snapshot))).toThrow()
+    expect(listPersonalNotes()).toEqual([])
+  })
+
+  test('accepts a standalone note (no topic, no target) on import', () => {
+    const snapshot = {
+      pendingQuestions: [],
+      personalNotes: [
+        { id: 'note-1', text: 'a freeform note', createdAt: '2024-01-01T00:00:00.000Z', updatedAt: '2024-01-01T00:00:00.000Z' },
+      ],
+      bookmarks: [],
+    }
+
+    importPersonalLayer(JSON.stringify(snapshot))
+
+    expect(listPersonalNotes()).toEqual(snapshot.personalNotes)
+  })
+
+  test('rejects an import where a personal note has a target but no topic, without writing anything', () => {
+    const snapshot = {
+      pendingQuestions: [],
+      personalNotes: [
+        {
+          id: 'note-1',
+          target: referenceTarget,
+          // topic missing — target without topic is malformed
+          text: 'restored note',
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z',
         },

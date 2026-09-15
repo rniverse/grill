@@ -24,6 +24,9 @@
   position: fixed;
   inset: 0;
   z-index: var(--z-overlay);
+  border: none;
+  padding: 0;
+  cursor: pointer;
   background: var(--color-scrim);
   animation: fadeIn var(--duration-fade) ease;
 }

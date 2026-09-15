@@ -31,8 +31,7 @@ function findRangeForOffsets(container: HTMLElement, start: number, end: number)
   let endNode: Node | null = null
   let endOffset = 0
 
-  let node: Node | null
-  while ((node = walker.nextNode())) {
+  for (let node = walker.nextNode(); node !== null; node = walker.nextNode()) {
     const length = node.textContent?.length ?? 0
     const nodeStart = cursor
     const nodeEnd = cursor + length

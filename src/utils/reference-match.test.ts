@@ -15,13 +15,13 @@ describe('findReferenceMatches', () => {
   test('does not match inside a larger word', () => {
     const matches = findReferenceMatches('Buffering is not the same as a Buffer.', [ref('Buffer')])
     expect(matches).toHaveLength(1)
-    expect(matches[0]!.start).toBe(31)
+    expect(matches[0].start).toBe(31)
   })
 
   test('prefers the longer overlapping term', () => {
     const matches = findReferenceMatches('Reach for Worker Threads here.', [ref('Worker'), ref('Worker Threads')])
     expect(matches).toHaveLength(1)
-    expect(matches[0]!.reference.term).toBe('Worker Threads')
+    expect(matches[0].reference.term).toBe('Worker Threads')
   })
 
   test('finds multiple distinct terms in order', () => {

@@ -1,0 +1,60 @@
+.collapsible-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 0;
+  flex: 1;
+}
+
+.collapsible-section__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.collapsible-section__title {
+  font-family: var(--font-ui);
+  font-size: var(--text-question);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.collapsible-section__chevron {
+  color: var(--color-ink-tertiary);
+  transition: transform var(--duration-pop) ease;
+}
+
+.collapsible-section__toggle[aria-expanded='false'] .collapsible-section__chevron {
+  transform: rotate(-90deg);
+}
+
+.collapsible-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+/* Collapsible only below --bp-mobile (700px) — @media can't read custom
+   properties, so this mirrors the token literally, same as elsewhere. */
+@media (max-width: 700px) {
+  .collapsible-section__body--collapsed {
+    display: none;
+  }
+}
+
+@media (min-width: 701px) {
+  .collapsible-section__toggle {
+    cursor: default;
+  }
+
+  .collapsible-section__chevron {
+    display: none;
+  }
+}

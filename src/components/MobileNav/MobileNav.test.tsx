@@ -3,7 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { MobileNav } from './MobileNav'
 import { savePendingQuestion } from '@/services/storage'
-import { topic as angularTopic, questions as angularQuestions } from '@/topics/angular'
+import angularTopicData from '@/topics/angular.json'
+
+const angularTopic = { name: angularTopicData.meta.name }
+const angularQuestions = angularTopicData.questions
 
 beforeEach(() => {
   localStorage.clear()
@@ -64,7 +67,7 @@ describe('MobileNav', () => {
   test('shows a live count of pending questions in the Yours section', async () => {
     savePendingQuestion({
       topic: { name: angularTopic.name, version: '1.0.0' },
-      target: { kind: 'question', id: angularQuestions[0]!.id },
+      target: { kind: 'question', id: angularQuestions[0].id },
       selection: { text: 'some text', range: { start: 0, end: 9 } },
       ask: 'A question',
     })

@@ -11,6 +11,7 @@ import {
   LogoIcon,
   MenuIcon,
   NotesIcon,
+  PreferencesIcon,
   QuestionsIcon,
   ReferencesIcon,
 } from '@/utils/icons'
@@ -41,7 +42,7 @@ export function MobileNav() {
       const summaries: LoadedTopicSummary[] = []
       let referenceCount = 0
       for (const entry of topicsConfig) {
-        const [topicModule, referencesModule] = await Promise.all([entry.load(), entry.loadReferences()])
+        const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
         summaries.push({
           id: topicModule.topic.id,
           name: topicModule.topic.name,
@@ -82,11 +83,12 @@ export function MobileNav() {
     wasOpenRef.current = open
   }, [open])
 
-  const yourItems = [
+  const yourItems: { to: string; label: string; Icon: typeof ReferencesIcon; count?: number }[] = [
     { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
     { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, count: listBookmarks().length },
     { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, count: listPendingQuestions().length },
     { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, count: listPersonalNotes().length },
+    { to: '/preferences', label: t('nav.preferences'), Icon: PreferencesIcon },
   ]
 
   return (
@@ -103,7 +105,12 @@ export function MobileNav() {
 
       {open ? (
         <>
-          <div className="mobile-nav__scrim" onClick={() => setOpen(false)} />
+          <button
+            type="button"
+            className="mobile-nav__scrim"
+            aria-label={t('nav.menu.scrim')}
+            onClick={() => setOpen(false)}
+          />
           <div className="mobile-nav__drawer">
             <div className="mobile-nav__brand">
               <Link to="/" className="mobile-nav__brand-link" onClick={() => setOpen(false)}>
@@ -144,7 +151,7 @@ export function MobileNav() {
                 <Link key={to} to={to} className="mobile-nav__item" onClick={() => setOpen(false)}>
                   <Icon size={16} />
                   <span className="mobile-nav__item-label">{label}</span>
-                  <span className="mobile-nav__item-count">{count}</span>
+                  {count !== undefined ? <span className="mobile-nav__item-count">{count}</span> : null}
                 </Link>
               ))}
             </div>

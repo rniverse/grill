@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router'
+import { Link, useParams, useSearchParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
@@ -10,7 +10,6 @@ import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { FilterChips } from '@/components/FilterChips/FilterChips'
 import { QuestionCard } from '@/components/QuestionCard/QuestionCard'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
-import { PersonalRail } from '@/components/PersonalRail/PersonalRail'
 import { MobileScreen } from './mobile-screen.enum'
 import './TopicPage.css'
 
@@ -33,6 +32,8 @@ function collectTags(questions: Question[]): string[] {
 
 export function TopicPage() {
   const { topicId } = useParams<{ topicId: string }>()
+  const [searchParams] = useSearchParams()
+  const requestedQuestionId = searchParams.get('question')
   const [topic, setTopic] = useState<Topic | null>(null)
   const [meta, setMeta] = useState<FileMeta | null>(null)
   const [questions, setQuestions] = useState<Question[]>([])
@@ -45,12 +46,16 @@ export function TopicPage() {
   // above --bp-mobile, so neither ever changes at desktop widths).
   const [mobileScreen, setMobileScreen] = useState<MobileScreen>(MobileScreen.Questions)
   const [bookmarkFilter, setBookmarkFilter] = useState(false)
-  // Bumped whenever a personal-layer mutation (ask/bookmark/note/import)
-  // happens somewhere below, so PersonalRail (and any pending-question
-  // highlights) re-read storage and reflect it. Never rendered itself.
+  // Bumped whenever a personal-layer mutation (ask/bookmark/note) happens
+  // somewhere below, so the bookmark filter and pending-question highlights
+  // re-read storage and reflect it. Never rendered itself.
   const [, bumpPersonalVersion] = useState(0)
   const onPersonalLayerChange = () => bumpPersonalVersion((version) => version + 1)
 
+  // requestedQuestionId deliberately excluded from deps below — this should
+  // only act once, when the topic itself loads, not re-fire on every
+  // URL/param change.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see comment above
   useEffect(() => {
     let cancelled = false
     setNotFound(false)
@@ -66,7 +71,10 @@ export function TopicPage() {
     }
 
     async function loadTopic() {
-      const [topicModule, referencesModule] = await Promise.all([entry!.load(), entry!.loadReferences()])
+      // entry is narrowed non-null above, but that narrowing doesn't reach
+      // into this nested function's closure — TS can't see across it.
+      // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
+      const [topicModule, referencesModule] = await Promise.all([entry!.load.topics(), entry!.load.references()])
       if (cancelled) {
         return
       }
@@ -74,6 +82,12 @@ export function TopicPage() {
       setMeta(topicModule.meta)
       setQuestions(topicModule.questions)
       setReferences(referencesModule.references)
+
+      // Deep-link support (e.g. from a bookmark): open the question the URL
+      // named, if it still exists in this topic.
+      if (requestedQuestionId && topicModule.questions.some((question) => question.id === requestedQuestionId)) {
+        setOpenQuestionId(requestedQuestionId)
+      }
     }
 
     loadTopic()
@@ -234,16 +248,13 @@ export function TopicPage() {
         ) : null}
       </main>
       {topic && meta ? (
-        <PersonalRail
+        <ReferenceModal
+          reference={openReference}
           topic={{ name: topic.name, version: meta.version }}
-          questions={questions}
-          references={references}
-          onOpenQuestion={setOpenQuestionId}
-          onOpenReference={setOpenReference}
+          onClose={() => setOpenReference(null)}
           onPersonalLayerChange={onPersonalLayerChange}
         />
       ) : null}
-      <ReferenceModal reference={openReference} onClose={() => setOpenReference(null)} />
     </div>
   )
 }

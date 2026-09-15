@@ -2,22 +2,46 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
-  background: var(--color-personal-highlight-alt);
-  border-radius: var(--radius-row);
-  padding: var(--space-md) var(--space-base);
 }
 
-.note-editor__content {
-  font-family: var(--font-reading);
+.note-editor__content .cm-editor {
+  outline: none;
+}
+
+/* Fixed to 15 lines by default (15 * the line-height below, in em so it
+   scales with font-size, not a flat px guess); more than that scrolls
+   inside the editor instead of growing the dialog. */
+.note-editor__content .cm-scroller {
+  height: calc(15 * var(--size-note-editor-line-height));
+  overflow-y: auto;
+  font-family: var(--font-mono);
   font-size: var(--text-secondary);
-  line-height: 1.7;
+  line-height: var(--size-note-editor-line-height);
+}
+
+.note-editor__content .cm-content {
   color: var(--color-ink-body);
+}
+
+/* CodeMirror's default gutter is a boxed-in gray strip with a border — mute
+   it to sit flush with the surface instead of looking like a separate
+   panel. */
+.note-editor__content .cm-gutters {
+  background: transparent;
+  border-right: none;
+  color: var(--color-ink-faint);
+}
+
+.note-editor__content .cm-activeLineGutter {
+  background: transparent;
+  color: var(--color-ink-tertiary);
 }
 
 .note-editor__actions {
   display: flex;
   gap: var(--space-base);
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .note-editor__cancel,

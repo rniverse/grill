@@ -1,34 +1,35 @@
 import { describe, expect, test } from 'bun:test'
-import { meta, questions, topic } from './angular'
-import { references } from '@/references/angular'
+import topicData from './angular.json'
+import referencesData from '@/references/angular.json'
 
 describe('angular topic content', () => {
-  test('topic id is angular', () => {
-    expect(topic.id).toBe('angular')
+  test('content bundle ids are as expected', () => {
+    expect(topicData.id).toBe('topics-angular')
+    expect(referencesData.id).toBe('references-angular')
   })
 
   test('meta has valid ISO timestamps', () => {
-    expect(Number.isNaN(Date.parse(meta.cutOffTime))).toBe(false)
-    expect(Number.isNaN(Date.parse(meta.updatedAt))).toBe(false)
+    expect(Number.isNaN(Date.parse(topicData.meta.cutOffTime))).toBe(false)
+    expect(Number.isNaN(Date.parse(topicData.meta.updatedAt))).toBe(false)
   })
 
   test('every question id is unique', () => {
     const seenIds = new Set<string>()
-    for (const question of questions) {
+    for (const question of topicData.questions) {
       expect(seenIds.has(question.id)).toBe(false)
       seenIds.add(question.id)
     }
   })
 
   test('every reference id is a real 26-character ULID', () => {
-    for (const reference of references) {
+    for (const reference of referencesData.references) {
       expect(reference.id).toHaveLength(26)
     }
   })
 
   test('every Question.references id resolves to a real reference', () => {
-    const referenceIds = new Set(references.map((r) => r.id))
-    for (const question of questions) {
+    const referenceIds = new Set(referencesData.references.map((r) => r.id))
+    for (const question of topicData.questions) {
       for (const referenceId of question.references) {
         expect(referenceIds.has(referenceId)).toBe(true)
       }
@@ -36,6 +37,6 @@ describe('angular topic content', () => {
   })
 
   test('has at least the three worked-example questions', () => {
-    expect(questions.length).toBeGreaterThanOrEqual(3)
+    expect(topicData.questions.length).toBeGreaterThanOrEqual(3)
   })
 })

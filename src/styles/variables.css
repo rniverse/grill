@@ -96,14 +96,13 @@
   --size-modal-width: 440px;
   --size-modal-max-width: 86vw;
   --size-modal-max-height: 80vh;
+  --size-note-modal-width: 720px;
+  --size-note-editor-line-height: 1.7em;
   --size-close-button: 24px;
   --size-topic-content-max-width: 760px;
   --size-floating-button: 30px;
   --size-ask-popover-width: 340px;
   --size-ask-popover-min-height: 104px;
-  --size-personal-rail-width: 330px;
-  --size-flyout-panel-width: 232px;
-  --size-flyout-panel-width-floating: 236px;
   --size-drawer-width: 274px;
 
   /* Type scale — topic row */
@@ -142,11 +141,12 @@
   /* Breakpoints (px) — nav rail responsive rules */
   --bp-mobile: 700px;
   --bp-nav-panel: 980px;
-  --bp-personal-rail: 1140px;
 
   /* Z-index */
   --z-overlay: 40;
   --z-drawer: 50;
-  --z-popup: 60;
   --z-modal: 70;
+  /* Above --z-modal: this floating affordance must stay clickable even when
+     its answer text is rendered inside a modal (e.g. ReferenceModal). */
+  --z-popup: 80;
 }

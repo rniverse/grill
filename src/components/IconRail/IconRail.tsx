@@ -4,6 +4,7 @@ import {
   ExportIcon,
   LogoIcon,
   NotesIcon,
+  PreferencesIcon,
   QuestionsIcon,
   ReferencesIcon,
   TopicsIcon,
@@ -25,6 +26,12 @@ const railLinks: RailLink[] = [
   { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, isActive: (pathname) => pathname.startsWith('/bookmarks') },
   { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, isActive: (pathname) => pathname.startsWith('/questions') },
   { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, isActive: (pathname) => pathname.startsWith('/notes') },
+  {
+    to: '/preferences',
+    label: t('nav.preferences'),
+    Icon: PreferencesIcon,
+    isActive: (pathname) => pathname.startsWith('/preferences'),
+  },
 ]
 
 export function IconRail() {

@@ -1,4 +1,5 @@
 import { useEffect, useState, type RefObject } from 'react'
+import { createPortal } from 'react-dom'
 import type { ID } from '@/types/topic.types'
 import type { TextSelection } from '@/types/personal.types'
 import { savePendingQuestion } from '@/services/storage'
@@ -39,6 +40,9 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
     if (!container) return
 
     function handleMouseUp(event: MouseEvent) {
+      // container is narrowed non-null above, but that narrowing doesn't
+      // reach into this nested function's closure — TS can't see across it.
+      // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
       const selection = captureSelection(container!)
       if (!selection) {
         setPlus(null)
@@ -54,7 +58,13 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
   }, [containerRef])
 
   if (asking) {
-    return (
+    // Portaled to document.body: a container inside a modal (e.g.
+    // ReferenceModal) sits behind a `transform`, which turns this
+    // fixed-positioned popover's viewport coordinates into coordinates
+    // relative to that transformed ancestor instead — and the modal's own
+    // `overflow-y: auto` would then clip it. Rendering at the document root
+    // keeps the fixed positioning meant literally, regardless of container.
+    return createPortal(
       <AskQuestionPopover
         quote={asking.selection.text}
         position={asking}
@@ -64,7 +74,8 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
           setAsking(null)
           onSaved?.()
         }}
-      />
+      />,
+      document.body,
     )
   }
 
@@ -72,7 +83,7 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
     return null
   }
 
-  return (
+  return createPortal(
     <button
       type="button"
       className="selection-plus-button"
@@ -91,6 +102,7 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
       }}
     >
       <AskIcon size={17} />
-    </button>
+    </button>,
+    document.body,
   )
 }

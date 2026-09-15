@@ -118,6 +118,83 @@
   padding: 0;
 }
 
+.question-card__note-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.question-card__note-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xs);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.question-card__note-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+}
+
+.question-card__note-dialog-edit {
+  border: none;
+  background: transparent;
+  color: var(--color-accent-icon);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.question-card__note-dialog-remove {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xs);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+  line-height: 1;
+}
+
+.question-card__note-dialog {
+  width: var(--size-note-modal-width);
+  max-width: var(--size-modal-max-width);
+  /* Content-sized, not stretched to fill the modal cap: a short note would
+     otherwise force the editor tall with mostly-empty gutter below it.
+     max-height caps it for long notes, where the editor scrolls internally
+     (see .cm-scroller below) instead of growing the dialog further. */
+  max-height: var(--size-modal-max-height);
+  overflow-y: auto;
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  box-shadow: var(--shadow-modal);
+  z-index: var(--z-modal);
+}
+
+.question-card__note-dialog-title {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-question);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
 /* Mobile ("Quiet list" / "1a" in the design handoff): no card, hairline rows
    instead. @media conditions can't reference custom properties, so this
    mirrors --bp-mobile (700px) from variables.css literally. */

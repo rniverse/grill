@@ -1,11 +1,17 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, within, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { BookmarksPage } from './BookmarksPage'
 import { toggleBookmark } from '@/services/storage'
-import { topic as angularTopic, questions as angularQuestions } from '@/topics/angular'
+import angularTopicData from '@/topics/angular.json'
+import angularReferencesData from '@/references/angular.json'
 
-const angularQuestion = angularQuestions[0]!
+const angularTopic = { name: angularTopicData.meta.name }
+const angularQuestions = angularTopicData.questions
+const angularReferences = angularReferencesData.references
+
+const angularQuestion = angularQuestions[0]
+const angularReference = angularReferences[0]
 
 beforeEach(() => {
   localStorage.clear()
@@ -27,27 +33,63 @@ describe('BookmarksPage', () => {
     expect(screen.getByRole('heading', { name: 'Bookmarks' })).toBeDefined()
   })
 
-  test('shows the empty state with no bookmarks', async () => {
+  test('renders a Questions section and a References section', async () => {
     renderPage()
+    await act(async () => {})
 
-    expect(await screen.findByText('Nothing bookmarked yet.')).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Questions' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'References' })).toBeDefined()
   })
 
-  test('resolves a bookmarked question to its text, across topics', async () => {
+  test('shows the empty state in both sections with no bookmarks', async () => {
+    renderPage()
+
+    expect(await screen.findAllByText('Nothing bookmarked yet.')).toHaveLength(2)
+  })
+
+  test('resolves a bookmarked question to its text under the Questions section, across topics', async () => {
     toggleBookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
 
     renderPage()
 
-    expect(await screen.findByText(angularQuestion.question)).toBeDefined()
+    const toggle = await screen.findByRole('button', { name: 'Questions' })
+    const questionsSection = toggle.closest('section')
+    if (!questionsSection) throw new Error('expected a section ancestor')
+    expect(within(questionsSection).getByText(angularQuestion.question)).toBeDefined()
+    expect(within(questionsSection).getByText('Angular')).toBeDefined()
   })
 
-  test('a bookmark links to its topic page', async () => {
+  test('resolves a bookmarked reference under the References section', async () => {
+    toggleBookmark({ kind: 'reference', id: angularReference.id }, { name: angularTopic.name, version: '1.0.0' })
+
+    renderPage()
+
+    const toggle = await screen.findByRole('button', { name: 'References' })
+    const referencesSection = toggle.closest('section')
+    if (!referencesSection) throw new Error('expected a section ancestor')
+    expect(within(referencesSection).getByText(angularReference.term)).toBeDefined()
+  })
+
+  test('a question bookmark links to the topic page, opened to that question', async () => {
     toggleBookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
 
     renderPage()
 
-    const link = await screen.findByRole('link', { name: angularQuestion.question })
-    expect(link.getAttribute('href')).toBe('/topics/angular')
+    const link = await screen.findByRole('link', { name: new RegExp(angularQuestion.question) })
+    expect(link.getAttribute('href')).toBe(`/topics/angular?question=${angularQuestion.id}`)
+  })
+
+  test('a reference bookmark opens the reference in place instead of navigating', async () => {
+    toggleBookmark({ kind: 'reference', id: angularReference.id }, { name: angularTopic.name, version: '1.0.0' })
+
+    renderPage()
+
+    const item = await screen.findByText(angularReference.term)
+    expect(item.closest('a')).toBeNull()
+
+    fireEvent.click(item)
+
+    expect(await screen.findByRole('button', { name: 'Close' })).toBeDefined()
   })
 
   test('renders a MobileNav trigger for phone widths', async () => {

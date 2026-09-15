@@ -73,7 +73,7 @@ describe('IconRail', () => {
   })
 
   test('clicking export downloads the current personal layer as a JSON blob', async () => {
-    savePersonalNote({ kind: 'question', id: 'q1' }, { name: 'nodejs', version: '1.0.0' }, 'a note')
+    savePersonalNote('a note', { target: { kind: 'question', id: 'q1' }, topic: { name: 'nodejs', version: '1.0.0' } })
 
     const createdUrls: string[] = []
     const revokedUrls: string[] = []

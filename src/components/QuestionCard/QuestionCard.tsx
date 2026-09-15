@@ -1,14 +1,21 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Question, Reference } from '@/types/topic.types'
 import type { PendingQuestion } from '@/types/personal.types'
-import { getPersonalNote, listPendingQuestions, savePersonalNote } from '@/services/storage'
+import {
+  deletePersonalNote,
+  getPersonalNote,
+  listPendingQuestions,
+  savePersonalNote,
+  updatePersonalNote,
+} from '@/services/storage'
 import { t } from '@/utils/i18n'
+import { RemoveIcon } from '@/utils/icons'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
 import { SelectionPlusButton } from '@/components/SelectionPlusButton/SelectionPlusButton'
 import { PendingHighlight } from '@/components/PendingHighlight/PendingHighlight'
 import { BookmarkButton } from '@/components/BookmarkButton/BookmarkButton'
-import { NoteView } from '@/components/NoteView/NoteView'
 import { NoteEditor } from '@/components/NoteEditor/NoteEditor'
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import './QuestionCard.css'
 
 export interface QuestionCardProps {
@@ -22,6 +29,8 @@ export interface QuestionCardProps {
   onPersonalLayerChange?: () => void
 }
 
+type NoteDialogState = 'closed' | 'view' | 'edit'
+
 export function QuestionCard({
   ordinal,
   question,
@@ -33,7 +42,7 @@ export function QuestionCard({
   onPersonalLayerChange,
 }: QuestionCardProps) {
   const answerRef = useRef<HTMLDivElement>(null)
-  const [editingNote, setEditingNote] = useState(false)
+  const [noteDialog, setNoteDialog] = useState<NoteDialogState>('closed')
   const target = { kind: 'question' as const, id: question.id }
 
   const citedReferences: Reference[] = []
@@ -62,6 +71,13 @@ export function QuestionCard({
     () => JSON.parse(pendingQuestionsFingerprint) as PendingQuestion[],
     [pendingQuestionsFingerprint],
   )
+
+  function removeNote() {
+    if (!personalNote) return
+    deletePersonalNote(personalNote.id)
+    onPersonalLayerChange?.()
+    setNoteDialog('closed')
+  }
 
   return (
     <div className={open ? 'question-card question-card--open' : 'question-card'}>
@@ -105,29 +121,79 @@ export function QuestionCard({
             <PendingHighlight containerRef={answerRef} pendingQuestions={pendingQuestions} />
           </div>
           <div className="question-card__note">
-            {editingNote ? (
-              <NoteEditor
-                initialValue={personalNote?.text ?? ''}
-                onSave={(text) => {
-                  savePersonalNote(target, topic, text)
-                  setEditingNote(false)
-                  onPersonalLayerChange?.()
-                }}
-                onCancel={() => setEditingNote(false)}
-              />
-            ) : personalNote ? (
-              <>
-                <NoteView note={personalNote} />
-                <button type="button" className="question-card__note-toggle" onClick={() => setEditingNote(true)}>
-                  {t('personal.note.edit')}
+            {personalNote ? (
+              <div className="question-card__note-actions">
+                <button
+                  type="button"
+                  className="question-card__note-toggle"
+                  onClick={() => setNoteDialog('view')}
+                >
+                  {t('personal.note.expand')}
                 </button>
-              </>
+                <button
+                  type="button"
+                  className="question-card__note-remove"
+                  aria-label={t('personal.note.delete')}
+                  title={t('personal.note.delete')}
+                  onClick={removeNote}
+                >
+                  <RemoveIcon size={14} />
+                </button>
+              </div>
             ) : (
-              <button type="button" className="question-card__note-toggle" onClick={() => setEditingNote(true)}>
+              <button type="button" className="question-card__note-toggle" onClick={() => setNoteDialog('edit')}>
                 {t('personal.note.add')}
               </button>
             )}
           </div>
+
+          <Dialog open={noteDialog !== 'closed'} onOpenChange={(isOpen) => !isOpen && setNoteDialog('closed')}>
+            <DialogContent className="question-card__note-dialog">
+              {noteDialog === 'edit' ? (
+                <>
+                  <DialogTitle className="question-card__note-dialog-title">{question.question}</DialogTitle>
+                  <NoteEditor
+                    initialValue={personalNote?.text ?? ''}
+                    onSave={(text) => {
+                      if (personalNote) {
+                        updatePersonalNote(personalNote.id, text)
+                      } else {
+                        savePersonalNote(text, { target, topic })
+                      }
+                      onPersonalLayerChange?.()
+                      setNoteDialog('closed')
+                    }}
+                    onCancel={() => setNoteDialog('closed')}
+                  />
+                </>
+              ) : null}
+
+              {noteDialog === 'view' && personalNote ? (
+                <>
+                  <DialogTitle className="question-card__note-dialog-title">{t('personal.note.eyebrow')}</DialogTitle>
+                  <AnswerBody text={personalNote.text} references={[]} onReferenceSelect={() => {}} />
+                  <div className="question-card__note-dialog-actions">
+                    <button
+                      type="button"
+                      className="question-card__note-dialog-edit"
+                      onClick={() => setNoteDialog('edit')}
+                    >
+                      {t('personal.note.edit')}
+                    </button>
+                    <button
+                      type="button"
+                      className="question-card__note-dialog-remove"
+                      aria-label={t('personal.note.delete')}
+                      title={t('personal.note.delete')}
+                      onClick={removeNote}
+                    >
+                      <RemoveIcon size={16} />
+                    </button>
+                  </div>
+                </>
+              ) : null}
+            </DialogContent>
+          </Dialog>
         </div>
       ) : null}
     </div>

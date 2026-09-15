@@ -1,13 +1,18 @@
-import { describe, expect, test } from 'bun:test'
+import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { ReferenceModal } from './ReferenceModal'
 import type { Reference } from '@/types/topic.types'
 
 const bufferRef: Reference = { id: 'r1', term: 'Buffer', text: { type: 'markdown.text', value: 'A raw-memory container.' } }
+const topic = { name: 'nodejs', version: '1.0.0' }
+
+beforeEach(() => {
+  localStorage.clear()
+})
 
 describe('ReferenceModal', () => {
   test('renders nothing when there is no reference', () => {
-    const { container } = render(<ReferenceModal reference={null} onClose={() => {}} />)
+    const { container } = render(<ReferenceModal reference={null} topic={topic} onClose={() => {}} />)
     expect(container.firstChild).toBeNull()
   })
 
@@ -16,7 +21,7 @@ describe('ReferenceModal', () => {
       closed = true
     }
     let closed = false
-    render(<ReferenceModal reference={bufferRef} onClose={onClose} />)
+    render(<ReferenceModal reference={bufferRef} topic={topic} onClose={onClose} />)
 
     expect(screen.getByText('Buffer')).toBeDefined()
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
@@ -25,7 +30,7 @@ describe('ReferenceModal', () => {
 
   test('closes on Escape', () => {
     let closed = false
-    render(<ReferenceModal reference={bufferRef} onClose={() => (closed = true)} />)
+    render(<ReferenceModal reference={bufferRef} topic={topic} onClose={() => (closed = true)} />)
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(closed).toBe(true)
   })
@@ -34,7 +39,13 @@ describe('ReferenceModal', () => {
   // keyed off this data-slot (DialogContent's internal DialogOverlay exposes no
   // className hook) — this pins the attribute our selector depends on.
   test('renders an overlay carrying the dialog-overlay data-slot', () => {
-    render(<ReferenceModal reference={bufferRef} onClose={() => {}} />)
+    render(<ReferenceModal reference={bufferRef} topic={topic} onClose={() => {}} />)
     expect(document.querySelector('[data-slot="dialog-overlay"]')).not.toBeNull()
+  })
+
+  test('bookmark button in the header bookmarks the reference', () => {
+    render(<ReferenceModal reference={bufferRef} topic={topic} onClose={() => {}} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Bookmark' }))
+    expect(screen.getByRole('button', { name: 'Bookmarked' })).toBeDefined()
   })
 })

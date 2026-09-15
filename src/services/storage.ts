@@ -55,28 +55,35 @@ export function listPersonalNotes(): PersonalNote[] {
 }
 
 export function getPersonalNote(target: LocalTargetRef['target']): PersonalNote | undefined {
-  return listPersonalNotes().find((note) => targetsMatch(note.target, target))
+  return listPersonalNotes().find((note) => note.target && targetsMatch(note.target, target))
 }
 
-export function savePersonalNote(
-  target: LocalTargetRef['target'],
-  topic: LocalTargetRef['topic'],
-  text: string,
-): PersonalNote {
-  const notes = listPersonalNotes()
-  const existingIndex = notes.findIndex((note) => targetsMatch(note.target, target))
+// Always creates a new note. ref is omitted for a standalone note made from
+// the Notes page directly, with no question or reference behind it.
+export function savePersonalNote(text: string, ref?: LocalTargetRef): PersonalNote {
   const now = new Date().toISOString()
-
-  if (existingIndex === -1) {
-    const note: PersonalNote = { id: generateId(), topic, target, text, createdAt: now, updatedAt: now }
-    notes.push(note)
-    writeArray(KEY.personalNotes, notes)
-    return note
+  const note: PersonalNote = {
+    id: generateId(),
+    topic: ref?.topic,
+    target: ref?.target,
+    text,
+    createdAt: now,
+    updatedAt: now,
   }
+  const notes = listPersonalNotes()
+  notes.push(note)
+  writeArray(KEY.personalNotes, notes)
+  return note
+}
 
-  const existing = notes[existingIndex]!
-  const updated: PersonalNote = { ...existing, text, updatedAt: now }
-  notes[existingIndex] = updated
+export function updatePersonalNote(id: ID, text: string): PersonalNote | undefined {
+  const notes = listPersonalNotes()
+  const index = notes.findIndex((note) => note.id === id)
+  if (index === -1) return undefined
+
+  const existing = notes[index]
+  const updated: PersonalNote = { ...existing, text, updatedAt: new Date().toISOString() }
+  notes[index] = updated
   writeArray(KEY.personalNotes, notes)
   return updated
 }
@@ -164,14 +171,15 @@ function isPendingQuestionShape(value: unknown): value is PendingQuestion {
 }
 
 function isPersonalNoteShape(value: unknown): value is PersonalNote {
-  if (!isLocalTargetRefShape(value)) return false
-  const candidate = value as unknown as Record<string, unknown>
-  return (
-    typeof candidate.id === 'string' &&
-    typeof candidate.createdAt === 'string' &&
-    typeof candidate.updatedAt === 'string' &&
-    typeof candidate.text === 'string'
-  )
+  if (!isRecord(value)) return false
+  if (typeof value.id !== 'string') return false
+  if (typeof value.createdAt !== 'string') return false
+  if (typeof value.updatedAt !== 'string') return false
+  if (typeof value.text !== 'string') return false
+
+  // topic/target are both present or both absent — never one without the other.
+  if (value.topic === undefined && value.target === undefined) return true
+  return isLocalTargetRefShape(value)
 }
 
 function isBookmarkShape(value: unknown): value is Bookmark {

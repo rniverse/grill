@@ -28,7 +28,7 @@ export function LandingPage() {
       const modules: TopicModule[] = []
       let referenceCount = 0
       for (const entry of topicsConfig) {
-        const [topicModule, referencesModule] = await Promise.all([entry.load(), entry.loadReferences()])
+        const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
         modules.push(topicModule)
         referenceCount += referencesModule.references.length
       }

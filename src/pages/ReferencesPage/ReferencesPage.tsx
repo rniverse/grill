@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
-import type { Reference, Topic } from '@/types/topic.types'
+import type { FileMeta, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
@@ -29,7 +29,7 @@ function ReferencesPicker() {
     async function loadAllTopics() {
       const nextLoadedTopics: LoadedTopic[] = []
       for (const entry of topicsConfig) {
-        const [topicModule, referencesModule] = await Promise.all([entry.load(), entry.loadReferences()])
+        const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
         nextLoadedTopics.push({
           id: topicModule.topic.id,
           name: topicModule.topic.name,
@@ -78,14 +78,21 @@ function ReferencesPicker() {
 
 function TopicReferences({ topicId }: { topicId: string }) {
   const [topic, setTopic] = useState<Topic | null>(null)
+  const [meta, setMeta] = useState<FileMeta | null>(null)
   const [references, setReferences] = useState<Reference[]>([])
   const [notFound, setNotFound] = useState(false)
   const [openReference, setOpenReference] = useState<Reference | null>(null)
+  // Bumped whenever a personal-layer mutation (ask/bookmark) happens inside
+  // the reference modal, so pending-question highlights there re-read
+  // storage and reflect it. Never rendered itself.
+  const [, bumpPersonalVersion] = useState(0)
+  const onPersonalLayerChange = () => bumpPersonalVersion((version) => version + 1)
 
   useEffect(() => {
     let cancelled = false
     setNotFound(false)
     setTopic(null)
+    setMeta(null)
     setReferences([])
     setOpenReference(null)
 
@@ -96,11 +103,15 @@ function TopicReferences({ topicId }: { topicId: string }) {
     }
 
     async function loadTopic() {
-      const [topicModule, referencesModule] = await Promise.all([entry!.load(), entry!.loadReferences()])
+      // entry is narrowed non-null above, but that narrowing doesn't reach
+      // into this nested function's closure — TS can't see across it.
+      // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
+      const [topicModule, referencesModule] = await Promise.all([entry!.load.topics(), entry!.load.references()])
       if (cancelled) {
         return
       }
       setTopic(topicModule.topic)
+      setMeta(topicModule.meta)
       setReferences(referencesModule.references)
     }
 
@@ -156,7 +167,14 @@ function TopicReferences({ topicId }: { topicId: string }) {
           </div>
         ) : null}
       </div>
-      <ReferenceModal reference={openReference} onClose={() => setOpenReference(null)} />
+      {topic && meta ? (
+        <ReferenceModal
+          reference={openReference}
+          topic={{ name: topic.name, version: meta.version }}
+          onClose={() => setOpenReference(null)}
+          onPersonalLayerChange={onPersonalLayerChange}
+        />
+      ) : null}
     </div>
   )
 }

@@ -21,6 +21,7 @@ export function AskQuestionPopover({ quote, position, onSave, onCancel }: AskQue
         placeholder={t('personal.ask.placeholder')}
         value={askText}
         onChange={(event) => setAskText(event.target.value)}
+        // biome-ignore lint/a11y/noAutofocus: this popover only appears right after the user explicitly selects text and clicks "+" — an intentional action, not a page load, so focusing the input immediately is expected here
         autoFocus
       />
       <div className="ask-question-popover__actions">

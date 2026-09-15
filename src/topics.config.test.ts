@@ -12,7 +12,7 @@ describe('topicsConfig', () => {
 
   test('load() resolves the real topic module', async () => {
     for (const entry of topicsConfig) {
-      const loaded = await entry.load()
+      const loaded = await entry.load.topics()
 
       expect(loaded.topic.id).toBe(entry.id)
       expect(typeof loaded.meta.version).toBe('string')
@@ -22,7 +22,7 @@ describe('topicsConfig', () => {
 
   test('loadReferences() resolves the real references module', async () => {
     for (const entry of topicsConfig) {
-      const loaded = await entry.loadReferences()
+      const loaded = await entry.load.references()
 
       expect(Array.isArray(loaded.references)).toBe(true)
       expect(loaded.references.length).toBeGreaterThan(0)

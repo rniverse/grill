@@ -59,3 +59,7 @@
   color: var(--color-ink);
   margin: 0;
 }
+
+.reference-modal__answer {
+  position: relative;
+}

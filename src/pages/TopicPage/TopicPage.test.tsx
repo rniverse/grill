@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
-import { render, screen, fireEvent, within } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { TopicPage } from './TopicPage'
+import angularTopicData from '@/topics/angular.json'
+
+const angularQuestions = angularTopicData.questions
 
 beforeEach(() => {
   localStorage.clear()
@@ -43,6 +46,24 @@ describe('TopicPage', () => {
     expect(filteredButtons.length).toBeLessThan(initialCount)
   })
 
+  test('a ?question= param opens that question on load', async () => {
+    const target = angularQuestions[0]
+    renderAt(`/topics/angular?question=${target.id}`)
+
+    const toggle = await screen.findByRole('button', { name: target.question })
+    expect(toggle.getAttribute('aria-expanded')).toBe('true')
+  })
+
+  test('an unknown ?question= id is ignored — nothing opens', async () => {
+    renderAt('/topics/angular?question=does-not-exist')
+    await screen.findAllByText('Angular')
+
+    const toggles = await screen.findAllByRole('button', { name: /standalone/i })
+    for (const toggle of toggles) {
+      expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    }
+  })
+
   test('shows a not-found message for an unknown topic id', async () => {
     renderAt('/topics/does-not-exist')
     expect(await screen.findByText('Topic not found.')).toBeDefined()
@@ -64,17 +85,14 @@ describe('TopicPage', () => {
     ).toBeDefined()
   })
 
-  test('bookmarking a question surfaces it in the Personal Rail bookmarks tab', async () => {
+  test('bookmarking a question toggles its bookmark button state', async () => {
     renderAt('/topics/angular')
     await screen.findAllByText('Angular')
-    const rail = screen.getByRole('complementary')
 
-    fireEvent.click(within(rail).getByRole('button', { name: 'Bookmarks' }))
-    expect(within(rail).getByText('Nothing bookmarked yet.')).toBeDefined()
+    const bookmarkButton = screen.getAllByRole('button', { name: 'Bookmark' })[0]
+    fireEvent.click(bookmarkButton)
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Bookmark' })[0]!)
-
-    expect(within(rail).queryByText('Nothing bookmarked yet.')).toBeNull()
+    expect(screen.getAllByRole('button', { name: 'Bookmarked' })[0]).toBeDefined()
   })
 
   test('renders a MobileNav trigger in the mobile header', async () => {
@@ -126,7 +144,7 @@ describe('TopicPage', () => {
     await screen.findAllByText('Angular')
     const initialCount = (await screen.findAllByRole('button', { name: /standalone/i })).length
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Bookmark' })[0]!)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Bookmark' })[0])
 
     const bookmarkFilterToggle = screen.getByRole('button', { name: 'Show bookmarked questions only' })
     fireEvent.click(bookmarkFilterToggle)
@@ -144,7 +162,7 @@ describe('TopicPage', () => {
     renderAt('/topics/angular')
     await screen.findAllByText('Angular')
 
-    fireEvent.click(screen.getAllByRole('button', { name: 'Bookmark' })[0]!)
+    fireEvent.click(screen.getAllByRole('button', { name: 'Bookmark' })[0])
     fireEvent.click(screen.getByRole('button', { name: 'Saved' }))
 
     const filteredButtons = screen

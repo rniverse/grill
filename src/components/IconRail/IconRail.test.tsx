@@ -1,42 +1,75 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { IconRail } from './IconRail'
-import { RailSection } from './rail-section.enum'
 import { savePersonalNote } from '@/services/storage'
 
 beforeEach(() => {
   localStorage.clear()
 })
 
-function renderRail(activeSection: RailSection = RailSection.Topics, topicId?: string) {
+function renderRail(initialPath = '/') {
   render(
-    <MemoryRouter>
-      <IconRail activeSection={activeSection} topicId={topicId} />
+    <MemoryRouter initialEntries={[initialPath]}>
+      <IconRail />
     </MemoryRouter>,
   )
 }
 
 describe('IconRail', () => {
-  test('marks the active section button', () => {
-    render(<IconRail activeSection={RailSection.Topics} />)
+  test('renders a link per rail section, plus a logo link and export button', () => {
+    renderRail()
 
-    const topicsButton = screen.getByRole('button', { name: 'Topics' })
-    expect(topicsButton.getAttribute('aria-current')).toBe('true')
-
-    const referencesButton = screen.getByRole('button', { name: 'References' })
-    expect(referencesButton.getAttribute('aria-current')).toBeNull()
+    expect(screen.getByRole('link', { name: 'Prep' }).getAttribute('href')).toBe('/')
+    expect(screen.getByRole('link', { name: 'Topics' }).getAttribute('href')).toBe('/')
+    expect(screen.getByRole('link', { name: 'References' }).getAttribute('href')).toBe('/references')
+    expect(screen.getByRole('link', { name: 'Bookmarks' }).getAttribute('href')).toBe('/bookmarks')
+    expect(screen.getByRole('link', { name: 'My questions' }).getAttribute('href')).toBe('/questions')
+    expect(screen.getByRole('link', { name: 'My notes' }).getAttribute('href')).toBe('/notes')
+    expect(screen.getByRole('button', { name: 'Export personal layer' })).toBeDefined()
   })
 
-  test('renders one button per rail section plus export', () => {
-    render(<IconRail activeSection={RailSection.Topics} />)
+  test('the logo links back to the topics landing page', () => {
+    renderRail('/topics/angular')
 
-    expect(screen.getByRole('button', { name: 'Topics' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'References' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Bookmarks' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'My questions' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'My notes' })).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Export personal layer' })).toBeDefined()
+    expect(screen.getByRole('link', { name: 'Prep' }).getAttribute('href')).toBe('/')
+  })
+
+  test('marks Topics as current on the landing route', () => {
+    renderRail('/')
+
+    expect(screen.getByRole('link', { name: 'Topics' }).getAttribute('aria-current')).toBe('true')
+    expect(screen.getByRole('link', { name: 'References' }).getAttribute('aria-current')).toBeNull()
+  })
+
+  test('marks Topics as current on a /topics/:id route', () => {
+    renderRail('/topics/angular')
+
+    expect(screen.getByRole('link', { name: 'Topics' }).getAttribute('aria-current')).toBe('true')
+  })
+
+  test('marks References as current on /references and /references/:id routes', () => {
+    renderRail('/references')
+    expect(screen.getByRole('link', { name: 'References' }).getAttribute('aria-current')).toBe('true')
+  })
+
+  test('marks Bookmarks as current on the /bookmarks route', () => {
+    renderRail('/bookmarks')
+
+    expect(screen.getByRole('link', { name: 'Bookmarks' }).getAttribute('aria-current')).toBe('true')
+    expect(screen.getByRole('link', { name: 'Topics' }).getAttribute('aria-current')).toBeNull()
+  })
+
+  test('marks Questions as current on the /questions route', () => {
+    renderRail('/questions')
+
+    expect(screen.getByRole('link', { name: 'My questions' }).getAttribute('aria-current')).toBe('true')
+  })
+
+  test('marks Notes as current on the /notes route', () => {
+    renderRail('/notes')
+
+    expect(screen.getByRole('link', { name: 'My notes' }).getAttribute('aria-current')).toBe('true')
   })
 
   test('clicking export downloads the current personal layer as a JSON blob', async () => {
@@ -59,7 +92,7 @@ describe('IconRail', () => {
     }
 
     try {
-      render(<IconRail activeSection={RailSection.Topics} />)
+      renderRail()
       fireEvent.click(screen.getByRole('button', { name: 'Export personal layer' }))
 
       expect(createdUrls).toHaveLength(1)
@@ -73,67 +106,5 @@ describe('IconRail', () => {
       URL.createObjectURL = originalCreateObjectURL
       URL.revokeObjectURL = originalRevokeObjectURL
     }
-  })
-
-  test('no panel is open by default', () => {
-    renderRail()
-
-    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
-  })
-
-  test('clicking a rail button opens its panel', async () => {
-    renderRail()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
-
-    expect(await screen.findByText('Bookmarks')).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Bookmarks' }).getAttribute('aria-expanded')).toBe('true')
-  })
-
-  test('clicking the same rail button again closes its panel', async () => {
-    renderRail()
-
-    const bookmarksButton = screen.getByRole('button', { name: 'Bookmarks' })
-    fireEvent.click(bookmarksButton)
-    fireEvent.click(bookmarksButton)
-    await act(async () => {})
-
-    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
-    expect(bookmarksButton.getAttribute('aria-expanded')).toBe('false')
-  })
-
-  test('clicking a different rail button switches the open panel', async () => {
-    renderRail()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
-    fireEvent.click(screen.getByRole('button', { name: 'My notes' }))
-    await act(async () => {})
-
-    expect(screen.getByRole('button', { name: 'Bookmarks' }).getAttribute('aria-expanded')).toBe('false')
-    expect(screen.getByRole('button', { name: 'My notes' }).getAttribute('aria-expanded')).toBe('true')
-  })
-
-  test("the panel's close button closes it", async () => {
-    renderRail()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
-    await act(async () => {})
-    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
-
-    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
-  })
-
-  test('pressing Escape closes the panel and returns focus to the rail button that opened it', async () => {
-    renderRail()
-
-    const bookmarksButton = screen.getByRole('button', { name: 'Bookmarks' })
-    fireEvent.click(bookmarksButton)
-    await act(async () => {})
-    expect(await screen.findByText('Bookmarks')).toBeDefined()
-
-    fireEvent.keyDown(window, { key: 'Escape' })
-
-    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
-    expect(document.activeElement).toBe(bookmarksButton)
   })
 })

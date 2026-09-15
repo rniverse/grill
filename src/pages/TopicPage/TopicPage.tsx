@@ -6,7 +6,6 @@ import { t } from '@/utils/i18n'
 import { isBookmarked } from '@/services/storage'
 import { BookmarksIcon, ReferencesIcon, SearchIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
-import { RailSection } from '@/components/IconRail/rail-section.enum'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { FilterChips } from '@/components/FilterChips/FilterChips'
 import { QuestionCard } from '@/components/QuestionCard/QuestionCard'
@@ -87,7 +86,7 @@ export function TopicPage() {
   if (notFound) {
     return (
       <div className="topic-page">
-        <IconRail activeSection={RailSection.Topics} />
+        <IconRail />
         <div className="topic-page__not-found">
           <p>{t('topic.notFound')}</p>
           <Link to="/">{t('topic.backToTopics')}</Link>
@@ -118,7 +117,7 @@ export function TopicPage() {
 
   return (
     <div className="topic-page">
-      <IconRail activeSection={RailSection.Topics} topicId={topic?.id} />
+      <IconRail />
       <main className="topic-page__main">
         {topic && meta ? (
           <div className="topic-page__content">
@@ -128,7 +127,7 @@ export function TopicPage() {
               </div>
               <div className="topic-page__mobile-header">
                 <div className="topic-page__mobile-header-left">
-                  <MobileNav activeTopicId={topic.id} />
+                  <MobileNav />
                   <div className="topic-page__mobile-title-group">
                     <h1 className="topic-page__mobile-title">{topic.name}</h1>
                     <span className="topic-page__mobile-meta">

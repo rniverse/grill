@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import { listBookmarks, listPendingQuestions, listPersonalNotes } from '@/services/storage'
 import { downloadPersonalLayer } from '@/utils/download-personal-layer'
@@ -22,16 +22,11 @@ interface LoadedTopicSummary {
   questionCount: number
 }
 
-export interface MobileNavProps {
-  activeTopicId?: string
-}
-
-// The "Yours" rows are summary counts, not deep links: unlike Topics (which
-// maps directly to an existing /topics/:id route), there's no dedicated
-// screen yet for a cross-topic bookmarks/questions/notes list, so these just
-// close the drawer. FlyoutPanel (desktop) already covers that cross-topic
-// view; wiring an equivalent mobile screen is follow-up work.
-export function MobileNav({ activeTopicId }: MobileNavProps) {
+// activeTopicId isn't a prop: MobileNav is only ever rendered inside route
+// components, so the router's own params already carry it (undefined on
+// routes with no :topicId, same as before).
+export function MobileNav() {
+  const { topicId: activeTopicId } = useParams<{ topicId?: string }>()
   const [open, setOpen] = useState(false)
   const [loadedTopics, setLoadedTopics] = useState<LoadedTopicSummary[]>([])
   const [totalReferences, setTotalReferences] = useState(0)
@@ -88,10 +83,10 @@ export function MobileNav({ activeTopicId }: MobileNavProps) {
   }, [open])
 
   const yourItems = [
-    { label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
-    { label: t('nav.bookmarks'), Icon: BookmarksIcon, count: listBookmarks().length },
-    { label: t('nav.myQuestions'), Icon: QuestionsIcon, count: listPendingQuestions().length },
-    { label: t('nav.myNotes'), Icon: NotesIcon, count: listPersonalNotes().length },
+    { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
+    { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, count: listBookmarks().length },
+    { to: '/questions', label: t('nav.myQuestions'), Icon: QuestionsIcon, count: listPendingQuestions().length },
+    { to: '/notes', label: t('nav.myNotes'), Icon: NotesIcon, count: listPersonalNotes().length },
   ]
 
   return (
@@ -143,12 +138,12 @@ export function MobileNav({ activeTopicId }: MobileNavProps) {
 
             <div className="mobile-nav__section">
               <span className="mobile-nav__section-label">{t('nav.yours')}</span>
-              {yourItems.map(({ label, Icon, count }) => (
-                <button key={label} type="button" className="mobile-nav__item" onClick={() => setOpen(false)}>
+              {yourItems.map(({ to, label, Icon, count }) => (
+                <Link key={to} to={to} className="mobile-nav__item" onClick={() => setOpen(false)}>
                   <Icon size={16} />
                   <span className="mobile-nav__item-label">{label}</span>
                   <span className="mobile-nav__item-count">{count}</span>
-                </button>
+                </Link>
               ))}
             </div>
 

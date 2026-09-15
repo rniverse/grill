@@ -4,7 +4,6 @@ import { t } from '@/utils/i18n'
 import { SearchIcon, ImportIcon, LogoIcon } from '@/utils/icons'
 import { importPersonalLayer } from '@/services/storage'
 import { IconRail } from '@/components/IconRail/IconRail'
-import { RailSection } from '@/components/IconRail/rail-section.enum'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
 import './LandingPage.css'
@@ -77,7 +76,7 @@ export function LandingPage() {
 
   return (
     <div className="landing-page">
-      <IconRail activeSection={RailSection.Topics} />
+      <IconRail />
       <div className="landing-page__content">
         <div className="landing-page__card">
           <div className="landing-page__header">

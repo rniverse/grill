@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { Link, useLocation } from 'react-router'
 import {
   BookmarksIcon,
   ExportIcon,
@@ -10,79 +10,47 @@ import {
 } from '@/utils/icons'
 import { t } from '@/utils/i18n'
 import { downloadPersonalLayer } from '@/utils/download-personal-layer'
-import { FlyoutPanel } from '@/components/FlyoutPanel/FlyoutPanel'
-import { RailSection } from './rail-section.enum'
 import './IconRail.css'
 
-interface RailSectionButton {
-  section: RailSection
+interface RailLink {
+  to: string
   label: string
   Icon: typeof TopicsIcon
+  isActive: (pathname: string) => boolean
 }
 
-const railSectionButtons: RailSectionButton[] = [
-  { section: RailSection.Topics, label: t('nav.topics'), Icon: TopicsIcon },
-  { section: RailSection.References, label: t('nav.references'), Icon: ReferencesIcon },
-  { section: RailSection.Bookmarks, label: t('nav.bookmarks'), Icon: BookmarksIcon },
-  { section: RailSection.Questions, label: t('nav.myQuestions'), Icon: QuestionsIcon },
-  { section: RailSection.Notes, label: t('nav.myNotes'), Icon: NotesIcon },
+const railLinks: RailLink[] = [
+  { to: '/', label: t('nav.topics'), Icon: TopicsIcon, isActive: (pathname) => pathname === '/' || pathname.startsWith('/topics') },
+  { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, isActive: (pathname) => pathname.startsWith('/references') },
+  { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, isActive: (pathname) => pathname.startsWith('/bookmarks') },
+  { to: '/questions', label: t('nav.myQuestions'), Icon: QuestionsIcon, isActive: (pathname) => pathname.startsWith('/questions') },
+  { to: '/notes', label: t('nav.myNotes'), Icon: NotesIcon, isActive: (pathname) => pathname.startsWith('/notes') },
 ]
 
-export interface IconRailProps {
-  activeSection: RailSection
-  // The topic currently in view, if any — threaded down to FlyoutPanel so
-  // its References section knows which topic's references to show.
-  topicId?: string
-}
-
-export function IconRail({ activeSection, topicId }: IconRailProps) {
-  const [openSection, setOpenSection] = useState<RailSection | null>(null)
-  const sectionButtonRefs = useRef<Partial<Record<RailSection, HTMLButtonElement | null>>>({})
-
-  function toggleSection(section: RailSection): void {
-    setOpenSection((current) => (current === section ? null : section))
-  }
-
-  // FlyoutPanel closes itself (Escape, scrim click, its own close button, or
-  // picking an item) purely by calling onClose — funnel all of those through
-  // here so focus reliably returns to the rail button that opened it.
-  function closePanel(section: RailSection): void {
-    setOpenSection(null)
-    sectionButtonRefs.current[section]?.focus()
-  }
+export function IconRail() {
+  const { pathname } = useLocation()
 
   return (
-    <>
-      <nav className="icon-rail">
-        <div className="icon-rail__logo">
-          <LogoIcon size={17} />
-        </div>
+    <nav className="icon-rail">
+      <Link to="/" className="icon-rail__logo" aria-label={t('nav.brand')}>
+        <LogoIcon size={17} />
+      </Link>
 
-        {railSectionButtons.map(({ section, label, Icon }) => (
-          <button
-            key={section}
-            type="button"
-            ref={(el) => {
-              sectionButtonRefs.current[section] = el
-            }}
-            className="icon-rail__button"
-            aria-label={label}
-            aria-current={section === activeSection ? 'true' : undefined}
-            aria-expanded={section === openSection}
-            onClick={() => toggleSection(section)}
-          >
-            <Icon size={18} />
-          </button>
-        ))}
+      {railLinks.map(({ to, label, Icon, isActive }) => (
+        <Link
+          key={to}
+          to={to}
+          className="icon-rail__button"
+          aria-label={label}
+          aria-current={isActive(pathname) ? 'true' : undefined}
+        >
+          <Icon size={18} />
+        </Link>
+      ))}
 
-        <button type="button" className="icon-rail__export" aria-label={t('nav.export')} onClick={downloadPersonalLayer}>
-          <ExportIcon size={18} />
-        </button>
-      </nav>
-
-      {openSection ? (
-        <FlyoutPanel section={openSection} topicId={topicId} onClose={() => closePanel(openSection)} />
-      ) : null}
-    </>
+      <button type="button" className="icon-rail__export" aria-label={t('nav.export')} onClick={downloadPersonalLayer}>
+        <ExportIcon size={18} />
+      </button>
+    </nav>
   )
 }

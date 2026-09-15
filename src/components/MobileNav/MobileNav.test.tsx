@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
-import { MemoryRouter } from 'react-router'
+import { MemoryRouter, Route, Routes } from 'react-router'
 import { MobileNav } from './MobileNav'
 import { savePendingQuestion } from '@/services/storage'
 import { topic as angularTopic, questions as angularQuestions } from '@/topics/angular'
@@ -9,10 +9,16 @@ beforeEach(() => {
   localStorage.clear()
 })
 
-function renderNav(activeTopicId?: string) {
+// activeTopicId now comes from the route's own :topicId param (see
+// MobileNav's useParams), so tests that need it render through a route
+// rather than passing a prop.
+function renderNav(initialPath = '/') {
   render(
-    <MemoryRouter>
-      <MobileNav activeTopicId={activeTopicId} />
+    <MemoryRouter initialEntries={[initialPath]}>
+      <Routes>
+        <Route path="/topics/:topicId" Component={MobileNav} />
+        <Route path="*" Component={MobileNav} />
+      </Routes>
     </MemoryRouter>,
   )
 }
@@ -35,13 +41,24 @@ describe('MobileNav', () => {
     expect(await screen.findByText(String(angularQuestions.length))).toBeDefined()
   })
 
-  test('marks the active topic when activeTopicId is given', async () => {
-    renderNav('angular')
+  test('marks the active topic from the route params', async () => {
+    renderNav('/topics/angular')
 
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
 
     const angularLink = await screen.findByText('Angular')
     expect(angularLink.closest('a')?.getAttribute('aria-current')).toBe('true')
+  })
+
+  test('the "Yours" rows link to their own pages', async () => {
+    renderNav()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+
+    expect((await screen.findByText('References')).closest('a')?.getAttribute('href')).toBe('/references')
+    expect(screen.getByText('Bookmarks').closest('a')?.getAttribute('href')).toBe('/bookmarks')
+    expect(screen.getByText('My questions').closest('a')?.getAttribute('href')).toBe('/questions')
+    expect(screen.getByText('My notes').closest('a')?.getAttribute('href')).toBe('/notes')
   })
 
   test('shows a live count of pending questions in the Yours section', async () => {
@@ -97,6 +114,15 @@ describe('MobileNav', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
 
     fireEvent.click(await screen.findByText('Angular'))
+
+    expect(screen.queryByText('Topics')).toBeNull()
+  })
+
+  test('clicking a "Yours" row closes the drawer', async () => {
+    renderNav()
+    fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
+
+    fireEvent.click(await screen.findByText('Bookmarks'))
 
     expect(screen.queryByText('Topics')).toBeNull()
   })

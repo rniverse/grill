@@ -21,3 +21,19 @@
   background: var(--color-surface);
   color: var(--color-ink);
 }
+
+/* Mobile: a horizontally-scrolling row instead of wrapping — the parent
+   (TopicPage's .topic-page__filter-row) owns the scroll container and adds
+   the trailing "Saved" chip; this just stops chips from wrapping/shrinking.
+   @media conditions can't reference custom properties, so this mirrors
+   --bp-mobile (700px) from variables.css literally. */
+@media (max-width: 700px) {
+  .filter-chips {
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+  }
+
+  .filter-chips__chip {
+    flex: 0 0 auto;
+  }
+}

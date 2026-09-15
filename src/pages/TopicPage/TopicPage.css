@@ -58,3 +58,159 @@
   font-family: var(--font-ui);
   color: var(--color-ink-secondary);
 }
+
+/* Mobile header ("Quiet list" / "1a" in the design handoff) — hidden at
+   desktop widths, swapped in for the desktop title row + IconRail below
+   --bp-mobile. */
+.topic-page__mobile-header {
+  display: none;
+}
+
+.topic-page__mobile-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-ms);
+}
+
+.topic-page__mobile-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.topic-page__mobile-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-topic-title-mobile);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+}
+
+.topic-page__mobile-meta {
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  color: var(--color-ink-faint);
+}
+
+.topic-page__mobile-actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.topic-page__mobile-icon-button {
+  display: flex;
+  padding: var(--space-ms);
+  border-radius: var(--radius-icon);
+  background: var(--color-surface);
+  color: var(--color-ink-secondary);
+  border: none;
+  cursor: pointer;
+}
+
+.topic-page__mobile-icon-button[aria-pressed='true'] {
+  color: var(--color-accent);
+}
+
+.topic-page__filter-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.topic-page__saved-chip {
+  display: none;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-chip);
+  border: none;
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.topic-page__saved-chip[aria-pressed='true'] {
+  background: var(--color-surface);
+  color: var(--color-accent);
+}
+
+.topic-page__mobile-references {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.topic-page__mobile-references-heading {
+  font-family: var(--font-ui);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--color-ink-tertiary);
+}
+
+.topic-page__mobile-reference-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+.topic-page__mobile-reference-chip {
+  padding: var(--space-ms) var(--space-base);
+  border-radius: var(--radius-chip);
+  border: none;
+  background: var(--color-surface);
+  color: var(--color-accent-text);
+  font-family: var(--font-ui);
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* @media conditions can't reference custom properties, so this mirrors
+   --bp-mobile (700px) from variables.css literally. */
+@media (max-width: 700px) {
+  /* IconRail already hides itself below --bp-mobile (see IconRail.css);
+     MobileNav (rendered inside .topic-page__mobile-header) takes over. */
+  .topic-page__main {
+    padding: var(--space-lg) 0 var(--space-topic-content-bottom);
+  }
+
+  .topic-page__content {
+    padding: 0 var(--space-xl);
+    gap: var(--space-md);
+  }
+
+  .topic-page__header {
+    padding: 0;
+  }
+
+  .topic-page__title-row {
+    display: none;
+  }
+
+  .topic-page__mobile-header {
+    display: flex;
+    align-items: center;
+  }
+
+  .topic-page__filter-row {
+    overflow-x: auto;
+    margin: 0 calc(-1 * var(--space-xl));
+    padding: 0 var(--space-xl);
+  }
+
+  .topic-page__saved-chip {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  /* Hairline rows (see QuestionCard.css's own mobile variant) already carry
+     their own vertical padding as separation — no extra gap between them. */
+  .topic-page__cards {
+    gap: 0;
+  }
+}

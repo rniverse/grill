@@ -70,3 +70,86 @@
   display: flex;
   flex-direction: column;
 }
+
+/* Mobile header ("5m" in the design handoff) — hidden at desktop widths,
+   swapped in for the desktop header + IconRail below --bp-mobile. */
+.landing-page__mobile-header,
+.landing-page__mobile-summary {
+  display: none;
+}
+
+.landing-page__mobile-logo {
+  width: var(--size-logo-tile);
+  height: var(--size-logo-tile);
+  flex: 0 0 var(--size-logo-tile);
+  border-radius: var(--radius-logo-tile);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.landing-page__mobile-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-section-title);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+}
+
+.landing-page__mobile-actions {
+  margin-left: auto;
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.landing-page__mobile-icon-button {
+  display: flex;
+  padding: var(--space-ms);
+  border-radius: var(--radius-icon);
+  background: var(--color-ground);
+  color: var(--color-ink-secondary);
+  border: none;
+  cursor: pointer;
+}
+
+/* @media conditions can't reference custom properties, so this mirrors
+   --bp-mobile (700px) from variables.css literally. */
+@media (max-width: 700px) {
+  /* IconRail already hides itself below --bp-mobile (see IconRail.css);
+     MobileNav (rendered inside .landing-page__mobile-header) takes over. */
+  .landing-page__content {
+    padding: 0;
+  }
+
+  .landing-page__card {
+    border-radius: 0;
+    background: transparent;
+    padding: var(--space-xl) var(--space-xl) var(--space-ms);
+    gap: var(--space-md);
+  }
+
+  .landing-page__header {
+    display: none;
+  }
+
+  .landing-page__mobile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-ms);
+  }
+
+  .landing-page__mobile-summary {
+    display: block;
+    margin: 0;
+    font-family: var(--font-ui);
+    font-size: var(--text-mono-meta);
+    color: var(--color-ink-secondary);
+  }
+
+  .landing-page__rows {
+    padding-bottom: var(--space-3xl);
+  }
+}

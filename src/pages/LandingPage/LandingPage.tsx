@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { topicsConfig, type TopicModule } from '@/topics.config'
 import { t } from '@/utils/i18n'
-import { SearchIcon, ImportIcon } from '@/utils/icons'
+import { SearchIcon, ImportIcon, LogoIcon } from '@/utils/icons'
 import { importPersonalLayer } from '@/services/storage'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { RailSection } from '@/components/IconRail/rail-section.enum'
+import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
 import './LandingPage.css'
 
@@ -68,6 +69,11 @@ export function LandingPage() {
   }
 
   const totalQuestions = loadedTopics.reduce((sum, topic) => sum + topic.questionCount, 0)
+  const summaryText = t('landing.summary', {
+    topics: loadedTopics.length,
+    questions: totalQuestions,
+    references: totalReferences,
+  })
 
   return (
     <div className="landing-page">
@@ -76,13 +82,7 @@ export function LandingPage() {
         <div className="landing-page__card">
           <div className="landing-page__header">
             <span className="landing-page__label">{t('landing.contents')}</span>
-            <span className="landing-page__summary">
-              {t('landing.summary', {
-                topics: loadedTopics.length,
-                questions: totalQuestions,
-                references: totalReferences,
-              })}
-            </span>
+            <span className="landing-page__summary">{summaryText}</span>
             <button type="button" className="landing-page__control">
               <SearchIcon size={15} />
               <span>{t('landing.search')}</span>
@@ -91,15 +91,36 @@ export function LandingPage() {
               <ImportIcon size={15} />
               <span>{t('landing.import')}</span>
             </button>
-            <input
-              ref={importInputRef}
-              type="file"
-              accept=".json"
-              hidden
-              onChange={handleImportFile}
-              aria-label={t('landing.import')}
-            />
           </div>
+          <div className="landing-page__mobile-header">
+            <MobileNav />
+            <div className="landing-page__mobile-logo">
+              <LogoIcon size={16} />
+            </div>
+            <h1 className="landing-page__mobile-title">{t('landing.contents')}</h1>
+            <div className="landing-page__mobile-actions">
+              <button
+                type="button"
+                className="landing-page__mobile-icon-button"
+                aria-label={t('landing.import')}
+                onClick={() => importInputRef.current?.click()}
+              >
+                <ImportIcon size={16} />
+              </button>
+              <button type="button" className="landing-page__mobile-icon-button" aria-label={t('landing.search')}>
+                <SearchIcon size={16} />
+              </button>
+            </div>
+          </div>
+          <p className="landing-page__mobile-summary">{summaryText}</p>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept=".json"
+            hidden
+            onChange={handleImportFile}
+            aria-label={t('landing.import')}
+          />
           {importError ? <p className="landing-page__import-error">{t('landing.importError')}</p> : null}
           <div className="landing-page__rows">
             {loadedTopics.map((topic, index) => (

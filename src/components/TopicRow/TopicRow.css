@@ -64,3 +64,26 @@
   width: var(--size-topic-row-count);
   text-align: right;
 }
+
+/* Mobile row ("5m" in the design handoff): no leader line, slightly smaller
+   name, tighter gap/padding/radius. @media conditions can't reference custom
+   properties, so this mirrors --bp-mobile (700px) from variables.css literally. */
+@media (max-width: 700px) {
+  .topic-row {
+    gap: var(--space-md);
+    padding: var(--space-sm);
+    border-radius: var(--radius-control);
+  }
+
+  .topic-row__name {
+    font-size: var(--text-topic-row-name-mobile);
+  }
+
+  .topic-row__leader {
+    display: none;
+  }
+
+  .topic-row__label {
+    flex: 1;
+  }
+}

@@ -3,12 +3,16 @@ import { Link, useParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
+import { isBookmarked } from '@/services/storage'
+import { BookmarksIcon, ReferencesIcon, SearchIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { RailSection } from '@/components/IconRail/rail-section.enum'
+import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { FilterChips } from '@/components/FilterChips/FilterChips'
 import { QuestionCard } from '@/components/QuestionCard/QuestionCard'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
 import { PersonalRail } from '@/components/PersonalRail/PersonalRail'
+import { MobileScreen } from './mobile-screen.enum'
 import './TopicPage.css'
 
 function collectTags(questions: Question[]): string[] {
@@ -38,6 +42,10 @@ export function TopicPage() {
   const [activeFilter, setActiveFilter] = useState(() => t('topic.filterAll'))
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null)
   const [openReference, setOpenReference] = useState<Reference | null>(null)
+  // Mobile-only UI toggles (the controls that drive these are CSS-hidden
+  // above --bp-mobile, so neither ever changes at desktop widths).
+  const [mobileScreen, setMobileScreen] = useState<MobileScreen>(MobileScreen.Questions)
+  const [bookmarkFilter, setBookmarkFilter] = useState(false)
   // Bumped whenever a personal-layer mutation (ask/bookmark/note/import)
   // happens somewhere below, so PersonalRail (and any pending-question
   // highlights) re-read storage and reflect it. Never rendered itself.
@@ -49,6 +57,8 @@ export function TopicPage() {
     setNotFound(false)
     setActiveFilter(t('topic.filterAll'))
     setOpenQuestionId(null)
+    setMobileScreen(MobileScreen.Questions)
+    setBookmarkFilter(false)
 
     const entry = topicsConfig.find((config) => config.id === topicId)
     if (!entry) {
@@ -86,13 +96,29 @@ export function TopicPage() {
     )
   }
 
-  const visibleQuestions = questions.filter(
-    (question) => activeFilter === t('topic.filterAll') || (question.tags ?? []).includes(activeFilter),
-  )
+  const visibleQuestions = bookmarkFilter
+    ? questions.filter((question) => isBookmarked({ kind: 'question', id: question.id }))
+    : questions.filter(
+        (question) => activeFilter === t('topic.filterAll') || (question.tags ?? []).includes(activeFilter),
+      )
+
+  function selectFilter(tag: string) {
+    setActiveFilter(tag)
+    setBookmarkFilter(false)
+  }
+
+  function toggleReferencesScreen() {
+    setMobileScreen(mobileScreen === MobileScreen.References ? MobileScreen.Questions : MobileScreen.References)
+  }
+
+  function toggleBookmarkFilter() {
+    setBookmarkFilter((current) => !current)
+    setMobileScreen(MobileScreen.Questions)
+  }
 
   return (
     <div className="topic-page">
-      <IconRail activeSection={RailSection.Topics} />
+      <IconRail activeSection={RailSection.Topics} topicId={topic?.id} />
       <main className="topic-page__main">
         {topic && meta ? (
           <div className="topic-page__content">
@@ -100,23 +126,90 @@ export function TopicPage() {
               <div className="topic-page__title-row">
                 <h1 className="topic-page__title">{topic.name}</h1>
               </div>
+              <div className="topic-page__mobile-header">
+                <div className="topic-page__mobile-header-left">
+                  <MobileNav activeTopicId={topic.id} />
+                  <div className="topic-page__mobile-title-group">
+                    <span className="topic-page__mobile-title">{topic.name}</span>
+                    <span className="topic-page__mobile-meta">
+                      {t('topic.mobileMeta', { version: meta.version, count: questions.length })}
+                    </span>
+                  </div>
+                </div>
+                <div className="topic-page__mobile-actions">
+                  <button
+                    type="button"
+                    className="topic-page__mobile-icon-button"
+                    aria-pressed={mobileScreen === MobileScreen.References}
+                    aria-label={t('topic.mobileReferencesToggle')}
+                    onClick={toggleReferencesScreen}
+                  >
+                    <ReferencesIcon size={16} />
+                  </button>
+                  <button
+                    type="button"
+                    className="topic-page__mobile-icon-button"
+                    aria-pressed={bookmarkFilter}
+                    aria-label={t('topic.mobileBookmarkToggle')}
+                    onClick={toggleBookmarkFilter}
+                  >
+                    <BookmarksIcon size={16} />
+                  </button>
+                  <button type="button" className="topic-page__mobile-icon-button" aria-label={t('landing.search')}>
+                    <SearchIcon size={16} />
+                  </button>
+                </div>
+              </div>
             </div>
-            <FilterChips tags={collectTags(questions)} active={activeFilter} onSelect={setActiveFilter} />
-            <div className="topic-page__cards">
-              {visibleQuestions.map((question, index) => (
-                <QuestionCard
-                  key={question.id}
-                  ordinal={String(index + 1).padStart(2, '0')}
-                  question={question}
-                  references={references}
-                  topic={{ name: topic.name, version: meta.version }}
-                  open={openQuestionId === question.id}
-                  onToggle={() => setOpenQuestionId(openQuestionId === question.id ? null : question.id)}
-                  onReferenceSelect={setOpenReference}
-                  onPersonalLayerChange={onPersonalLayerChange}
-                />
-              ))}
-            </div>
+            {mobileScreen === MobileScreen.References ? (
+              <div className="topic-page__mobile-references">
+                <span className="topic-page__mobile-references-heading">
+                  {t('topic.mobileReferencesHeading', { count: references.length })}
+                </span>
+                <div className="topic-page__mobile-reference-chips">
+                  {references.map((reference) => (
+                    <button
+                      key={reference.id}
+                      type="button"
+                      className="topic-page__mobile-reference-chip"
+                      onClick={() => setOpenReference(reference)}
+                    >
+                      {reference.term}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="topic-page__filter-row">
+                  <FilterChips tags={collectTags(questions)} active={activeFilter} onSelect={selectFilter} />
+                  <button
+                    type="button"
+                    className="topic-page__saved-chip"
+                    aria-pressed={bookmarkFilter}
+                    onClick={toggleBookmarkFilter}
+                  >
+                    <BookmarksIcon size={13} />
+                    <span>{t('topic.savedChip')}</span>
+                  </button>
+                </div>
+                <div className="topic-page__cards">
+                  {visibleQuestions.map((question, index) => (
+                    <QuestionCard
+                      key={question.id}
+                      ordinal={String(index + 1).padStart(2, '0')}
+                      question={question}
+                      references={references}
+                      topic={{ name: topic.name, version: meta.version }}
+                      open={openQuestionId === question.id}
+                      onToggle={() => setOpenQuestionId(openQuestionId === question.id ? null : question.id)}
+                      onReferenceSelect={setOpenReference}
+                      onPersonalLayerChange={onPersonalLayerChange}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         ) : null}
       </main>

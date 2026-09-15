@@ -38,3 +38,11 @@
   background: none;
   padding: 0;
 }
+
+/* @media conditions can't reference custom properties, so this mirrors
+   --bp-mobile (700px) from variables.css literally. */
+@media (max-width: 700px) {
+  .answer-body {
+    font-size: var(--text-body-reading-mobile);
+  }
+}

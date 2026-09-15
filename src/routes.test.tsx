@@ -13,7 +13,7 @@ describe('routes', () => {
     renderAt('/')
 
     await screen.findByText('Angular')
-    expect(screen.getByText('Contents')).toBeDefined()
+    expect(screen.getAllByText('Contents').length).toBeGreaterThan(0)
   })
 
   test('renders TopicPage at /topics/:topicId', async () => {

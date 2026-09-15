@@ -117,3 +117,33 @@
   cursor: pointer;
   padding: 0;
 }
+
+/* Mobile ("Quiet list" / "1a" in the design handoff): no card, hairline rows
+   instead. @media conditions can't reference custom properties, so this
+   mirrors --bp-mobile (700px) from variables.css literally. */
+@media (max-width: 700px) {
+  .question-card {
+    background: transparent;
+    border-radius: 0;
+    padding: var(--space-base) 0;
+    box-shadow: none;
+    border-bottom: var(--size-hairline) solid var(--color-hairline-mobile);
+  }
+
+  .question-card--open {
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom-color: transparent;
+  }
+
+  .question-card--open .question-card__tag {
+    color: var(--color-accent);
+  }
+
+  .question-card__body {
+    padding-top: 0;
+    margin-top: 0;
+    border-top: none;
+    padding-left: var(--space-3xl);
+  }
+}

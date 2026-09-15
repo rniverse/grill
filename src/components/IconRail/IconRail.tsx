@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
   BookmarksIcon,
   ExportIcon,
@@ -8,7 +9,8 @@ import {
   TopicsIcon,
 } from '@/utils/icons'
 import { t } from '@/utils/i18n'
-import { exportPersonalLayer } from '@/services/storage'
+import { downloadPersonalLayer } from '@/utils/download-personal-layer'
+import { FlyoutPanel } from '@/components/FlyoutPanel/FlyoutPanel'
 import { RailSection } from './rail-section.enum'
 import './IconRail.css'
 
@@ -26,49 +28,50 @@ const railSectionButtons: RailSectionButton[] = [
   { section: RailSection.Notes, label: t('nav.myNotes'), Icon: NotesIcon },
 ]
 
-function downloadPersonalLayer(): void {
-  const json = exportPersonalLayer()
-  const blob = new Blob([json], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-
-  const link = document.createElement('a')
-  link.href = url
-  link.download = `grill-prep-personal-layer-${new Date().toISOString().slice(0, 10)}.json`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-
-  // Revoking synchronously right after click() is flaky outside Chrome —
-  // give the browser a tick to start the download first.
-  setTimeout(() => URL.revokeObjectURL(url), 0)
-}
-
 export interface IconRailProps {
   activeSection: RailSection
+  // The topic currently in view, if any — threaded down to FlyoutPanel so
+  // its References section knows which topic's references to show. Neither
+  // LandingPage nor TopicPage passes this yet (see .agent-a-report.md).
+  topicId?: string
 }
 
-export function IconRail({ activeSection }: IconRailProps) {
+export function IconRail({ activeSection, topicId }: IconRailProps) {
+  const [openSection, setOpenSection] = useState<RailSection | null>(null)
+
+  function toggleSection(section: RailSection): void {
+    setOpenSection((current) => (current === section ? null : section))
+  }
+
   return (
-    <nav className="icon-rail">
-      <div className="icon-rail__logo">
-        <LogoIcon size={17} />
-      </div>
+    <>
+      <nav className="icon-rail">
+        <div className="icon-rail__logo">
+          <LogoIcon size={17} />
+        </div>
 
-      {railSectionButtons.map(({ section, label, Icon }) => (
-        <button
-          key={section}
-          type="button"
-          className="icon-rail__button"
-          aria-label={label}
-          aria-current={section === activeSection ? 'true' : undefined}
-        >
-          <Icon size={18} />
+        {railSectionButtons.map(({ section, label, Icon }) => (
+          <button
+            key={section}
+            type="button"
+            className="icon-rail__button"
+            aria-label={label}
+            aria-current={section === activeSection ? 'true' : undefined}
+            aria-expanded={section === openSection}
+            onClick={() => toggleSection(section)}
+          >
+            <Icon size={18} />
+          </button>
+        ))}
+
+        <button type="button" className="icon-rail__export" aria-label={t('nav.export')} onClick={downloadPersonalLayer}>
+          <ExportIcon size={18} />
         </button>
-      ))}
+      </nav>
 
-      <button type="button" className="icon-rail__export" aria-label={t('nav.export')} onClick={downloadPersonalLayer}>
-        <ExportIcon size={18} />
-      </button>
-    </nav>
+      {openSection ? (
+        <FlyoutPanel section={openSection} topicId={topicId} onClose={() => setOpenSection(null)} />
+      ) : null}
+    </>
   )
 }

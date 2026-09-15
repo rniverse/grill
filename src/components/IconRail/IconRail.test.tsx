@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router'
 import { IconRail } from './IconRail'
 import { RailSection } from './rail-section.enum'
 import { savePersonalNote } from '@/services/storage'
@@ -7,6 +8,14 @@ import { savePersonalNote } from '@/services/storage'
 beforeEach(() => {
   localStorage.clear()
 })
+
+function renderRail(activeSection: RailSection = RailSection.Topics, topicId?: string) {
+  render(
+    <MemoryRouter>
+      <IconRail activeSection={activeSection} topicId={topicId} />
+    </MemoryRouter>,
+  )
+}
 
 describe('IconRail', () => {
   test('marks the active section button', () => {
@@ -64,5 +73,50 @@ describe('IconRail', () => {
       URL.createObjectURL = originalCreateObjectURL
       URL.revokeObjectURL = originalRevokeObjectURL
     }
+  })
+
+  test('no panel is open by default', () => {
+    renderRail()
+
+    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
+  })
+
+  test('clicking a rail button opens its panel', () => {
+    renderRail()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
+
+    expect(screen.getByText('Bookmarks')).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Bookmarks' }).getAttribute('aria-expanded')).toBe('true')
+  })
+
+  test('clicking the same rail button again closes its panel', () => {
+    renderRail()
+
+    const bookmarksButton = screen.getByRole('button', { name: 'Bookmarks' })
+    fireEvent.click(bookmarksButton)
+    fireEvent.click(bookmarksButton)
+
+    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
+    expect(bookmarksButton.getAttribute('aria-expanded')).toBe('false')
+  })
+
+  test('clicking a different rail button switches the open panel', () => {
+    renderRail()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
+    fireEvent.click(screen.getByRole('button', { name: 'My notes' }))
+
+    expect(screen.getByRole('button', { name: 'Bookmarks' }).getAttribute('aria-expanded')).toBe('false')
+    expect(screen.getByRole('button', { name: 'My notes' }).getAttribute('aria-expanded')).toBe('true')
+  })
+
+  test("the panel's close button closes it", () => {
+    renderRail()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Bookmarks' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }))
+
+    expect(screen.queryByRole('button', { name: 'Close panel' })).toBeNull()
   })
 })

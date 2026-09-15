@@ -16,9 +16,9 @@ import './PersonalRail.css'
 const NOTE_PREVIEW_LENGTH = 80
 
 const tabs: { tab: PersonalRailTab; label: string }[] = [
-  { tab: PersonalRailTab.Questions, label: t('personal.railTabQuestions') },
-  { tab: PersonalRailTab.Bookmarks, label: t('personal.railTabBookmarks') },
-  { tab: PersonalRailTab.Notes, label: t('personal.railTabNotes') },
+  { tab: PersonalRailTab.Questions, label: t('personal.rail.tab.questions') },
+  { tab: PersonalRailTab.Bookmarks, label: t('personal.rail.tab.bookmarks') },
+  { tab: PersonalRailTab.Notes, label: t('personal.rail.tab.notes') },
 ]
 
 export interface PersonalRailProps {
@@ -95,11 +95,11 @@ function PendingQuestionItem({
       }}
     >
       <div className="personal-rail__item-row">
-        <span className="personal-rail__badge">{t('personal.railAskedBadge')}</span>
+        <span className="personal-rail__badge">{t('personal.rail.badge.asked')}</span>
         <button
           type="button"
           className="personal-rail__remove"
-          aria-label={t('personal.railRemove')}
+          aria-label={t('personal.rail.remove')}
           onClick={(event) => {
             event.stopPropagation()
             deletePendingQuestion(pending.id)
@@ -157,7 +157,7 @@ export function PersonalRail({
       <div className="personal-rail__items">
         {activeTab === PersonalRailTab.Questions ? (
           pendingQuestions.length === 0 ? (
-            <p className="personal-rail__empty">{t('personal.railQuestionsEmpty')}</p>
+            <p className="personal-rail__empty">{t('personal.rail.empty.questions')}</p>
           ) : (
             <>
               {locatablePendingQuestions.map((pending) => (
@@ -173,7 +173,7 @@ export function PersonalRail({
 
               {needsReviewPendingQuestions.length > 0 ? (
                 <div className="personal-rail__needs-review">
-                  <p className="personal-rail__section-heading">{t('personal.railNeedsReview')}</p>
+                  <p className="personal-rail__section-heading">{t('personal.rail.needs.review')}</p>
                   {needsReviewPendingQuestions.map((pending) => (
                     <PendingQuestionItem
                       key={pending.id}
@@ -192,7 +192,7 @@ export function PersonalRail({
 
         {activeTab === PersonalRailTab.Bookmarks ? (
           bookmarks.length === 0 ? (
-            <p className="personal-rail__empty">{t('personal.railBookmarksEmpty')}</p>
+            <p className="personal-rail__empty">{t('personal.rail.empty.bookmarks')}</p>
           ) : (
             bookmarks.map((bookmark) => (
               <div
@@ -208,7 +208,7 @@ export function PersonalRail({
                 }}
               >
                 <span className="personal-rail__badge">
-                  {bookmark.target.kind === 'question' ? t('personal.railQuestionBadge') : t('personal.railReferenceBadge')}
+                  {bookmark.target.kind === 'question' ? t('personal.rail.badge.question') : t('personal.rail.badge.reference')}
                 </span>
                 <p className="personal-rail__title">{targetLabel(bookmark.target, questions, references)}</p>
               </div>
@@ -218,7 +218,7 @@ export function PersonalRail({
 
         {activeTab === PersonalRailTab.Notes ? (
           notes.length === 0 ? (
-            <p className="personal-rail__empty">{t('personal.railNotesEmpty')}</p>
+            <p className="personal-rail__empty">{t('personal.rail.empty.notes')}</p>
           ) : (
             notes.map((note) => (
               <div
@@ -238,7 +238,7 @@ export function PersonalRail({
                   <button
                     type="button"
                     className="personal-rail__remove"
-                    aria-label={t('personal.railRemove')}
+                    aria-label={t('personal.rail.remove')}
                     onClick={(event) => {
                       event.stopPropagation()
                       deletePersonalNote(note.id)

@@ -88,7 +88,7 @@ export function LandingPage() {
             </button>
             <button type="button" className="landing-page__control" onClick={() => importInputRef.current?.click()}>
               <ImportIcon size={15} />
-              <span>{t('landing.import')}</span>
+              <span>{t('landing.import.label')}</span>
             </button>
           </div>
           <div className="landing-page__mobile-header">
@@ -101,7 +101,7 @@ export function LandingPage() {
               <button
                 type="button"
                 className="landing-page__mobile-icon-button"
-                aria-label={t('landing.import')}
+                aria-label={t('landing.import.label')}
                 onClick={() => importInputRef.current?.click()}
               >
                 <ImportIcon size={16} />
@@ -118,9 +118,9 @@ export function LandingPage() {
             accept=".json"
             hidden
             onChange={handleImportFile}
-            aria-label={t('landing.import')}
+            aria-label={t('landing.import.label')}
           />
-          {importError ? <p className="landing-page__import-error">{t('landing.importError')}</p> : null}
+          {importError ? <p className="landing-page__import-error">{t('landing.import.error')}</p> : null}
           <div className="landing-page__rows">
             {loadedTopics.map((topic, index) => (
               <TopicRow

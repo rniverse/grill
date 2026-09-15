@@ -80,7 +80,7 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
         left: clamp(plus.x, SCREEN_MARGIN, window.innerWidth - SCREEN_MARGIN),
         top: clamp(plus.y, SCREEN_MARGIN, window.innerHeight - SCREEN_MARGIN),
       }}
-      aria-label={t('personal.ask')}
+      aria-label={t('personal.ask.question')}
       onClick={() => {
         setAsking({
           selection: plus.selection,

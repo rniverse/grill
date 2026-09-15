@@ -57,7 +57,7 @@ function ReferencesPicker() {
       </div>
       <div className="references-page__content">
         <div className="references-page__card">
-          <h1 className="references-page__label">{t('references.title')}</h1>
+          <h1 className="references-page__label">{t('page.references.title')}</h1>
           <div className="references-page__rows">
             {loadedTopics.map((topic, index) => (
               <TopicRow
@@ -119,8 +119,8 @@ function TopicReferences({ topicId }: { topicId: string }) {
           <MobileNav />
         </div>
         <div className="references-page__not-found">
-          <p>{t('references.notFound')}</p>
-          <Link to="/references">{t('references.backToReferences')}</Link>
+          <p>{t('error.notfound.references')}</p>
+          <Link to="/references">{t('backto.references')}</Link>
         </div>
       </div>
     )
@@ -138,7 +138,7 @@ function TopicReferences({ topicId }: { topicId: string }) {
             <div className="references-page__header">
               <h1 className="references-page__title">{topic.name}</h1>
               <span className="references-page__count">
-                {t('references.termCount', { count: references.length })}
+                {t('references.term.count', { count: references.length })}
               </span>
             </div>
             <div className="references-page__chips">

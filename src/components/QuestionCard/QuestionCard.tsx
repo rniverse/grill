@@ -119,12 +119,12 @@ export function QuestionCard({
               <>
                 <NoteView note={personalNote} />
                 <button type="button" className="question-card__note-toggle" onClick={() => setEditingNote(true)}>
-                  {t('personal.noteEdit')}
+                  {t('personal.note.edit')}
                 </button>
               </>
             ) : (
               <button type="button" className="question-card__note-toggle" onClick={() => setEditingNote(true)}>
-                {t('personal.noteAdd')}
+                {t('personal.note.add')}
               </button>
             )}
           </div>

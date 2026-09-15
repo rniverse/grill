@@ -49,10 +49,10 @@ export function QuestionsPage() {
           <div className="questions-page__mobile-header">
             <MobileNav />
           </div>
-          <h1 className="questions-page__title">{t('questions.title')}</h1>
+          <h1 className="questions-page__title">{t('page.questions.title')}</h1>
           <div className="questions-page__items">
             {pendingQuestions.length === 0 ? (
-              <p className="questions-page__empty">{t('personal.railQuestionsEmpty')}</p>
+              <p className="questions-page__empty">{t('personal.rail.empty.questions')}</p>
             ) : (
               pendingQuestions.map((pending) => {
                 const topic = topicByName(pending.topic.name)

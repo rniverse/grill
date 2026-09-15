@@ -33,12 +33,12 @@ export function NoteEditor({ initialValue, onSave, onCancel }: NoteEditorProps) 
         markdown={initialValue}
         onChange={setMarkdown}
         contentEditableClassName="note-editor__content"
-        placeholder={t('personal.notePlaceholder')}
+        placeholder={t('personal.note.placeholder')}
         plugins={[headingsPlugin(), listsPlugin(), quotePlugin(), thematicBreakPlugin(), markdownShortcutPlugin()]}
       />
       <div className="note-editor__actions">
         <button type="button" className="note-editor__cancel" onClick={onCancel}>
-          {t('personal.noteCancel')}
+          {t('personal.note.cancel')}
         </button>
         <button
           type="button"
@@ -46,7 +46,7 @@ export function NoteEditor({ initialValue, onSave, onCancel }: NoteEditorProps) 
           disabled={trimmedMarkdown.length === 0}
           onClick={() => onSave(editorRef.current?.getMarkdown() ?? '')}
         >
-          {t('personal.noteSave')}
+          {t('personal.note.save')}
         </button>
       </div>
     </div>

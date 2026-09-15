@@ -35,18 +35,18 @@ export function NoteView({ note }: NoteViewProps) {
   return (
     <div className="note-view">
       <button type="button" className="note-view__expand" onClick={() => setExpanded(true)}>
-        {t('personal.noteExpand')}
+        {t('personal.note.expand')}
       </button>
       {expanded ? (
         <Dialog open onOpenChange={(open) => !open && setExpanded(false)}>
           <DialogContent className="note-view__content" showCloseButton={false}>
             <div className="note-view__header">
-              <span className="note-view__eyebrow">{t('personal.noteEyebrow')}</span>
-              <DialogClose className="note-view__close" aria-label={t('personal.noteClose')}>
+              <span className="note-view__eyebrow">{t('personal.note.eyebrow')}</span>
+              <DialogClose className="note-view__close" aria-label={t('personal.note.close')}>
                 ×
               </DialogClose>
             </div>
-            <DialogTitle className="sr-only">{t('personal.noteEyebrow')}</DialogTitle>
+            <DialogTitle className="sr-only">{t('personal.note.eyebrow')}</DialogTitle>
             <AnswerBody text={note.text} references={[]} onReferenceSelect={() => {}} />
           </DialogContent>
         </Dialog>

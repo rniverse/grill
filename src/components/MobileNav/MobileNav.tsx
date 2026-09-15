@@ -85,8 +85,8 @@ export function MobileNav() {
   const yourItems = [
     { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
     { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, count: listBookmarks().length },
-    { to: '/questions', label: t('nav.myQuestions'), Icon: QuestionsIcon, count: listPendingQuestions().length },
-    { to: '/notes', label: t('nav.myNotes'), Icon: NotesIcon, count: listPersonalNotes().length },
+    { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, count: listPendingQuestions().length },
+    { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, count: listPersonalNotes().length },
   ]
 
   return (
@@ -95,7 +95,7 @@ export function MobileNav() {
         type="button"
         ref={triggerRef}
         className="mobile-nav__trigger"
-        aria-label={t('nav.menuOpen')}
+        aria-label={t('nav.menu.open')}
         onClick={() => setOpen(true)}
       >
         <MenuIcon size={16} />
@@ -115,7 +115,7 @@ export function MobileNav() {
               <button
                 type="button"
                 className="mobile-nav__close"
-                aria-label={t('nav.menuClose')}
+                aria-label={t('nav.menu.close')}
                 onClick={() => setOpen(false)}
               >
                 <CloseIcon size={16} />
@@ -151,7 +151,7 @@ export function MobileNav() {
 
             <button type="button" className="mobile-nav__export" onClick={downloadPersonalLayer}>
               <ExportIcon size={15} />
-              <span>{t('nav.export')}</span>
+              <span>{t('nav.export.label')}</span>
             </button>
           </div>
         </>

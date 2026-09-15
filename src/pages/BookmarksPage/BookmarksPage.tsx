@@ -67,10 +67,10 @@ export function BookmarksPage() {
           <div className="bookmarks-page__mobile-header">
             <MobileNav />
           </div>
-          <h1 className="bookmarks-page__title">{t('bookmarks.title')}</h1>
+          <h1 className="bookmarks-page__title">{t('page.bookmarks.title')}</h1>
           <div className="bookmarks-page__items">
             {bookmarks.length === 0 ? (
-              <p className="bookmarks-page__empty">{t('personal.railBookmarksEmpty')}</p>
+              <p className="bookmarks-page__empty">{t('personal.rail.empty.bookmarks')}</p>
             ) : (
               bookmarks.map((bookmark) => {
                 const topic = topicByName(bookmark.topic.name)

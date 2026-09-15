@@ -23,8 +23,8 @@ const railLinks: RailLink[] = [
   { to: '/', label: t('nav.topics'), Icon: TopicsIcon, isActive: (pathname) => pathname === '/' || pathname.startsWith('/topics') },
   { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, isActive: (pathname) => pathname.startsWith('/references') },
   { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, isActive: (pathname) => pathname.startsWith('/bookmarks') },
-  { to: '/questions', label: t('nav.myQuestions'), Icon: QuestionsIcon, isActive: (pathname) => pathname.startsWith('/questions') },
-  { to: '/notes', label: t('nav.myNotes'), Icon: NotesIcon, isActive: (pathname) => pathname.startsWith('/notes') },
+  { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, isActive: (pathname) => pathname.startsWith('/questions') },
+  { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, isActive: (pathname) => pathname.startsWith('/notes') },
 ]
 
 export function IconRail() {
@@ -48,7 +48,7 @@ export function IconRail() {
         </Link>
       ))}
 
-      <button type="button" className="icon-rail__export" aria-label={t('nav.export')} onClick={downloadPersonalLayer}>
+      <button type="button" className="icon-rail__export" aria-label={t('nav.export.label')} onClick={downloadPersonalLayer}>
         <ExportIcon size={18} />
       </button>
     </nav>

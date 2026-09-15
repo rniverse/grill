@@ -55,10 +55,10 @@ export function NotesPage() {
           <div className="notes-page__mobile-header">
             <MobileNav />
           </div>
-          <h1 className="notes-page__title">{t('notes.title')}</h1>
+          <h1 className="notes-page__title">{t('page.notes.title')}</h1>
           <div className="notes-page__items">
             {notes.length === 0 ? (
-              <p className="notes-page__empty">{t('personal.railNotesEmpty')}</p>
+              <p className="notes-page__empty">{t('personal.rail.empty.notes')}</p>
             ) : (
               notes.map((note) => {
                 const topic = topicByName(note.topic.name)

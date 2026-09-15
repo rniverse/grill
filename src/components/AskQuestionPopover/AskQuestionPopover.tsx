@@ -18,14 +18,14 @@ export function AskQuestionPopover({ quote, position, onSave, onCancel }: AskQue
       <p className="ask-question-popover__quote">{quote}</p>
       <textarea
         className="ask-question-popover__input"
-        placeholder={t('personal.askPlaceholder')}
+        placeholder={t('personal.ask.placeholder')}
         value={askText}
         onChange={(event) => setAskText(event.target.value)}
         autoFocus
       />
       <div className="ask-question-popover__actions">
         <button type="button" className="ask-question-popover__cancel" onClick={onCancel}>
-          {t('personal.askCancel')}
+          {t('personal.ask.cancel')}
         </button>
         <button
           type="button"
@@ -33,7 +33,7 @@ export function AskQuestionPopover({ quote, position, onSave, onCancel }: AskQue
           disabled={trimmedAskText.length === 0}
           onClick={() => onSave(trimmedAskText)}
         >
-          {t('personal.askSave')}
+          {t('personal.ask.save')}
         </button>
       </div>
     </div>

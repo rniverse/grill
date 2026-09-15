@@ -15,7 +15,7 @@ import { MobileScreen } from './mobile-screen.enum'
 import './TopicPage.css'
 
 function collectTags(questions: Question[]): string[] {
-  const filterAll = t('topic.filterAll')
+  const filterAll = t('topic.filter.all')
   const tags: string[] = [filterAll]
   const seen = new Set<string>([filterAll])
 
@@ -38,7 +38,7 @@ export function TopicPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [references, setReferences] = useState<Reference[]>([])
   const [notFound, setNotFound] = useState(false)
-  const [activeFilter, setActiveFilter] = useState(() => t('topic.filterAll'))
+  const [activeFilter, setActiveFilter] = useState(() => t('topic.filter.all'))
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null)
   const [openReference, setOpenReference] = useState<Reference | null>(null)
   // Mobile-only UI toggles (the controls that drive these are CSS-hidden
@@ -54,7 +54,7 @@ export function TopicPage() {
   useEffect(() => {
     let cancelled = false
     setNotFound(false)
-    setActiveFilter(t('topic.filterAll'))
+    setActiveFilter(t('topic.filter.all'))
     setOpenQuestionId(null)
     setMobileScreen(MobileScreen.Questions)
     setBookmarkFilter(false)
@@ -88,8 +88,8 @@ export function TopicPage() {
       <div className="topic-page">
         <IconRail />
         <div className="topic-page__not-found">
-          <p>{t('topic.notFound')}</p>
-          <Link to="/">{t('topic.backToTopics')}</Link>
+          <p>{t('error.notfound.topics')}</p>
+          <Link to="/">{t('backto.topics')}</Link>
         </div>
       </div>
     )
@@ -98,7 +98,7 @@ export function TopicPage() {
   const visibleQuestions = bookmarkFilter
     ? questions.filter((question) => isBookmarked({ kind: 'question', id: question.id }))
     : questions.filter(
-        (question) => activeFilter === t('topic.filterAll') || (question.tags ?? []).includes(activeFilter),
+        (question) => activeFilter === t('topic.filter.all') || (question.tags ?? []).includes(activeFilter),
       )
 
   function selectFilter(tag: string) {
@@ -131,7 +131,7 @@ export function TopicPage() {
                   <div className="topic-page__mobile-title-group">
                     <h1 className="topic-page__mobile-title">{topic.name}</h1>
                     <span className="topic-page__mobile-meta">
-                      {t('topic.mobileMeta', { version: meta.version, count: questions.length })}
+                      {t('topic.mobile.meta', { version: meta.version, count: questions.length })}
                     </span>
                   </div>
                 </div>
@@ -140,7 +140,7 @@ export function TopicPage() {
                     type="button"
                     className="topic-page__mobile-icon-button"
                     aria-pressed={mobileScreen === MobileScreen.References}
-                    aria-label={t('topic.mobileReferencesToggle')}
+                    aria-label={t('topic.mobile.toggle.references')}
                     onClick={toggleReferencesScreen}
                   >
                     <ReferencesIcon size={16} />
@@ -149,7 +149,7 @@ export function TopicPage() {
                     type="button"
                     className="topic-page__mobile-icon-button"
                     aria-pressed={bookmarkFilter}
-                    aria-label={t('topic.mobileBookmarkToggle')}
+                    aria-label={t('topic.mobile.toggle.bookmarks')}
                     onClick={toggleBookmarkFilter}
                   >
                     <BookmarksIcon size={16} />
@@ -172,7 +172,7 @@ export function TopicPage() {
               }
             >
               <span className="topic-page__mobile-references-heading">
-                {t('topic.mobileReferencesHeading', { count: references.length })}
+                {t('topic.mobile.references.label', { count: references.length })}
               </span>
               <div className="topic-page__mobile-reference-chips">
                 {references.map((reference) => (
@@ -206,7 +206,7 @@ export function TopicPage() {
                 onClick={toggleBookmarkFilter}
               >
                 <BookmarksIcon size={13} />
-                <span>{t('topic.savedChip')}</span>
+                <span>{t('topic.save.label')}</span>
               </button>
             </div>
             <div

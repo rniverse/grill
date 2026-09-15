@@ -20,7 +20,7 @@ export function BookmarkButton({ topic, target, onToggle }: BookmarkButtonProps)
       type="button"
       className="bookmark-button"
       aria-pressed={bookmarked}
-      aria-label={bookmarked ? t('personal.bookmarked') : t('personal.bookmark')}
+      aria-label={bookmarked ? t('personal.bookmark.added') : t('personal.bookmark.title')}
       onClick={(event) => {
         event.stopPropagation()
         toggleBookmark(target, topic)

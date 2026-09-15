@@ -97,7 +97,7 @@ export function LandingPage() {
             <div className="landing-page__mobile-logo">
               <LogoIcon size={16} />
             </div>
-            <span className="landing-page__mobile-title">{t('landing.contents')}</span>
+            <h1 className="landing-page__mobile-title">{t('landing.contents')}</h1>
             <div className="landing-page__mobile-actions">
               <button
                 type="button"

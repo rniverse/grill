@@ -64,6 +64,20 @@ describe('LandingPage', () => {
     expect(screen.queryByText('Could not import — check the file and try again.')).toBeNull()
   })
 
+  test('renders exactly one h1 per header (desktop label + mobile title), both "Contents"', async () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>,
+    )
+    await screen.findByText('Angular')
+    // Both headers are always in the DOM (CSS picks which is visible at a
+    // given width — see the comment above); each must carry a real <h1> so
+    // exactly one heading is visible per width, never zero.
+    const headings = screen.getAllByRole('heading', { level: 1, name: 'Contents' })
+    expect(headings).toHaveLength(2)
+  })
+
   test('renders a MobileNav trigger in the mobile header', async () => {
     render(
       <MemoryRouter>

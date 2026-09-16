@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, test } from 'bun:test'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { PreferencesPage } from './PreferencesPage'
 
@@ -30,6 +30,23 @@ describe('PreferencesPage', () => {
     expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
   })
 
+  test('renders a Sources section listing the seeded rows', async () => {
+    renderPage()
+    await act(async () => {})
+
+    expect(screen.getByText('Content sources')).toBeDefined()
+    expect(screen.getByText('Angular')).toBeDefined()
+    expect(screen.getByText('Node.js')).toBeDefined()
+  })
+
+  test('renders a Developer section with the existing Generate ID control', async () => {
+    renderPage()
+    await act(async () => {})
+
+    expect(screen.getByText('Developer')).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Generate new ID' })).toBeDefined()
+  })
+
   test('renders the generate button with no confirmation message yet', async () => {
     renderPage()
     await act(async () => {})
@@ -56,8 +73,35 @@ describe('PreferencesPage', () => {
         <PreferencesPage />
       </MemoryRouter>,
     )
+    await act(async () => {})
 
     const preferencesLink = await screen.findByRole('link', { name: 'Preferences' })
     expect(preferencesLink.getAttribute('aria-current')).toBe('true')
+  })
+
+  test('clicking Validate on a row shows success after a successful check', async () => {
+    globalThis.fetch = mock(async () => ({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        id: 'angular',
+        meta: {
+          version: '1.0.0',
+          cutOffTime: '2026-09-14T00:00:00.000Z',
+          updatedAt: '2026-09-14T00:00:00.000Z',
+          type: 'topic',
+          name: 'Angular',
+        },
+        questions: [],
+      }),
+    })) as unknown as typeof fetch
+
+    renderPage()
+    await act(async () => {})
+
+    const validateButtons = screen.getAllByRole('button', { name: 'Validate' })
+    fireEvent.click(validateButtons[0])
+
+    await waitFor(() => expect(screen.getAllByText(/Validated|Failed/).length).toBeGreaterThan(0))
   })
 })

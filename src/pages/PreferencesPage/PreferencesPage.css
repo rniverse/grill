@@ -82,3 +82,94 @@
     padding-bottom: var(--space-md);
   }
 }
+
+.preferences-page__section-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-section-title);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.preferences-page__sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.preferences-page__source-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: var(--size-hairline) solid var(--color-hairline);
+  border-radius: var(--radius-row);
+}
+
+.preferences-page__source-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-sm);
+}
+
+.preferences-page__source-name {
+  font-family: var(--font-ui);
+  font-size: var(--text-secondary);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.preferences-page__source-id {
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-meta);
+  color: var(--color-ink-tertiary);
+}
+
+.preferences-page__source-field {
+  display: flex;
+  gap: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-meta);
+}
+
+.preferences-page__source-field-label {
+  color: var(--color-ink-tertiary);
+  flex-shrink: 0;
+}
+
+.preferences-page__source-field-value {
+  color: var(--color-ink-secondary);
+  word-break: break-all;
+}
+
+.preferences-page__source-validate {
+  border: none;
+  border-radius: var(--radius-control);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.preferences-page__source-validate:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.preferences-page__source-status {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+}
+
+.preferences-page__source-status--success {
+  color: var(--color-ink-tertiary);
+}
+
+.preferences-page__source-status--failed {
+  color: var(--color-ink-secondary);
+}

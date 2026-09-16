@@ -3,7 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
-import { isBookmarked } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { BookmarksIcon, ReferencesIcon, SearchIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
@@ -110,7 +110,7 @@ export function TopicPage() {
   }
 
   const visibleQuestions = bookmarkFilter
-    ? questions.filter((question) => isBookmarked({ kind: 'question', id: question.id }))
+    ? questions.filter((question) => storage.check.bookmarked({ kind: 'question', id: question.id }))
     : questions.filter(
         (question) => activeFilter === t('topic.filter.all') || (question.tags ?? []).includes(activeFilter),
       )

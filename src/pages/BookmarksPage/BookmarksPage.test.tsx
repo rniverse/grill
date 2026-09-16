@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, act, within, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { BookmarksPage } from './BookmarksPage'
-import { toggleBookmark } from '@/services/storage'
+import { storage } from '@/services/storage'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 
@@ -48,7 +48,7 @@ describe('BookmarksPage', () => {
   })
 
   test('resolves a bookmarked question to its text under the Questions section, across topics', async () => {
-    toggleBookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
+    storage.toggle.bookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
 
     renderPage()
 
@@ -60,7 +60,7 @@ describe('BookmarksPage', () => {
   })
 
   test('resolves a bookmarked reference under the References section', async () => {
-    toggleBookmark({ kind: 'reference', id: angularReference.id }, { name: angularTopic.name, version: '1.0.0' })
+    storage.toggle.bookmark({ kind: 'reference', id: angularReference.id }, { name: angularTopic.name, version: '1.0.0' })
 
     renderPage()
 
@@ -71,7 +71,7 @@ describe('BookmarksPage', () => {
   })
 
   test('a question bookmark links to the topic page, opened to that question', async () => {
-    toggleBookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
+    storage.toggle.bookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
 
     renderPage()
 
@@ -80,7 +80,7 @@ describe('BookmarksPage', () => {
   })
 
   test('a reference bookmark opens the reference in place instead of navigating', async () => {
-    toggleBookmark({ kind: 'reference', id: angularReference.id }, { name: angularTopic.name, version: '1.0.0' })
+    storage.toggle.bookmark({ kind: 'reference', id: angularReference.id }, { name: angularTopic.name, version: '1.0.0' })
 
     renderPage()
 

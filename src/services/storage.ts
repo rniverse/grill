@@ -1,11 +1,13 @@
 import { generateId } from '@/utils/id'
 import type { Bookmark, LocalTargetRef, PendingQuestion, PersonalNote, TextSelection } from '@/types/personal.types'
 import type { ID } from '@/types/topic.types'
+import { CONTENT_SOURCES, type ContentSourceConfig, type SourceValidation } from '@/config/content-sources'
 
 const KEY = {
   pendingQuestions: 'grill-prep:pending-questions',
   personalNotes: 'grill-prep:personal-notes',
   bookmarks: 'grill-prep:bookmarks',
+  contentSources: 'grill-prep:content-sources',
 } as const
 
 function readArray<T>(key: string): T[] {
@@ -27,13 +29,11 @@ function targetsMatch(a: LocalTargetRef['target'], b: LocalTargetRef['target']):
   return a.kind === b.kind && a.id === b.id
 }
 
-export function listPendingQuestions(): PendingQuestion[] {
+function listPendingQuestions(): PendingQuestion[] {
   return readArray<PendingQuestion>(KEY.pendingQuestions)
 }
 
-export function savePendingQuestion(
-  input: Omit<PendingQuestion, 'id' | 'createdAt'>,
-): PendingQuestion {
+function savePendingQuestion(input: Omit<PendingQuestion, 'id' | 'createdAt'>): PendingQuestion {
   const question: PendingQuestion = {
     ...input,
     id: generateId(),
@@ -45,22 +45,22 @@ export function savePendingQuestion(
   return question
 }
 
-export function deletePendingQuestion(id: ID): void {
+function deletePendingQuestion(id: ID): void {
   const remaining = listPendingQuestions().filter((question) => question.id !== id)
   writeArray(KEY.pendingQuestions, remaining)
 }
 
-export function listPersonalNotes(): PersonalNote[] {
+function listPersonalNotes(): PersonalNote[] {
   return readArray<PersonalNote>(KEY.personalNotes)
 }
 
-export function getPersonalNote(target: LocalTargetRef['target']): PersonalNote | undefined {
+function getPersonalNote(target: LocalTargetRef['target']): PersonalNote | undefined {
   return listPersonalNotes().find((note) => note.target && targetsMatch(note.target, target))
 }
 
 // Always creates a new note. ref is omitted for a standalone note made from
 // the Notes page directly, with no question or reference behind it.
-export function savePersonalNote(text: string, ref?: LocalTargetRef): PersonalNote {
+function savePersonalNote(text: string, ref?: LocalTargetRef): PersonalNote {
   const now = new Date().toISOString()
   const note: PersonalNote = {
     id: generateId(),
@@ -76,7 +76,7 @@ export function savePersonalNote(text: string, ref?: LocalTargetRef): PersonalNo
   return note
 }
 
-export function updatePersonalNote(id: ID, text: string): PersonalNote | undefined {
+function updatePersonalNote(id: ID, text: string): PersonalNote | undefined {
   const notes = listPersonalNotes()
   const index = notes.findIndex((note) => note.id === id)
   if (index === -1) return undefined
@@ -88,20 +88,20 @@ export function updatePersonalNote(id: ID, text: string): PersonalNote | undefin
   return updated
 }
 
-export function deletePersonalNote(id: ID): void {
+function deletePersonalNote(id: ID): void {
   const remaining = listPersonalNotes().filter((note) => note.id !== id)
   writeArray(KEY.personalNotes, remaining)
 }
 
-export function listBookmarks(): Bookmark[] {
+function listBookmarks(): Bookmark[] {
   return readArray<Bookmark>(KEY.bookmarks)
 }
 
-export function isBookmarked(target: LocalTargetRef['target']): boolean {
+function isBookmarked(target: LocalTargetRef['target']): boolean {
   return listBookmarks().some((bookmark) => targetsMatch(bookmark.target, target))
 }
 
-export function toggleBookmark(target: LocalTargetRef['target'], topic: LocalTargetRef['topic']): void {
+function toggleBookmark(target: LocalTargetRef['target'], topic: LocalTargetRef['topic']): void {
   const bookmarks = listBookmarks()
   const existing = bookmarks.find((bookmark) => targetsMatch(bookmark.target, target))
 
@@ -118,7 +118,26 @@ export function toggleBookmark(target: LocalTargetRef['target'], topic: LocalTar
   writeArray(KEY.bookmarks, bookmarks)
 }
 
-export function exportPersonalLayer(): string {
+// Seeds CONTENT_SOURCES into storage on first read (key absent, not just
+// empty — an empty array the user emptied out on purpose must stay empty).
+function listContentSources(): ContentSourceConfig[] {
+  if (localStorage.getItem(KEY.contentSources) === null) {
+    writeArray(KEY.contentSources, CONTENT_SOURCES)
+  }
+  return readArray<ContentSourceConfig>(KEY.contentSources)
+}
+
+function updateSourceValidation(id: string, kind: 'topic' | 'references', result: SourceValidation): void {
+  const sources = listContentSources()
+  const index = sources.findIndex((source) => source.id === id)
+  if (index === -1) return
+
+  const existing = sources[index]
+  sources[index] = { ...existing, validation: { ...existing.validation, [kind]: result } }
+  writeArray(KEY.contentSources, sources)
+}
+
+function exportPersonalLayer(): string {
   return JSON.stringify({
     pendingQuestions: listPendingQuestions(),
     personalNotes: listPersonalNotes(),
@@ -201,7 +220,7 @@ function isPersonalLayerExport(value: unknown): value is PersonalLayerExport {
   )
 }
 
-export function importPersonalLayer(json: string): void {
+function importPersonalLayer(json: string): void {
   let parsed: unknown
   try {
     parsed = JSON.parse(json)
@@ -218,4 +237,40 @@ export function importPersonalLayer(json: string): void {
   writeArray(KEY.pendingQuestions, parsed.pendingQuestions)
   writeArray(KEY.personalNotes, parsed.personalNotes)
   writeArray(KEY.bookmarks, parsed.bookmarks)
+}
+
+export const storage = {
+  list: {
+    personal: {
+      bookmarks: listBookmarks,
+      notes: listPersonalNotes,
+      questions: listPendingQuestions,
+    },
+    sources: listContentSources,
+  },
+  get: {
+    note: getPersonalNote,
+  },
+  create: {
+    note: savePersonalNote,
+    question: savePendingQuestion,
+  },
+  update: {
+    note: updatePersonalNote,
+    sourceValidation: updateSourceValidation,
+  },
+  delete: {
+    note: deletePersonalNote,
+    question: deletePendingQuestion,
+  },
+  toggle: {
+    bookmark: toggleBookmark,
+  },
+  check: {
+    bookmarked: isBookmarked,
+  },
+  personalLayer: {
+    export: exportPersonalLayer,
+    import: importPersonalLayer,
+  },
 }

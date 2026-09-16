@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { BookmarkButton } from './BookmarkButton'
-import { isBookmarked } from '@/services/storage'
+import { storage } from '@/services/storage'
 
 const topic = { name: 'nodejs', version: '1.0.0' }
 const target = { kind: 'question' as const, id: 'q1' }
@@ -21,7 +21,7 @@ describe('BookmarkButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Bookmark' }))
 
-    expect(isBookmarked(target)).toBe(true)
+    expect(storage.check.bookmarked(target)).toBe(true)
     expect(screen.getByRole('button', { name: 'Bookmarked' }).getAttribute('aria-pressed')).toBe('true')
   })
 
@@ -31,7 +31,7 @@ describe('BookmarkButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Bookmark' }))
     fireEvent.click(screen.getByRole('button', { name: 'Bookmarked' }))
 
-    expect(isBookmarked(target)).toBe(false)
+    expect(storage.check.bookmarked(target)).toBe(false)
     expect(screen.getByRole('button', { name: 'Bookmark' }).getAttribute('aria-pressed')).toBe('false')
   })
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent, within } from '@testing-library/react'
 import { QuestionCard } from './QuestionCard'
 import type { Question, Reference } from '@/types/topic.types'
-import { isBookmarked, savePersonalNote } from '@/services/storage'
+import { storage } from '@/services/storage'
 
 const topic = { name: 'nodejs', version: '1.0.0' }
 
@@ -86,7 +86,7 @@ describe('QuestionCard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Bookmark' }))
 
-    expect(isBookmarked({ kind: 'question', id: 'q1' })).toBe(true)
+    expect(storage.check.bookmarked({ kind: 'question', id: 'q1' })).toBe(true)
     expect(toggled).toBe(false)
   })
 
@@ -106,7 +106,7 @@ describe('QuestionCard', () => {
   })
 
   test('shows view and remove controls (not add) when a note exists', () => {
-    savePersonalNote('My own note about buffers.', { target: { kind: 'question', id: 'q1' }, topic })
+    storage.create.note('My own note about buffers.', { target: { kind: 'question', id: 'q1' }, topic })
     render(
       <QuestionCard
         ordinal="01"
@@ -124,7 +124,7 @@ describe('QuestionCard', () => {
   })
 
   test('clicking the view control opens a dialog with the note rendered as markdown, plus edit/delete', () => {
-    savePersonalNote('**bold** note about buffers.', { target: { kind: 'question', id: 'q1' }, topic })
+    storage.create.note('**bold** note about buffers.', { target: { kind: 'question', id: 'q1' }, topic })
     render(
       <QuestionCard
         ordinal="01"
@@ -146,7 +146,7 @@ describe('QuestionCard', () => {
   })
 
   test('deleting a note from the dialog removes it', () => {
-    savePersonalNote('a note to delete', { target: { kind: 'question', id: 'q1' }, topic })
+    storage.create.note('a note to delete', { target: { kind: 'question', id: 'q1' }, topic })
     render(
       <QuestionCard
         ordinal="01"

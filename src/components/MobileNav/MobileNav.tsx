@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
-import { listBookmarks, listPendingQuestions, listPersonalNotes } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { downloadPersonalLayer } from '@/utils/download-personal-layer'
 import { t } from '@/utils/i18n'
 import {
@@ -85,9 +85,9 @@ export function MobileNav() {
 
   const yourItems: { to: string; label: string; Icon: typeof ReferencesIcon; count?: number }[] = [
     { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
-    { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, count: listBookmarks().length },
-    { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, count: listPendingQuestions().length },
-    { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, count: listPersonalNotes().length },
+    { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, count: storage.list.personal.bookmarks().length },
+    { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, count: storage.list.personal.questions().length },
+    { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, count: storage.list.personal.notes().length },
     { to: '/preferences', label: t('nav.preferences'), Icon: PreferencesIcon },
   ]
 

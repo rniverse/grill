@@ -1,13 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { Question, Reference } from '@/types/topic.types'
 import type { PendingQuestion } from '@/types/personal.types'
-import {
-  deletePersonalNote,
-  getPersonalNote,
-  listPendingQuestions,
-  savePersonalNote,
-  updatePersonalNote,
-} from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { RemoveIcon } from '@/utils/icons'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
@@ -53,9 +47,9 @@ export function QuestionCard({
     }
   }
 
-  const personalNote = getPersonalNote(target)
+  const personalNote = storage.get.note(target)
 
-  const matchingPendingQuestions = listPendingQuestions().filter(
+  const matchingPendingQuestions = storage.list.personal.questions().filter(
     (pending) => pending.target.kind === 'question' && pending.target.id === question.id,
   )
   // A content fingerprint of this question's pending questions. Serializing
@@ -74,7 +68,7 @@ export function QuestionCard({
 
   function removeNote() {
     if (!personalNote) return
-    deletePersonalNote(personalNote.id)
+    storage.delete.note(personalNote.id)
     onPersonalLayerChange?.()
     setNoteDialog('closed')
   }
@@ -156,9 +150,9 @@ export function QuestionCard({
                     initialValue={personalNote?.text ?? ''}
                     onSave={(text) => {
                       if (personalNote) {
-                        updatePersonalNote(personalNote.id, text)
+                        storage.update.note(personalNote.id, text)
                       } else {
-                        savePersonalNote(text, { target, topic })
+                        storage.create.note(text, { target, topic })
                       }
                       onPersonalLayerChange?.()
                       setNoteDialog('closed')

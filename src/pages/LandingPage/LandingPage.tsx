@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { topicsConfig, type TopicModule } from '@/topics.config'
 import { t } from '@/utils/i18n'
 import { SearchIcon, ImportIcon, LogoIcon } from '@/utils/icons'
-import { importPersonalLayer } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
@@ -60,7 +60,7 @@ export function LandingPage() {
 
     try {
       const text = await file.text()
-      importPersonalLayer(text)
+      storage.personalLayer.import(text)
       setImportError(false)
     } catch {
       setImportError(true)

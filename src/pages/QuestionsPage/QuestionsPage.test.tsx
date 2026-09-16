@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { QuestionsPage } from './QuestionsPage'
-import { listPendingQuestions, savePendingQuestion } from '@/services/storage'
+import { storage } from '@/services/storage'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 
@@ -56,7 +56,7 @@ describe('QuestionsPage', () => {
   })
 
   test("shows a pending question's own ask text, asked on a question target", async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'question', id: angularQuestion.id },
       selection: { text: 'some text', range: { start: 0, end: 9 } },
@@ -72,7 +72,7 @@ describe('QuestionsPage', () => {
   })
 
   test('a pending question asked on a reference target shows under the References section', async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'reference', id: angularReference.id },
       selection: { text: 'some text', range: { start: 0, end: 9 } },
@@ -87,7 +87,7 @@ describe('QuestionsPage', () => {
   })
 
   test('clicking a pending question on a question target opens a dialog with a go-to-question link', async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'question', id: angularQuestion.id },
       selection: { text: 'the quoted passage', range: { start: 0, end: 9 } },
@@ -106,7 +106,7 @@ describe('QuestionsPage', () => {
   })
 
   test('clicking a pending question on a reference target opens a dialog whose go-to-question button opens the reference', async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'reference', id: angularReference.id },
       selection: { text: 'the quoted passage', range: { start: 0, end: 9 } },
@@ -125,7 +125,7 @@ describe('QuestionsPage', () => {
   })
 
   test('removing a pending question from the dialog deletes it and closes the dialog', async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'question', id: angularQuestion.id },
       selection: { text: 'the quoted passage', range: { start: 0, end: 9 } },
@@ -138,12 +138,12 @@ describe('QuestionsPage', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Remove' }))
 
-    expect(listPendingQuestions()).toEqual([])
+    expect(storage.list.personal.questions()).toEqual([])
     expect(screen.queryByText('the quoted passage')).toBeNull()
   })
 
   test('closing the dialog via the close button hides it', async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'question', id: angularQuestion.id },
       selection: { text: 'the quoted passage', range: { start: 0, end: 9 } },

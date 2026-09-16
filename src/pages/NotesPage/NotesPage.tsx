@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import type { PersonalNote } from '@/types/personal.types'
-import { deletePersonalNote, listPersonalNotes, savePersonalNote } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
@@ -22,7 +22,7 @@ export function NotesPage() {
   // Bumped after a create, so the list re-reads storage.
   const [, bumpVersion] = useState(0)
 
-  const notes: PersonalNote[] = listPersonalNotes()
+  const notes: PersonalNote[] = storage.list.personal.notes()
 
   return (
     <div className="notes-page">
@@ -67,7 +67,7 @@ export function NotesPage() {
                     title={t('personal.note.delete')}
                     onClick={(event) => {
                       event.stopPropagation()
-                      deletePersonalNote(note.id)
+                      storage.delete.note(note.id)
                       bumpVersion((version) => version + 1)
                     }}
                   >
@@ -86,7 +86,7 @@ export function NotesPage() {
           <NoteEditor
             initialValue=""
             onSave={(text) => {
-              savePersonalNote(text)
+              storage.create.note(text)
               bumpVersion((version) => version + 1)
               setCreating(false)
             }}

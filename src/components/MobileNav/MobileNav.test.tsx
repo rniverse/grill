@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { MobileNav } from './MobileNav'
-import { savePendingQuestion } from '@/services/storage'
+import { storage } from '@/services/storage'
 import angularTopicData from '@/topics/angular.json'
 
 const angularTopic = { name: angularTopicData.meta.name }
@@ -65,7 +65,7 @@ describe('MobileNav', () => {
   })
 
   test('shows a live count of pending questions in the Yours section', async () => {
-    savePendingQuestion({
+    storage.create.question({
       topic: { name: angularTopic.name, version: '1.0.0' },
       target: { kind: 'question', id: angularQuestions[0].id },
       selection: { text: 'some text', range: { start: 0, end: 9 } },

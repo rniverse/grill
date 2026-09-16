@@ -1,7 +1,7 @@
 import { useMemo, useRef } from 'react'
 import type { Reference } from '@/types/topic.types'
 import type { PendingQuestion } from '@/types/personal.types'
-import { listPendingQuestions } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
 import { BookmarkButton } from '@/components/BookmarkButton/BookmarkButton'
@@ -25,7 +25,7 @@ export function ReferenceModal({ reference, topic, onClose, onPersonalLayerChang
   // ordering constraint QuestionCard's target/pendingQuestions setup has.
   const target = { kind: 'reference' as const, id: reference?.id ?? '' }
 
-  const matchingPendingQuestions = listPendingQuestions().filter(
+  const matchingPendingQuestions = storage.list.personal.questions().filter(
     (pending) => pending.target.kind === 'reference' && pending.target.id === reference?.id,
   )
   const pendingQuestionsFingerprint = JSON.stringify(matchingPendingQuestions)

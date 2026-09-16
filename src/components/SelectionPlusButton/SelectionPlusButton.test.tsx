@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { useRef } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { SelectionPlusButton } from './SelectionPlusButton'
-import { listPendingQuestions } from '@/services/storage'
+import { storage } from '@/services/storage'
 
 const topic = { name: 'nodejs', version: '1.0.0' }
 const target = { kind: 'question' as const, id: 'q1' }
@@ -83,7 +83,7 @@ describe('SelectionPlusButton', () => {
     })
     fireEvent.click(screen.getByRole('button', { name: 'Save' }))
 
-    const saved = listPendingQuestions()
+    const saved = storage.list.personal.questions()
     expect(saved).toHaveLength(1)
     expect(saved[0]?.ask).toBe('How does this interact with microtasks?')
     expect(saved[0]?.selection).toEqual({ text: 'Event Loop', range: { start: 4, end: 14 } })
@@ -103,6 +103,6 @@ describe('SelectionPlusButton', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
 
     expect(screen.queryByPlaceholderText('What do you want to know?')).toBeNull()
-    expect(listPendingQuestions()).toEqual([])
+    expect(storage.list.personal.questions()).toEqual([])
   })
 })

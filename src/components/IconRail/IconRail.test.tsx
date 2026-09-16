@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { IconRail } from './IconRail'
-import { savePersonalNote } from '@/services/storage'
+import { storage } from '@/services/storage'
 
 beforeEach(() => {
   localStorage.clear()
@@ -73,7 +73,7 @@ describe('IconRail', () => {
   })
 
   test('clicking export downloads the current personal layer as a JSON blob', async () => {
-    savePersonalNote('a note', { target: { kind: 'question', id: 'q1' }, topic: { name: 'nodejs', version: '1.0.0' } })
+    storage.create.note('a note', { target: { kind: 'question', id: 'q1' }, topic: { name: 'nodejs', version: '1.0.0' } })
 
     const createdUrls: string[] = []
     const revokedUrls: string[] = []

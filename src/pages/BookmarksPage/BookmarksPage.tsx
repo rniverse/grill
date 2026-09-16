@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { Bookmark, LocalTargetRef } from '@/types/personal.types'
-import { listBookmarks } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
@@ -133,7 +133,7 @@ export function BookmarksPage() {
     setOpenReferenceTopic(topic)
   }
 
-  const bookmarks: Bookmark[] = listBookmarks()
+  const bookmarks: Bookmark[] = storage.list.personal.bookmarks()
   const questionBookmarks = bookmarks.filter((bookmark) => bookmark.target.kind === 'question')
   const referenceBookmarks = bookmarks.filter((bookmark) => bookmark.target.kind === 'reference')
 

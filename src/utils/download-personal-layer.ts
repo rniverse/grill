@@ -1,9 +1,9 @@
-import { exportPersonalLayer } from '@/services/storage'
+import { storage } from '@/services/storage'
 
 // Shared by IconRail's export button and MobileNav's drawer export button —
 // same personal-layer JSON download, two entry points.
 export function downloadPersonalLayer(): void {
-  const json = exportPersonalLayer()
+  const json = storage.personalLayer.export()
   const blob = new Blob([json], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
 

@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import { personalNoteHasTarget } from '@/types/personal.types'
-import { deletePersonalNote, listPersonalNotes, updatePersonalNote } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { RemoveIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
@@ -67,7 +67,7 @@ export function NoteDetailPage() {
     return loadedTopics.find((topic) => topic.name === name)
   }
 
-  const note = listPersonalNotes().find((candidate) => candidate.id === noteId)
+  const note = storage.list.personal.notes().find((candidate) => candidate.id === noteId)
 
   if (!note) {
     return (
@@ -138,7 +138,7 @@ export function NoteDetailPage() {
                 aria-label={t('personal.note.delete')}
                 title={t('personal.note.delete')}
                 onClick={() => {
-                  deletePersonalNote(note.id)
+                  storage.delete.note(note.id)
                   navigate('/notes')
                 }}
               >
@@ -162,7 +162,7 @@ export function NoteDetailPage() {
           <NoteEditor
             initialValue={note.text}
             onSave={(text) => {
-              updatePersonalNote(note.id, text)
+              storage.update.note(note.id, text)
               bumpVersion((version) => version + 1)
               setEditing(false)
             }}

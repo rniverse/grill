@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { LandingPage } from './LandingPage'
-import { listBookmarks } from '@/services/storage'
+import { storage } from '@/services/storage'
 
 beforeEach(() => {
   localStorage.clear()
@@ -60,7 +60,7 @@ describe('LandingPage', () => {
 
     fireEvent.change(screen.getByLabelText('Import', { selector: 'input' }), { target: { files: [file] } })
 
-    await waitFor(() => expect(listBookmarks()).toHaveLength(1))
+    await waitFor(() => expect(storage.list.personal.bookmarks()).toHaveLength(1))
     expect(screen.queryByText('Could not import — check the file and try again.')).toBeNull()
   })
 

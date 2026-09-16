@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { topicsConfig } from '@/topics.config'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { LocalTargetRef, PendingQuestion } from '@/types/personal.types'
-import { deletePendingQuestion, listPendingQuestions } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
@@ -101,7 +101,7 @@ export function QuestionsPage() {
   }
 
   function removePending(pending: PendingQuestion) {
-    deletePendingQuestion(pending.id)
+    storage.delete.question(pending.id)
     bumpPersonalVersion((version) => version + 1)
     setOpenPending(null)
   }
@@ -119,7 +119,7 @@ export function QuestionsPage() {
     setOpenPending(null)
   }
 
-  const pendingQuestions: PendingQuestion[] = listPendingQuestions()
+  const pendingQuestions: PendingQuestion[] = storage.list.personal.questions()
   const onQuestionTarget = pendingQuestions.filter((pending) => pending.target.kind === 'question')
   const onReferenceTarget = pendingQuestions.filter((pending) => pending.target.kind === 'reference')
   const openTopic = openPending ? topicByName(openPending.topic.name) : undefined

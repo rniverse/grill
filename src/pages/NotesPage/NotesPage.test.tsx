@@ -3,7 +3,7 @@ import { render, screen, act, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { NotesPage } from './NotesPage'
 import { NoteDetailPage } from '@/pages/NoteDetailPage/NoteDetailPage'
-import { listPersonalNotes, savePersonalNote } from '@/services/storage'
+import { storage } from '@/services/storage'
 import angularTopicData from '@/topics/angular.json'
 
 const angularTopic = { name: angularTopicData.meta.name }
@@ -64,7 +64,7 @@ describe('NotesPage', () => {
 
   test('shows a truncated preview of long notes', async () => {
     const longText = 'a'.repeat(100)
-    savePersonalNote(longText, {
+    storage.create.note(longText, {
       target: { kind: 'question', id: angularQuestion.id },
       topic: { name: angularTopic.name, version: '1.0.0' },
     })
@@ -75,7 +75,7 @@ describe('NotesPage', () => {
   })
 
   test('clicking a note about a question navigates to its own page with a go-to-question button', async () => {
-    savePersonalNote('a note tied to a question', {
+    storage.create.note('a note tied to a question', {
       target: { kind: 'question', id: angularQuestion.id },
       topic: { name: angularTopic.name, version: '1.0.0' },
     })
@@ -88,7 +88,7 @@ describe('NotesPage', () => {
   })
 
   test('clicking a standalone note (no target) navigates to its own page with no go-to button', async () => {
-    savePersonalNote('a freeform note')
+    storage.create.note('a freeform note')
 
     renderWithNoteRoute()
     fireEvent.click(await screen.findByText('a freeform note'))
@@ -108,14 +108,14 @@ describe('NotesPage', () => {
   })
 
   test('removing a note from the list deletes it', async () => {
-    savePersonalNote('a note to remove')
+    storage.create.note('a note to remove')
 
     renderPage()
     await screen.findByText('a note to remove')
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete note' }))
 
-    expect(listPersonalNotes()).toEqual([])
+    expect(storage.list.personal.notes()).toEqual([])
     expect(await screen.findByText('No notes yet.')).toBeDefined()
   })
 })

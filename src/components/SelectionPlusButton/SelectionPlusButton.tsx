@@ -2,7 +2,7 @@ import { useEffect, useState, type RefObject } from 'react'
 import { createPortal } from 'react-dom'
 import type { ID } from '@/types/topic.types'
 import type { TextSelection } from '@/types/personal.types'
-import { savePendingQuestion } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { captureSelection } from '@/utils/text-selection'
 import { t } from '@/utils/i18n'
 import { AskIcon } from '@/utils/icons'
@@ -70,7 +70,7 @@ export function SelectionPlusButton({ containerRef, topic, target, onSaved }: Se
         position={asking}
         onCancel={() => setAsking(null)}
         onSave={(askText) => {
-          savePendingQuestion({ topic, target, selection: asking.selection, ask: askText })
+          storage.create.question({ topic, target, selection: asking.selection, ask: askText })
           setAsking(null)
           onSaved?.()
         }}

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ID } from '@/types/topic.types'
-import { isBookmarked, toggleBookmark } from '@/services/storage'
+import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { BookmarkedIcon, BookmarksIcon } from '@/utils/icons'
 import './BookmarkButton.css'
@@ -12,7 +12,7 @@ export interface BookmarkButtonProps {
 }
 
 export function BookmarkButton({ topic, target, onToggle }: BookmarkButtonProps) {
-  const [bookmarked, setBookmarked] = useState(() => isBookmarked(target))
+  const [bookmarked, setBookmarked] = useState(() => storage.check.bookmarked(target))
   const Icon = bookmarked ? BookmarkedIcon : BookmarksIcon
 
   return (
@@ -23,7 +23,7 @@ export function BookmarkButton({ topic, target, onToggle }: BookmarkButtonProps)
       aria-label={bookmarked ? t('personal.bookmark.added') : t('personal.bookmark.title')}
       onClick={(event) => {
         event.stopPropagation()
-        toggleBookmark(target, topic)
+        storage.toggle.bookmark(target, topic)
         setBookmarked(!bookmarked)
         onToggle?.()
       }}

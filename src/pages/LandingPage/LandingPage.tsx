@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { topicsConfig, type TopicModule } from '@/topics.config'
+import { content, type TopicModule } from '@/services/content'
 import { t } from '@/utils/i18n'
 import { SearchIcon, ImportIcon, LogoIcon } from '@/utils/icons'
 import { storage } from '@/services/storage'
@@ -25,25 +25,31 @@ export function LandingPage() {
     let cancelled = false
 
     async function loadAllTopics() {
-      const modules: TopicModule[] = []
-      let referenceCount = 0
-      for (const entry of topicsConfig) {
-        const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
-        modules.push(topicModule)
-        referenceCount += referencesModule.references.length
-      }
+      const results = await Promise.all(
+        storage.list.sources().map(async (source) => {
+          const [topicResult, referencesResult] = await Promise.all([
+            content.load.topic(source),
+            content.load.references(source),
+          ])
+          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
+          return { topicModule: topicResult.data, referenceCount: referencesResult.data.references.length }
+        }),
+      )
+      const loaded = results.filter((result) => result !== null)
 
       if (cancelled) {
         return
       }
 
-      const nextLoadedTopics = modules.map((topicModule) => ({
-        id: topicModule.topic.id,
-        name: topicModule.topic.name,
-        questionCount: topicModule.questions.length,
-      }))
-      setLoadedTopics(nextLoadedTopics)
-      setTotalReferences(referenceCount)
+      const nextLoadedTopics: TopicModule[] = loaded.map(({ topicModule }) => topicModule)
+      setLoadedTopics(
+        nextLoadedTopics.map((topicModule) => ({
+          id: topicModule.topic.id,
+          name: topicModule.topic.name,
+          questionCount: topicModule.questions.length,
+        })),
+      )
+      setTotalReferences(loaded.reduce((sum, { referenceCount }) => sum + referenceCount, 0))
     }
 
     loadAllTopics()

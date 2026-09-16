@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { topicsConfig } from '@/topics.config'
+import { content } from '@/services/content'
 import { storage } from '@/services/storage'
 import { downloadPersonalLayer } from '@/utils/download-personal-layer'
 import { t } from '@/utils/i18n'
@@ -39,20 +39,25 @@ export function MobileNav() {
     let cancelled = false
 
     async function loadAllTopics() {
-      const summaries: LoadedTopicSummary[] = []
-      let referenceCount = 0
-      for (const entry of topicsConfig) {
-        const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
-        summaries.push({
-          id: topicModule.topic.id,
-          name: topicModule.topic.name,
-          questionCount: topicModule.questions.length,
-        })
-        referenceCount += referencesModule.references.length
-      }
+      const results = await Promise.all(
+        storage.list.sources().map(async (source) => {
+          const [topicResult, referencesResult] = await Promise.all([
+            content.load.topic(source),
+            content.load.references(source),
+          ])
+          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
+          return {
+            id: topicResult.data.topic.id,
+            name: topicResult.data.topic.name,
+            questionCount: topicResult.data.questions.length,
+            referenceCount: referencesResult.data.references.length,
+          }
+        }),
+      )
+      const loaded = results.filter((result) => result !== null)
       if (!cancelled) {
-        setLoadedTopics(summaries)
-        setTotalReferences(referenceCount)
+        setLoadedTopics(loaded.map(({ id, name, questionCount }) => ({ id, name, questionCount })))
+        setTotalReferences(loaded.reduce((sum, { referenceCount }) => sum + referenceCount, 0))
       }
     }
 

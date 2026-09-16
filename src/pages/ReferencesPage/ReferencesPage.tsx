@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { topicsConfig } from '@/topics.config'
+import { content } from '@/services/content'
+import { storage } from '@/services/storage'
 import type { FileMeta, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
@@ -27,18 +28,23 @@ function ReferencesPicker() {
     let cancelled = false
 
     async function loadAllTopics() {
-      const nextLoadedTopics: LoadedTopic[] = []
-      for (const entry of topicsConfig) {
-        const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
-        nextLoadedTopics.push({
-          id: topicModule.topic.id,
-          name: topicModule.topic.name,
-          referenceCount: referencesModule.references.length,
-        })
-      }
+      const results = await Promise.all(
+        storage.list.sources().map(async (source) => {
+          const [topicResult, referencesResult] = await Promise.all([
+            content.load.topic(source),
+            content.load.references(source),
+          ])
+          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
+          return {
+            id: topicResult.data.topic.id,
+            name: topicResult.data.topic.name,
+            referenceCount: referencesResult.data.references.length,
+          }
+        }),
+      )
 
       if (!cancelled) {
-        setLoadedTopics(nextLoadedTopics)
+        setLoadedTopics(results.filter((topic) => topic !== null))
       }
     }
 
@@ -96,20 +102,30 @@ function TopicReferences({ topicId }: { topicId: string }) {
     setReferences([])
     setOpenReference(null)
 
-    const entry = topicsConfig.find((config) => config.id === topicId)
-    if (!entry) {
+    const source = storage.list.sources().find((row) => row.id === topicId)
+    if (!source) {
       setNotFound(true)
       return
     }
 
     async function loadTopic() {
-      // entry is narrowed non-null above, but that narrowing doesn't reach
+      // source is narrowed non-null above, but that narrowing doesn't reach
       // into this nested function's closure — TS can't see across it.
-      // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
-      const [topicModule, referencesModule] = await Promise.all([entry!.load.topics(), entry!.load.references()])
+      const [topicResult, referencesResult] = await Promise.all([
+        // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
+        content.load.topic(source!),
+        // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
+        content.load.references(source!),
+      ])
       if (cancelled) {
         return
       }
+      if (topicResult.status === 'error' || referencesResult.status === 'error') {
+        setNotFound(true)
+        return
+      }
+      const topicModule = topicResult.data
+      const referencesModule = referencesResult.data
       setTopic(topicModule.topic)
       setMeta(topicModule.meta)
       setReferences(referencesModule.references)

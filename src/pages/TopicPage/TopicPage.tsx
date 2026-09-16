@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
-import { topicsConfig } from '@/topics.config'
+import { content } from '@/services/content'
 import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { storage } from '@/services/storage'
@@ -64,20 +64,30 @@ export function TopicPage() {
     setMobileScreen(MobileScreen.Questions)
     setBookmarkFilter(false)
 
-    const entry = topicsConfig.find((config) => config.id === topicId)
-    if (!entry) {
+    const source = storage.list.sources().find((row) => row.id === topicId)
+    if (!source) {
       setNotFound(true)
       return
     }
 
     async function loadTopic() {
-      // entry is narrowed non-null above, but that narrowing doesn't reach
+      // source is narrowed non-null above, but that narrowing doesn't reach
       // into this nested function's closure — TS can't see across it.
-      // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
-      const [topicModule, referencesModule] = await Promise.all([entry!.load.topics(), entry!.load.references()])
+      const [topicResult, referencesResult] = await Promise.all([
+        // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
+        content.load.topic(source!),
+        // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
+        content.load.references(source!),
+      ])
       if (cancelled) {
         return
       }
+      if (topicResult.status === 'error' || referencesResult.status === 'error') {
+        setNotFound(true)
+        return
+      }
+      const topicModule = topicResult.data
+      const referencesModule = referencesResult.data
       setTopic(topicModule.topic)
       setMeta(topicModule.meta)
       setQuestions(topicModule.questions)

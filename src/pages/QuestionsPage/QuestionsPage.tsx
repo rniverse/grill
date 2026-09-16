@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { topicsConfig } from '@/topics.config'
+import { content } from '@/services/content'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { LocalTargetRef, PendingQuestion } from '@/types/personal.types'
 import { storage } from '@/services/storage'
@@ -75,18 +75,23 @@ export function QuestionsPage() {
     let cancelled = false
 
     async function loadAllTopics() {
-      const summaries = await Promise.all(
-        topicsConfig.map(async (entry) => {
-          const [topicModule, referencesModule] = await Promise.all([entry.load.topics(), entry.load.references()])
+      const results = await Promise.all(
+        storage.list.sources().map(async (source) => {
+          const [topicResult, referencesResult] = await Promise.all([
+            content.load.topic(source),
+            content.load.references(source),
+          ])
+          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
           return {
-            id: topicModule.topic.id,
-            name: topicModule.topic.name,
-            meta: topicModule.meta,
-            questions: topicModule.questions,
-            references: referencesModule.references,
+            id: topicResult.data.topic.id,
+            name: topicResult.data.topic.name,
+            meta: topicResult.data.meta,
+            questions: topicResult.data.questions,
+            references: referencesResult.data.references,
           }
         }),
       )
+      const summaries = results.filter((summary) => summary !== null)
       if (!cancelled) setLoadedTopics(summaries)
     }
 

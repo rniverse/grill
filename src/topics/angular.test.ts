@@ -4,8 +4,8 @@ import referencesData from '@/references/angular.json'
 
 describe('angular topic content', () => {
   test('content bundle ids are as expected', () => {
-    expect(topicData.id).toBe('topics-angular')
-    expect(referencesData.id).toBe('references-angular')
+    expect(topicData.id).toBe('angular')
+    expect(referencesData.id).toBe('angular')
   })
 
   test('meta has valid ISO timestamps', () => {

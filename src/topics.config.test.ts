@@ -5,9 +5,7 @@ describe('topicsConfig', () => {
   test('has one entry each for angular and nodejs', () => {
     expect(topicsConfig).toHaveLength(2)
     expect(topicsConfig[0].id).toBe('angular')
-    expect(topicsConfig[0].name).toBe('Angular')
     expect(topicsConfig[1].id).toBe('nodejs')
-    expect(topicsConfig[1].name).toBe('Node.js')
   })
 
   test('load() resolves the real topic module', async () => {

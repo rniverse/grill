@@ -48,6 +48,19 @@ function jsonResponse(body: unknown, ok = true, status = 200): Response {
   } as Response
 }
 
+// A 200 response whose body isn't valid JSON — response.json() rejects with
+// a SyntaxError in this case, distinct from a network failure or a schema
+// mismatch on already-parsed JSON.
+function malformedJsonResponse(): Response {
+  return {
+    ok: true,
+    status: 200,
+    json: async (): Promise<unknown> => {
+      throw new SyntaxError('Unexpected token')
+    },
+  } as Response
+}
+
 // bun-types' `fetch` is a function-plus-namespace (it carries `.preconnect`),
 // so a plain mock function isn't structurally assignable to it. Centralize
 // the cast here rather than repeating it at every call site.
@@ -127,6 +140,17 @@ describe('content.load.topic', () => {
     expect(result.status).toBe('error')
     expect(fetchMock).not.toHaveBeenCalled()
   })
+
+  test('a 200 response with a malformed body resolves to an error instead of rejecting', async () => {
+    mockFetch(async () => malformedJsonResponse())
+
+    const result = await content.load.topic(row)
+
+    expect(result.status).toBe('error')
+    if (result.status === 'error') {
+      expect(result.error.message).toBe('Unexpected token')
+    }
+  })
 })
 
 describe('content.load.references', () => {
@@ -149,5 +173,16 @@ describe('content.load.references', () => {
 
     expect(result.status).toBe('error')
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  test('a 200 response with a malformed body resolves to an error instead of rejecting', async () => {
+    mockFetch(async () => malformedJsonResponse())
+
+    const result = await content.load.references(row)
+
+    expect(result.status).toBe('error')
+    if (result.status === 'error') {
+      expect(result.error.message).toBe('Unexpected token')
+    }
   })
 })

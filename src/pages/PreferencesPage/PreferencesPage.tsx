@@ -21,25 +21,27 @@ function SourceRow({ source, onValidated }: { source: ContentSourceConfig; onVal
     setValidating(true)
     const at = new Date().toISOString()
 
-    if (source.source.topic) {
-      const result = await content.load.topic(source)
-      storage.update.sourceValidation(
-        source.id,
-        'topic',
-        result.status === 'ok' ? { status: 'success', at } : { status: 'failed', at, error: result.error },
-      )
+    try {
+      if (source.source.topic) {
+        const result = await content.load.topic(source)
+        storage.update.sourceValidation(
+          source.id,
+          'topic',
+          result.status === 'ok' ? { status: 'success', at } : { status: 'failed', at, error: result.error },
+        )
+      }
+      if (source.source.references) {
+        const result = await content.load.references(source)
+        storage.update.sourceValidation(
+          source.id,
+          'references',
+          result.status === 'ok' ? { status: 'success', at } : { status: 'failed', at, error: result.error },
+        )
+      }
+    } finally {
+      setValidating(false)
+      onValidated()
     }
-    if (source.source.references) {
-      const result = await content.load.references(source)
-      storage.update.sourceValidation(
-        source.id,
-        'references',
-        result.status === 'ok' ? { status: 'success', at } : { status: 'failed', at, error: result.error },
-      )
-    }
-
-    setValidating(false)
-    onValidated()
   }
 
   function renderValidation(validation: SourceValidation | undefined) {

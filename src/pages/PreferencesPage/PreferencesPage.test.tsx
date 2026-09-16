@@ -2,6 +2,19 @@ import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { PreferencesPage } from './PreferencesPage'
+import { storage } from '@/services/storage'
+import angularTopicData from '@/topics/angular.json'
+import angularReferencesData from '@/references/angular.json'
+import nodejsTopicData from '@/topics/nodejs.json'
+import nodejsReferencesData from '@/references/nodejs.json'
+
+function fixtureFor(url: string): unknown {
+  if (url.includes('/topics/angular')) return angularTopicData
+  if (url.includes('/references/angular')) return angularReferencesData
+  if (url.includes('/topics/nodejs')) return nodejsTopicData
+  if (url.includes('/references/nodejs')) return nodejsReferencesData
+  throw new Error(`no fixture for ${url}`)
+}
 
 beforeEach(() => {
   localStorage.clear()
@@ -80,28 +93,27 @@ describe('PreferencesPage', () => {
   })
 
   test('clicking Validate on a row shows success after a successful check', async () => {
-    globalThis.fetch = mock(async () => ({
-      ok: true,
-      status: 200,
-      json: async () => ({
-        id: 'angular',
-        meta: {
-          version: '1.0.0',
-          cutOffTime: '2026-09-14T00:00:00.000Z',
-          updatedAt: '2026-09-14T00:00:00.000Z',
-          type: 'topic',
-          name: 'Angular',
-        },
-        questions: [],
-      }),
-    })) as unknown as typeof fetch
+    globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
+    }) as unknown as typeof fetch
 
     renderPage()
     await act(async () => {})
 
+    // Angular is the first row in CONTENT_SOURCES.
     const validateButtons = screen.getAllByRole('button', { name: 'Validate' })
     fireEvent.click(validateButtons[0])
 
-    await waitFor(() => expect(screen.getAllByText(/Validated|Failed/).length).toBeGreaterThan(0))
+    // The status text shares a <p> with the "· <timestamp>" suffix, so the
+    // element's full normalized text isn't exactly "Validated" — match it as
+    // a substring instead of a regex that would equally match "Failed".
+    await waitFor(() => expect(screen.getAllByText('Validated', { exact: false })).toHaveLength(2))
+    expect(screen.queryByText('Failed', { exact: false })).toBeNull()
+
+    const sources = storage.list.sources()
+    const angular = sources.find((source) => source.id === 'angular')
+    expect(angular?.validation?.topic?.status).toBe('success')
+    expect(angular?.validation?.references?.status).toBe('success')
   })
 })

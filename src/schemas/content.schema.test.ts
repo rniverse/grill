@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'bun:test'
 import { parseReferencesFile, parseTopicFile } from './content.schema'
+import angularTopicData from '@/topics/angular.json'
+import angularReferencesData from '@/references/angular.json'
+import nodejsTopicData from '@/topics/nodejs.json'
+import nodejsReferencesData from '@/references/nodejs.json'
 
 const validTopic = {
   id: 'angular',
@@ -76,5 +80,27 @@ describe('parseReferencesFile', () => {
     const broken = { ...validReferences, references: [{ id: 'r1', text: validReferences.references[0].text }] }
     const result = parseReferencesFile(broken)
     expect(result.success).toBe(false)
+  })
+})
+
+// Before this feature these files were `import()`ed and type-checked at
+// build time. Now they're only fetched and validated at runtime in the
+// browser — nothing else in the suite confirms the actual shipped files
+// still pass the schema a future edit to them could silently break.
+describe('real shipped content files', () => {
+  test.each([
+    ['topics/angular.json', angularTopicData],
+    ['topics/nodejs.json', nodejsTopicData],
+  ])('%s passes parseTopicFile', (_name, data) => {
+    const result = parseTopicFile(data)
+    expect(result.success).toBe(true)
+  })
+
+  test.each([
+    ['references/angular.json', angularReferencesData],
+    ['references/nodejs.json', nodejsReferencesData],
+  ])('%s passes parseReferencesFile', (_name, data) => {
+    const result = parseReferencesFile(data)
+    expect(result.success).toBe(true)
   })
 })

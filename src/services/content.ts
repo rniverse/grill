@@ -58,7 +58,13 @@ async function fetchAndValidate<T>(
     return { status: 'error', error: { message: `HTTP ${response.status}`, meta: { url } } }
   }
 
-  const json: unknown = await response.json()
+  let json: unknown
+  try {
+    json = await response.json()
+  } catch (err) {
+    return { status: 'error', error: toFetchError(err, url) }
+  }
+
   const result = parse(json)
   if (!result.success) {
     return { status: 'error', error: { message: SCHEMA_ERROR_MESSAGE, meta: result.issues } }

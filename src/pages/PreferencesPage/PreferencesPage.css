@@ -83,67 +83,85 @@
   }
 }
 
-.preferences-page__section-title {
-  margin: 0;
-  font-family: var(--font-ui);
-  font-size: var(--text-section-title);
-  font-weight: 600;
-  color: var(--color-ink);
+.preferences-page__body {
+  display: flex;
+  gap: var(--space-xl);
+  min-height: 0;
+  flex: 1;
 }
 
-.preferences-page__sources {
+.preferences-page__nav {
   display: flex;
   flex-direction: column;
-  gap: var(--space-lg);
-}
-
-.preferences-page__source-row {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  align-items: stretch;
   gap: var(--space-xs);
-  padding: var(--space-md);
-  border: var(--size-hairline) solid var(--color-hairline);
-  border-radius: var(--radius-row);
+  flex-shrink: 0;
+  width: 180px;
 }
 
-.preferences-page__source-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-sm);
-}
-
-.preferences-page__source-name {
+.preferences-page__nav-item {
+  border: none;
+  background: none;
+  text-align: left;
+  border-radius: var(--radius-control);
+  padding: var(--space-sm) var(--space-md);
   font-family: var(--font-ui);
   font-size: var(--text-secondary);
   font-weight: 600;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+}
+
+.preferences-page__nav-item[aria-current='true'] {
+  background: var(--color-ground);
   color: var(--color-ink);
 }
 
-.preferences-page__source-id {
-  font-family: var(--font-mono);
-  font-size: var(--text-mono-meta);
-  color: var(--color-ink-tertiary);
-}
-
-.preferences-page__source-field {
+.preferences-page__panel {
   display: flex;
-  gap: var(--space-sm);
-  font-family: var(--font-mono);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-lg);
+  flex: 1;
+  min-width: 0;
+}
+
+.preferences-page__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
   font-size: var(--text-mono-meta);
 }
 
-.preferences-page__source-field-label {
+.preferences-page__table th {
+  text-align: left;
+  padding: var(--space-xs) var(--space-sm);
   color: var(--color-ink-tertiary);
-  flex-shrink: 0;
+  font-weight: 600;
+  border-bottom: var(--size-hairline) solid var(--color-hairline);
 }
 
-.preferences-page__source-field-value {
+.preferences-page__table td {
+  padding: var(--space-sm);
+  border-bottom: var(--size-hairline) solid var(--color-hairline);
+  vertical-align: top;
+  color: var(--color-ink);
+}
+
+.preferences-page__table-mono {
+  font-family: var(--font-mono);
   color: var(--color-ink-secondary);
   word-break: break-all;
 }
 
-.preferences-page__source-validate {
+.preferences-page__table-actions {
+  display: flex;
+  gap: var(--space-xs);
+  white-space: nowrap;
+}
+
+.preferences-page__source-validate,
+.preferences-page__table-edit {
   border: none;
   border-radius: var(--radius-control);
   padding: var(--space-xs) var(--space-md);
@@ -155,9 +173,24 @@
   cursor: pointer;
 }
 
+.preferences-page__table-edit {
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
 .preferences-page__source-validate:disabled {
   opacity: 0.6;
   cursor: default;
+}
+
+.preferences-page__table-remove {
+  border: none;
+  background: none;
+  padding: var(--space-xs);
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
 }
 
 .preferences-page__source-status {
@@ -172,4 +205,118 @@
 
 .preferences-page__source-status--failed {
   color: var(--color-ink-secondary);
+}
+
+.preferences-page__add-source {
+  border: none;
+  border-radius: var(--radius-control);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.preferences-page__dialog {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-modal);
+  padding: var(--space-lg);
+  width: var(--size-modal-width);
+  max-width: var(--size-modal-max-width);
+  /* Every other custom dialog in this app sets this (ReferenceModal,
+     NoteDetailPage, QuestionsPage) — without it the popup sits at the base
+     component's z-50, below --z-modal (70), and renders blurry. */
+  z-index: var(--z-modal);
+}
+
+.preferences-page__dialog-title {
+  margin: 0 0 var(--space-md);
+  font-family: var(--font-ui);
+  font-size: var(--text-section-title);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.preferences-page__dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.preferences-page__dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  color: var(--color-ink-tertiary);
+}
+
+.preferences-page__dialog-field input {
+  border: var(--size-hairline) solid var(--color-hairline);
+  border-radius: var(--radius-control);
+  padding: var(--space-xs) var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: var(--text-mono-meta);
+  color: var(--color-ink);
+}
+
+.preferences-page__dialog-field input:disabled {
+  opacity: 0.6;
+}
+
+.preferences-page__dialog-error {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  color: var(--color-ink-secondary);
+}
+
+.preferences-page__dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+
+.preferences-page__dialog-cancel {
+  border: none;
+  background: none;
+  border-radius: var(--radius-control);
+  padding: var(--space-xs) var(--space-md);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+}
+
+.preferences-page__dialog-save {
+  border: none;
+  border-radius: var(--radius-control);
+  padding: var(--space-xs) var(--space-md);
+  background: var(--color-accent);
+  color: var(--color-surface);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (max-width: 700px) {
+  .preferences-page__body {
+    flex-direction: column;
+  }
+
+  .preferences-page__nav {
+    flex-direction: row;
+    width: auto;
+  }
+
+  .preferences-page__table {
+    display: block;
+    overflow-x: auto;
+  }
 }

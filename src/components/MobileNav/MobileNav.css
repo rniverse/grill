@@ -149,7 +149,6 @@
   font-weight: 500;
 }
 
-.mobile-nav__topic-count,
 .mobile-nav__item-count {
   margin-left: auto;
   font-family: var(--font-mono);

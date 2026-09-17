@@ -9,6 +9,7 @@ export interface TopicModule {
 }
 
 export interface ReferencesModule {
+  meta: FileMeta
   references: Reference[]
 }
 
@@ -25,7 +26,10 @@ const adapt = {
     }
   },
   references(raw: RawReferencesFile): ReferencesModule {
-    return { references: raw.references }
+    return {
+      meta: { version: raw.meta.version, cutOffTime: raw.meta.cutOffTime, updatedAt: raw.meta.updatedAt },
+      references: raw.references,
+    }
   },
 }
 

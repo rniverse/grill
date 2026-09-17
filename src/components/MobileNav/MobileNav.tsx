@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { content } from '@/services/content'
 import { storage } from '@/services/storage'
 import { downloadPersonalLayer } from '@/utils/download-personal-layer'
 import { t } from '@/utils/i18n'
@@ -17,55 +16,17 @@ import {
 } from '@/utils/icons'
 import './MobileNav.css'
 
-interface LoadedTopicSummary {
-  id: string
-  name: string
-  questionCount: number
-}
-
 // activeTopicId isn't a prop: MobileNav is only ever rendered inside route
 // components, so the router's own params already carry it (undefined on
 // routes with no :topicId, same as before).
 export function MobileNav() {
   const { topicId: activeTopicId } = useParams<{ topicId?: string }>()
   const [open, setOpen] = useState(false)
-  const [loadedTopics, setLoadedTopics] = useState<LoadedTopicSummary[]>([])
-  const [totalReferences, setTotalReferences] = useState(0)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const wasOpenRef = useRef(open)
-
-  useEffect(() => {
-    if (!open) return
-    let cancelled = false
-
-    async function loadAllTopics() {
-      const results = await Promise.all(
-        storage.list.sources().map(async (source) => {
-          const [topicResult, referencesResult] = await Promise.all([
-            content.load.topic(source),
-            content.load.references(source),
-          ])
-          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
-          return {
-            id: topicResult.data.topic.id,
-            name: topicResult.data.topic.name,
-            questionCount: topicResult.data.questions.length,
-            referenceCount: referencesResult.data.references.length,
-          }
-        }),
-      )
-      const loaded = results.filter((result) => result !== null)
-      if (!cancelled) {
-        setLoadedTopics(loaded.map(({ id, name, questionCount }) => ({ id, name, questionCount })))
-        setTotalReferences(loaded.reduce((sum, { referenceCount }) => sum + referenceCount, 0))
-      }
-    }
-
-    loadAllTopics()
-    return () => {
-      cancelled = true
-    }
-  }, [open])
+  // Names only, from local storage — no fetch here. A topic's real content
+  // is only fetched once the user opens it.
+  const topics = storage.list.sources().filter((source) => source.source.topic)
 
   useEffect(() => {
     if (!open) return
@@ -89,7 +50,7 @@ export function MobileNav() {
   }, [open])
 
   const yourItems: { to: string; label: string; Icon: typeof ReferencesIcon; count?: number }[] = [
-    { to: '/references', label: t('nav.references'), Icon: ReferencesIcon, count: totalReferences },
+    { to: '/references', label: t('nav.references'), Icon: ReferencesIcon },
     { to: '/bookmarks', label: t('nav.bookmarks'), Icon: BookmarksIcon, count: storage.list.personal.bookmarks().length },
     { to: '/questions', label: t('nav.questions'), Icon: QuestionsIcon, count: storage.list.personal.questions().length },
     { to: '/notes', label: t('nav.notes'), Icon: NotesIcon, count: storage.list.personal.notes().length },
@@ -136,16 +97,15 @@ export function MobileNav() {
 
             <div className="mobile-nav__section">
               <span className="mobile-nav__section-label">{t('nav.topics')}</span>
-              {loadedTopics.map((topicSummary) => (
+              {topics.map((source) => (
                 <Link
-                  key={topicSummary.id}
-                  to={`/topics/${topicSummary.id}`}
+                  key={source.id}
+                  to={`/topics/${source.id}`}
                   className="mobile-nav__topic"
-                  aria-current={topicSummary.id === activeTopicId ? 'true' : undefined}
+                  aria-current={source.id === activeTopicId ? 'true' : undefined}
                   onClick={() => setOpen(false)}
                 >
-                  <span className="mobile-nav__topic-name">{topicSummary.name}</span>
-                  <span className="mobile-nav__topic-count">{topicSummary.questionCount}</span>
+                  <span className="mobile-nav__topic-name">{source.name}</span>
                 </Link>
               ))}
             </div>

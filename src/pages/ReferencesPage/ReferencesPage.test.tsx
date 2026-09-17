@@ -15,12 +15,15 @@ function fixtureFor(url: string): unknown {
   throw new Error(`no fixture for ${url}`)
 }
 
-beforeEach(() => {
-  localStorage.clear()
+function mockFetch() {
   globalThis.fetch = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
   }) as unknown as typeof fetch
+}
+
+beforeEach(() => {
+  localStorage.clear()
 })
 
 function renderAt(path: string) {
@@ -36,28 +39,21 @@ function renderAt(path: string) {
 
 describe('ReferencesPage', () => {
   describe('topic picker (/references)', () => {
-    test('renders a row for every configured topic once loaded', async () => {
+    test('renders a row for every configured topic from local storage, with no network request', () => {
+      const fetchMock = () => {
+        throw new Error('the references picker must not fetch — names come from local storage')
+      }
+      globalThis.fetch = fetchMock as unknown as typeof fetch
+
       renderAt('/references')
-      expect(await screen.findByText('Angular')).toBeDefined()
+
+      expect(screen.getByText('Angular')).toBeDefined()
       expect(screen.getByText('Node.js')).toBeDefined()
     })
 
-    test('renders each topic with its real reference count, not a question count', async () => {
-      renderAt('/references')
-      await screen.findByText('Angular')
-
-      // angular ships 5 references, nodejs ships 3 (src/references/*.ts) —
-      // distinct from either topic's question count, so this proves the
-      // picker is counting references and not reusing LandingPage's numbers.
-      const angularRow = screen.getByText('Angular').closest('a')
-      const nodejsRow = screen.getByText('Node.js').closest('a')
-      expect(angularRow?.textContent).toContain('5')
-      expect(nodejsRow?.textContent).toContain('3')
-    })
-
     test('clicking a topic row navigates to that topic\'s reference chips', async () => {
+      mockFetch()
       renderAt('/references')
-      await screen.findByText('Angular')
 
       fireEvent.click(screen.getByText('Angular'))
 
@@ -65,16 +61,28 @@ describe('ReferencesPage', () => {
       expect(screen.getByRole('button', { name: 'NgRx' })).toBeDefined()
     })
 
-    test('renders a MobileNav trigger for phone widths', async () => {
+    test('renders a MobileNav trigger for phone widths', () => {
       renderAt('/references')
-      await screen.findByText('Angular')
 
       expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
     })
   })
 
   describe('topic references (/references/:topicId)', () => {
+    test('never fetches the topic (questions) file — only references for this slug', async () => {
+      globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+        const url = typeof input === 'string' ? input : input.toString()
+        if (url.includes('/topics/')) throw new Error(`must not fetch the topic file: ${url}`)
+        return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
+      }) as unknown as typeof fetch
+
+      renderAt('/references/nodejs')
+
+      expect(await screen.findByRole('button', { name: 'Event Loop' })).toBeDefined()
+    })
+
     test('renders every reference as a clickable chip', async () => {
+      mockFetch()
       renderAt('/references/nodejs')
       expect(await screen.findByRole('button', { name: 'Event Loop' })).toBeDefined()
       expect(screen.getByRole('button', { name: 'libuv' })).toBeDefined()
@@ -82,6 +90,7 @@ describe('ReferencesPage', () => {
     })
 
     test('clicking a chip opens ReferenceModal with that reference', async () => {
+      mockFetch()
       renderAt('/references/nodejs')
       const chip = await screen.findByRole('button', { name: 'Event Loop' })
 
@@ -98,6 +107,7 @@ describe('ReferencesPage', () => {
     })
 
     test('renders a MobileNav trigger for phone widths, including on the not-found screen', async () => {
+      mockFetch()
       renderAt('/references/nodejs')
       await screen.findByRole('button', { name: 'Event Loop' })
       expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()

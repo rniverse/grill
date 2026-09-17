@@ -57,14 +57,6 @@
   background: var(--color-hairline-alt);
 }
 
-.topic-row__count {
-  font-family: var(--font-mono);
-  font-size: var(--text-mono-meta);
-  color: var(--color-accent-text);
-  width: var(--size-topic-row-count);
-  text-align: right;
-}
-
 /* Mobile row ("5m" in the design handoff): no leader line, slightly smaller
    name, tighter gap/padding/radius. @media conditions can't reference custom
    properties, so this mirrors --bp-mobile (700px) from variables.css literally. */

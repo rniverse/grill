@@ -29,3 +29,6 @@ dist-ssr
 *.sln
 *.sw?
 graphify-out/
+
+# Planning/design docs stay local, not in git
+docs/

@@ -8,7 +8,7 @@ import { router } from './routes'
 // Optional chaining here would silently skip .render() instead of throwing.
 // biome-ignore lint/style/noNonNullAssertion: see comment
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+  // <StrictMode>
     <RouterProvider router={router} />
-  </StrictMode>,
+  // </StrictMode>,
 )

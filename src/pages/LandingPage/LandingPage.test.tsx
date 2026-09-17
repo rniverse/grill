@@ -1,39 +1,38 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import { beforeEach, describe, expect, test } from 'bun:test'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { LandingPage } from './LandingPage'
 import { storage } from '@/services/storage'
-import angularTopicData from '@/topics/angular.json'
-import angularReferencesData from '@/references/angular.json'
-import nodejsTopicData from '@/topics/nodejs.json'
-import nodejsReferencesData from '@/references/nodejs.json'
-
-function fixtureFor(url: string): unknown {
-  if (url.includes('/topics/angular')) return angularTopicData
-  if (url.includes('/references/angular')) return angularReferencesData
-  if (url.includes('/topics/nodejs')) return nodejsTopicData
-  if (url.includes('/references/nodejs')) return nodejsReferencesData
-  throw new Error(`no fixture for ${url}`)
-}
 
 beforeEach(() => {
   localStorage.clear()
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
-    const url = typeof input === 'string' ? input : input.toString()
-    return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
 })
 
 describe('LandingPage', () => {
-  test('renders a row for each configured topic once loaded', async () => {
+  test('renders a row for each configured source from local storage, with no network request', async () => {
+    const fetchMock = () => {
+      throw new Error('LandingPage must not fetch — names come from local storage')
+    }
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
     render(
       <MemoryRouter>
         <LandingPage />
       </MemoryRouter>,
     )
 
-    const angularRow = await screen.findByText('Angular')
-    expect(angularRow).toBeDefined()
+    expect(screen.getByText('Angular')).toBeDefined()
+    expect(screen.getByText('Node.js')).toBeDefined()
+  })
+
+  test('renders a topic-count summary with no question/reference counts', () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getAllByText('2 topics').length).toBeGreaterThan(0)
   })
 
   test('renders the CONTENTS label and search/import controls', async () => {

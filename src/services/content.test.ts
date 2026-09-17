@@ -162,6 +162,7 @@ describe('content.load.references', () => {
     expect(result.status).toBe('ok')
     if (result.status === 'ok') {
       expect(result.data.references).toHaveLength(1)
+      expect(result.data.meta.version).toBe('1.0.0')
     }
   })
 

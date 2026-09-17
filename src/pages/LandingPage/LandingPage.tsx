@@ -1,5 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
-import { content, type TopicModule } from '@/services/content'
+import { useRef, useState, type ChangeEvent } from 'react'
 import { t } from '@/utils/i18n'
 import { SearchIcon, ImportIcon, LogoIcon } from '@/utils/icons'
 import { storage } from '@/services/storage'
@@ -8,56 +7,12 @@ import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
 import './LandingPage.css'
 
-interface LoadedTopic {
-  id: string
-  name: string
-  questionCount: number
-  blurb?: string
-}
-
 export function LandingPage() {
-  const [loadedTopics, setLoadedTopics] = useState<LoadedTopic[]>([])
-  const [totalReferences, setTotalReferences] = useState(0)
   const [importError, setImportError] = useState(false)
   const importInputRef = useRef<HTMLInputElement>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function loadAllTopics() {
-      const results = await Promise.all(
-        storage.list.sources().map(async (source) => {
-          const [topicResult, referencesResult] = await Promise.all([
-            content.load.topic(source),
-            content.load.references(source),
-          ])
-          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
-          return { topicModule: topicResult.data, referenceCount: referencesResult.data.references.length }
-        }),
-      )
-      const loaded = results.filter((result) => result !== null)
-
-      if (cancelled) {
-        return
-      }
-
-      const nextLoadedTopics: TopicModule[] = loaded.map(({ topicModule }) => topicModule)
-      setLoadedTopics(
-        nextLoadedTopics.map((topicModule) => ({
-          id: topicModule.topic.id,
-          name: topicModule.topic.name,
-          questionCount: topicModule.questions.length,
-        })),
-      )
-      setTotalReferences(loaded.reduce((sum, { referenceCount }) => sum + referenceCount, 0))
-    }
-
-    loadAllTopics()
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
+  // Names only, from local storage — no fetch here. Fetching a topic's real
+  // content only happens once the user opens that specific topic.
+  const sources = storage.list.sources()
 
   async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]
@@ -73,12 +28,7 @@ export function LandingPage() {
     }
   }
 
-  const totalQuestions = loadedTopics.reduce((sum, topic) => sum + topic.questionCount, 0)
-  const summaryText = t('landing.summary', {
-    topics: loadedTopics.length,
-    questions: totalQuestions,
-    references: totalReferences,
-  })
+  const summaryText = t('landing.summary', { topics: sources.length })
 
   return (
     <div className="landing-page">
@@ -128,14 +78,12 @@ export function LandingPage() {
           />
           {importError ? <p className="landing-page__import-error">{t('landing.import.error')}</p> : null}
           <div className="landing-page__rows">
-            {loadedTopics.map((topic, index) => (
+            {sources.map((source, index) => (
               <TopicRow
-                key={topic.id}
+                key={source.id}
                 ordinal={String(index + 1).padStart(2, '0')}
-                topicId={topic.id}
-                name={topic.name}
-                blurb={topic.blurb}
-                questionCount={topic.questionCount}
+                topicId={source.id}
+                name={source.name}
               />
             ))}
           </div>

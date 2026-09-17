@@ -43,33 +43,31 @@ describe('PreferencesPage', () => {
     expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
   })
 
-  test('renders a Sources section listing the seeded rows', async () => {
+  test('renders left nav with Content sources and Developer, Content sources active by default', async () => {
     renderPage()
     await act(async () => {})
 
-    expect(screen.getByText('Content sources')).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Content sources' })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'Developer' })).toBeDefined()
     expect(screen.getByText('Angular')).toBeDefined()
     expect(screen.getByText('Node.js')).toBeDefined()
+    expect(screen.queryByRole('button', { name: 'Generate new ID' })).toBeNull()
   })
 
-  test('renders a Developer section with the existing Generate ID control', async () => {
+  test('clicking Developer switches the right panel to the Generate ID control', async () => {
     renderPage()
     await act(async () => {})
 
-    expect(screen.getByText('Developer')).toBeDefined()
-    expect(screen.getByRole('button', { name: 'Generate new ID' })).toBeDefined()
-  })
-
-  test('renders the generate button with no confirmation message yet', async () => {
-    renderPage()
-    await act(async () => {})
+    fireEvent.click(screen.getByRole('button', { name: 'Developer' }))
 
     expect(screen.getByRole('button', { name: 'Generate new ID' })).toBeDefined()
-    expect(screen.queryByText('New ID copied to clipboard')).toBeNull()
+    expect(screen.queryByText('Angular')).toBeNull()
   })
 
   test('clicking generate copies a new ULID to the clipboard and shows a confirmation', async () => {
     renderPage()
+    await act(async () => {})
+    fireEvent.click(screen.getByRole('button', { name: 'Developer' }))
 
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: 'Generate new ID' }))
@@ -105,9 +103,6 @@ describe('PreferencesPage', () => {
     const validateButtons = screen.getAllByRole('button', { name: 'Validate' })
     fireEvent.click(validateButtons[0])
 
-    // The status text shares a <p> with the "· <timestamp>" suffix, so the
-    // element's full normalized text isn't exactly "Validated" — match it as
-    // a substring instead of a regex that would equally match "Failed".
     await waitFor(() => expect(screen.getAllByText('Validated', { exact: false })).toHaveLength(2))
     expect(screen.queryByText('Failed', { exact: false })).toBeNull()
 
@@ -115,5 +110,63 @@ describe('PreferencesPage', () => {
     const angular = sources.find((source) => source.id === 'angular')
     expect(angular?.validation?.topic?.status).toBe('success')
     expect(angular?.validation?.references?.status).toBe('success')
+  })
+
+  test('Add source opens a dialog and creates a new row on save', async () => {
+    renderPage()
+    await act(async () => {})
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add source' }))
+    fireEvent.change(screen.getByLabelText('ID'), { target: { value: 'react' } })
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'React' } })
+    fireEvent.change(screen.getByLabelText('Topic source'), {
+      target: { value: 'https://example.test/react.json' },
+    })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByText('React')).toBeDefined()
+    expect(storage.list.sources()).toHaveLength(3)
+  })
+
+  test('Add source with a duplicate id shows an inline error and does not close the dialog', async () => {
+    renderPage()
+    await act(async () => {})
+
+    fireEvent.click(screen.getByRole('button', { name: 'Add source' }))
+    fireEvent.change(screen.getByLabelText('ID'), { target: { value: 'angular' } })
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Angular Again' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByText('A source with this ID already exists.')).toBeDefined()
+    expect(screen.getByLabelText('ID')).toBeDefined() // dialog still open
+    expect(storage.list.sources()).toHaveLength(2)
+  })
+
+  test('Edit updates a row and preserves its id', async () => {
+    renderPage()
+    await act(async () => {})
+
+    const editButtons = screen.getAllByRole('button', { name: 'Edit' })
+    fireEvent.click(editButtons[0])
+
+    const nameInput = screen.getByLabelText('Name') as HTMLInputElement
+    fireEvent.change(nameInput, { target: { value: 'Angular (renamed)' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save' }))
+
+    expect(await screen.findByText('Angular (renamed)')).toBeDefined()
+    const sources = storage.list.sources()
+    expect(sources.find((source) => source.id === 'angular')?.name).toBe('Angular (renamed)')
+    expect(sources).toHaveLength(2)
+  })
+
+  test('Delete removes a row', async () => {
+    renderPage()
+    await act(async () => {})
+
+    const deleteButtons = screen.getAllByRole('button', { name: 'Delete source' })
+    fireEvent.click(deleteButtons[0])
+
+    expect(screen.queryByText('Angular')).toBeNull()
+    expect(storage.list.sources().map((source) => source.id)).toEqual(['nodejs'])
   })
 })

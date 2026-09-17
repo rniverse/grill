@@ -127,6 +127,46 @@ function listContentSources(): ContentSourceConfig[] {
   return readArray<ContentSourceConfig>(KEY.contentSources)
 }
 
+function createContentSource(row: {
+  id: string
+  name: string
+  source: { topic?: string; references?: string }
+}): ContentSourceConfig {
+  const sources = listContentSources()
+  if (sources.some((existing) => existing.id === row.id)) {
+    throw new Error(`createContentSource: id "${row.id}" already exists`)
+  }
+
+  const source: ContentSourceConfig = { id: row.id, name: row.name, source: row.source }
+  sources.push(source)
+  writeArray(KEY.contentSources, sources)
+  return source
+}
+
+function updateContentSource(
+  id: string,
+  patch: { name?: string; source?: { topic?: string; references?: string } },
+): ContentSourceConfig | undefined {
+  const sources = listContentSources()
+  const index = sources.findIndex((source) => source.id === id)
+  if (index === -1) return undefined
+
+  const existing = sources[index]
+  const updated: ContentSourceConfig = {
+    ...existing,
+    name: patch.name ?? existing.name,
+    source: patch.source ?? existing.source,
+  }
+  sources[index] = updated
+  writeArray(KEY.contentSources, sources)
+  return updated
+}
+
+function deleteContentSource(id: string): void {
+  const remaining = listContentSources().filter((source) => source.id !== id)
+  writeArray(KEY.contentSources, remaining)
+}
+
 function updateSourceValidation(id: string, kind: 'topic' | 'references', result: SourceValidation): void {
   const sources = listContentSources()
   const index = sources.findIndex((source) => source.id === id)
@@ -254,14 +294,17 @@ export const storage = {
   create: {
     note: savePersonalNote,
     question: savePendingQuestion,
+    source: createContentSource,
   },
   update: {
     note: updatePersonalNote,
     sourceValidation: updateSourceValidation,
+    source: updateContentSource,
   },
   delete: {
     note: deletePersonalNote,
     question: deletePendingQuestion,
+    source: deleteContentSource,
   },
   toggle: {
     bookmark: toggleBookmark,

@@ -355,4 +355,51 @@ describe('content sources', () => {
 
     expect(storage.list.sources().every((source) => source.validation === undefined)).toBe(true)
   })
+
+  test('create.source adds a new row', () => {
+    storage.list.sources() // seeds
+
+    const created = storage.create.source({
+      id: 'react',
+      name: 'React',
+      source: { topic: 'https://example.test/react.json' },
+    })
+
+    expect(created).toEqual({ id: 'react', name: 'React', source: { topic: 'https://example.test/react.json' } })
+    expect(storage.list.sources()).toHaveLength(3)
+  })
+
+  test('create.source throws on a duplicate id', () => {
+    storage.list.sources() // seeds
+
+    expect(() => storage.create.source({ id: 'angular', name: 'Angular again', source: {} })).toThrow()
+  })
+
+  test('update.source updates name and source fields, keeps validation', () => {
+    storage.list.sources() // seeds
+    storage.update.sourceValidation('angular', 'topic', { status: 'success', at: '2026-09-16T00:00:00.000Z' })
+
+    const updated = storage.update.source('angular', {
+      name: 'Angular (updated)',
+      source: { topic: 'https://example.test/angular2.json' },
+    })
+
+    expect(updated?.name).toBe('Angular (updated)')
+    expect(updated?.source.topic).toBe('https://example.test/angular2.json')
+    expect(updated?.validation?.topic?.status).toBe('success')
+  })
+
+  test('update.source on an unknown id returns undefined', () => {
+    storage.list.sources() // seeds
+
+    expect(storage.update.source('does-not-exist', { name: 'x' })).toBeUndefined()
+  })
+
+  test('delete.source removes the row', () => {
+    storage.list.sources() // seeds
+
+    storage.delete.source('angular')
+
+    expect(storage.list.sources().map((source) => source.id)).toEqual(['nodejs'])
+  })
 })

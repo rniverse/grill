@@ -1,22 +1,22 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router'
-import { content } from '@/services/content'
+import { contentCache } from '@/services/content-cache'
 import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { storage } from '@/services/storage'
-import { BookmarksIcon, ReferencesIcon, SearchIcon } from '@/utils/icons'
+import { BookmarksIcon, ReferencesIcon, ReloadIcon, SearchIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
-import { FilterChips } from '@/components/FilterChips/FilterChips'
+import { TopicTagFilter } from '@/components/TopicTagFilter/TopicTagFilter'
 import { QuestionCard } from '@/components/QuestionCard/QuestionCard'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { MobileScreen } from './mobile-screen.enum'
 import './TopicPage.css'
 
 function collectTags(questions: Question[]): string[] {
-  const filterAll = t('topic.filter.all')
-  const tags: string[] = [filterAll]
-  const seen = new Set<string>([filterAll])
+  const tags: string[] = []
+  const seen = new Set<string>()
 
   for (const question of questions) {
     for (const tag of question.tags ?? []) {
@@ -39,7 +39,7 @@ export function TopicPage() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [references, setReferences] = useState<Reference[]>([])
   const [notFound, setNotFound] = useState(false)
-  const [activeFilter, setActiveFilter] = useState(() => t('topic.filter.all'))
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [openQuestionId, setOpenQuestionId] = useState<string | null>(null)
   const [openReference, setOpenReference] = useState<Reference | null>(null)
   // Mobile-only UI toggles (the controls that drive these are CSS-hidden
@@ -51,6 +51,7 @@ export function TopicPage() {
   // re-read storage and reflect it. Never rendered itself.
   const [, bumpPersonalVersion] = useState(0)
   const onPersonalLayerChange = () => bumpPersonalVersion((version) => version + 1)
+  const [reloading, setReloading] = useState(false)
 
   // requestedQuestionId deliberately excluded from deps below — this should
   // only act once, when the topic itself loads, not re-fire on every
@@ -59,7 +60,7 @@ export function TopicPage() {
   useEffect(() => {
     let cancelled = false
     setNotFound(false)
-    setActiveFilter(t('topic.filter.all'))
+    setSelectedTags([])
     setOpenQuestionId(null)
     setMobileScreen(MobileScreen.Questions)
     setBookmarkFilter(false)
@@ -75,9 +76,9 @@ export function TopicPage() {
       // into this nested function's closure — TS can't see across it.
       const [topicResult, referencesResult] = await Promise.all([
         // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
-        content.load.topic(source!),
+        contentCache.resolve.topic(source!),
         // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
-        content.load.references(source!),
+        contentCache.resolve.references(source!),
       ])
       if (cancelled) {
         return
@@ -107,6 +108,29 @@ export function TopicPage() {
     }
   }, [topicId])
 
+  async function handleReload() {
+    const source = storage.list.sources().find((row) => row.id === topicId)
+    if (!source) return
+
+    setReloading(true)
+    try {
+      const [topicResult, referencesResult] = await Promise.all([
+        contentCache.resolve.topic(source, { force: true }),
+        contentCache.resolve.references(source, { force: true }),
+      ])
+      if (topicResult.status === 'error' || referencesResult.status === 'error') {
+        setNotFound(true)
+        return
+      }
+      setTopic(topicResult.data.topic)
+      setMeta(topicResult.data.meta)
+      setQuestions(topicResult.data.questions)
+      setReferences(referencesResult.data.references)
+    } finally {
+      setReloading(false)
+    }
+  }
+
   if (notFound) {
     return (
       <div className="topic-page">
@@ -121,12 +145,12 @@ export function TopicPage() {
 
   const visibleQuestions = bookmarkFilter
     ? questions.filter((question) => storage.check.bookmarked({ kind: 'question', id: question.id }))
-    : questions.filter(
-        (question) => activeFilter === t('topic.filter.all') || (question.tags ?? []).includes(activeFilter),
-      )
+    : selectedTags.length === 0
+      ? questions
+      : questions.filter((question) => (question.tags ?? []).some((tag) => selectedTags.includes(tag)))
 
-  function selectFilter(tag: string) {
-    setActiveFilter(tag)
+  function selectTags(tags: string[]) {
+    setSelectedTags(tags)
     setBookmarkFilter(false)
   }
 
@@ -148,6 +172,22 @@ export function TopicPage() {
             <div className="topic-page__header">
               <div className="topic-page__title-row">
                 <h1 className="topic-page__title">{topic.name}</h1>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="topic-page__reload"
+                        aria-label={t('reload.topic')}
+                        onClick={handleReload}
+                        disabled={reloading}
+                      />
+                    }
+                  >
+                    <ReloadIcon size={14} className={reloading ? 'icon-spin' : undefined} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('reload.topic')}</TooltipContent>
+                </Tooltip>
               </div>
               <div className="topic-page__mobile-header">
                 <div className="topic-page__mobile-header-left">
@@ -218,10 +258,10 @@ export function TopicPage() {
                   : 'topic-page__filter-row'
               }
             >
-              <FilterChips
+              <TopicTagFilter
                 tags={collectTags(questions)}
-                active={bookmarkFilter ? '' : activeFilter}
-                onSelect={selectFilter}
+                selected={bookmarkFilter ? [] : selectedTags}
+                onChange={selectTags}
               />
               <button
                 type="button"

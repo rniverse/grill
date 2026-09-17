@@ -36,7 +36,7 @@
 
   /* Color — ink, quaternary (flyout panel counts/empty states, mobile nav
      section labels/counts — one notch lighter than --color-ink-tertiary) */
-  --color-ink-quaternary: #b4bcc4;
+  --color-ink-quaternary: #98a4b0;
 
   /* Font families (fontsource-variable naming convention) */
   --font-ui: 'Manrope Variable', system-ui, sans-serif;
@@ -104,6 +104,7 @@
   --size-ask-popover-width: 340px;
   --size-ask-popover-min-height: 104px;
   --size-drawer-width: 274px;
+  --size-table-col: 128px;
 
   /* Type scale — topic row */
   --text-topic-row-ordinal: 12px;

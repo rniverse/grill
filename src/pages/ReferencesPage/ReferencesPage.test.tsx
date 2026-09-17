@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, mock, test } from 'bun:test'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { ReferencesPage } from './ReferencesPage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -16,14 +17,17 @@ function fixtureFor(url: string): unknown {
 }
 
 function mockFetch() {
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  const fetchMock = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
+  })
+  globalThis.fetch = fetchMock as unknown as typeof fetch
+  return fetchMock
 }
 
 beforeEach(() => {
   localStorage.clear()
+  contentCache.clear()
 })
 
 function renderAt(path: string) {
@@ -115,6 +119,42 @@ describe('ReferencesPage', () => {
       renderAt('/references/does-not-exist')
       expect(await screen.findByText('Topic not found.')).toBeDefined()
       expect(screen.getAllByRole('button', { name: 'Menu' }).length).toBeGreaterThan(0)
+    })
+
+    test('re-mounting the same topic reuses the cache — no second fetch', async () => {
+      const fetchMock = mockFetch()
+      const { unmount } = render(
+        <MemoryRouter initialEntries={['/references/nodejs']}>
+          <Routes>
+            <Route path="/references/:topicId" element={<ReferencesPage />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+      await screen.findByRole('button', { name: 'Event Loop' })
+      unmount()
+
+      render(
+        <MemoryRouter initialEntries={['/references/nodejs']}>
+          <Routes>
+            <Route path="/references/:topicId" element={<ReferencesPage />} />
+          </Routes>
+        </MemoryRouter>,
+      )
+      await screen.findByRole('button', { name: 'Event Loop' })
+
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    })
+
+    test('clicking the reload button forces a fresh fetch even though the topic is cached', async () => {
+      const fetchMock = mockFetch()
+      renderAt('/references/nodejs')
+      await screen.findByRole('button', { name: 'Event Loop' })
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+
+      fireEvent.click(screen.getByRole('button', { name: 'Reload references' }))
+      await screen.findByRole('button', { name: 'Event Loop' })
+
+      expect(fetchMock).toHaveBeenCalledTimes(2)
     })
   })
 })

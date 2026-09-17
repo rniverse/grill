@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { QuestionsPage } from './QuestionsPage'
 import { storage } from '@/services/storage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -11,9 +12,12 @@ import nodejsReferencesData from '@/references/nodejs.json'
 const angularTopic = { name: angularTopicData.meta.name }
 const angularQuestions = angularTopicData.questions
 const angularReferences = angularReferencesData.references
+const nodejsTopic = { name: nodejsTopicData.meta.name }
+const nodejsReferences = nodejsReferencesData.references
 
 const angularQuestion = angularQuestions[0]
 const angularReference = angularReferences[0]
+const nodejsReference = nodejsReferences[0]
 
 function fixtureFor(url: string): unknown {
   if (url.includes('/topics/angular')) return angularTopicData
@@ -23,16 +27,20 @@ function fixtureFor(url: string): unknown {
   throw new Error(`no fixture for ${url}`)
 }
 
+let fetchMock: ReturnType<typeof mock>
+
 beforeEach(() => {
   localStorage.clear()
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  contentCache.clear()
+  fetchMock = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
+  })
+  globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 function renderPage() {
-  render(
+  return render(
     <MemoryRouter>
       <QuestionsPage />
     </MemoryRouter>,
@@ -112,9 +120,10 @@ describe('QuestionsPage', () => {
 
     fireEvent.click(await screen.findByText('What does this mean in practice?'))
 
-    expect(await screen.findByText('the quoted passage')).toBeDefined()
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText('the quoted passage')).toBeDefined()
     // The dialog also shows which question this was asked against.
-    expect(await screen.findByText(angularQuestion.question)).toBeDefined()
+    expect(within(dialog).getByText(angularQuestion.question)).toBeDefined()
     const link = screen.getByRole('link', { name: 'Go to question' })
     expect(link.getAttribute('href')).toBe(`/topics/angular?question=${angularQuestion.id}`)
   })
@@ -131,9 +140,10 @@ describe('QuestionsPage', () => {
 
     fireEvent.click(await screen.findByText('Why does this reference matter?'))
     // The dialog also shows which reference term this was asked against.
-    expect(await screen.findByText(angularReference.term)).toBeDefined()
+    const dialog = await screen.findByRole('dialog')
+    expect(within(dialog).getByText(angularReference.term)).toBeDefined()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Go to reference' }))
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Go to reference' }))
 
     expect(await screen.findAllByText(angularReference.term)).not.toHaveLength(0)
   })
@@ -171,5 +181,117 @@ describe('QuestionsPage', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Close' }))
 
     expect(screen.queryByText('the quoted passage')).toBeNull()
+  })
+
+  test('the row shows the real question text, above the pending question\'s own ask text', async () => {
+    storage.create.question({
+      topic: { name: angularTopic.name, version: '1.0.0' },
+      target: { kind: 'question', id: angularQuestion.id },
+      selection: { text: 'some text', range: { start: 0, end: 9 } },
+      ask: 'What does this mean in practice?',
+    })
+
+    renderPage()
+
+    const ask = await screen.findByText('What does this mean in practice?')
+    const target = await screen.findByText(angularQuestion.question)
+
+    expect(target.compareDocumentPosition(ask) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  test('the row shows the real reference term, above the pending question\'s own ask text', async () => {
+    storage.create.question({
+      topic: { name: angularTopic.name, version: '1.0.0' },
+      target: { kind: 'reference', id: angularReference.id },
+      selection: { text: 'some text', range: { start: 0, end: 9 } },
+      ask: 'Why does this reference matter?',
+    })
+
+    renderPage()
+
+    const ask = await screen.findByText('Why does this reference matter?')
+    const target = await screen.findByText(angularReference.term)
+
+    expect(target.compareDocumentPosition(ask) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  test('the row chip sits after the item label, not before it', async () => {
+    storage.create.question({
+      topic: { name: angularTopic.name, version: '1.0.0' },
+      target: { kind: 'question', id: angularQuestion.id },
+      selection: { text: 'some text', range: { start: 0, end: 9 } },
+      ask: 'What does this mean in practice?',
+    })
+
+    renderPage()
+
+    const label = await screen.findByText('What does this mean in practice?')
+    const row = label.closest('.questions-page__item')
+    if (!row) throw new Error('expected a row ancestor')
+    const children = Array.from(row.children)
+    const labelIndex = children.indexOf(label)
+    const chipIndex = children.findIndex((child) => child.className.includes('topic-chip'))
+    expect(chipIndex).toBeGreaterThan(labelIndex)
+  })
+
+  test('the dialog header still shows the bold TopicBadge, not the row chip', async () => {
+    storage.create.question({
+      topic: { name: angularTopic.name, version: '1.0.0' },
+      target: { kind: 'question', id: angularQuestion.id },
+      selection: { text: 'the quoted passage', range: { start: 0, end: 9 } },
+      ask: 'What does this mean in practice?',
+    })
+
+    renderPage()
+    fireEvent.click(await screen.findByText('What does this mean in practice?'))
+
+    const header = document.querySelector('.questions-page__dialog-header')
+    expect(header?.querySelector('.topic-badge')).toBeDefined()
+    expect(header?.querySelector('.topic-chip')).toBeNull()
+  })
+
+  test('one question-target on angular + one reference-target on nodejs: only fetches angular topic + nodejs references, nothing else', async () => {
+    storage.create.question({
+      topic: { name: angularTopic.name, version: '1.0.0' },
+      target: { kind: 'question', id: angularQuestion.id },
+      selection: { text: 'some text', range: { start: 0, end: 9 } },
+      ask: 'about angular',
+    })
+    storage.create.question({
+      topic: { name: nodejsTopic.name, version: '1.0.0' },
+      target: { kind: 'reference', id: nodejsReference.id },
+      selection: { text: 'some text', range: { start: 0, end: 9 } },
+      ask: 'about nodejs',
+    })
+
+    renderPage()
+    await screen.findByText('about angular')
+    await screen.findByText('about nodejs')
+
+    const fetchedUrls = fetchMock.mock.calls.map((call) => String(call[0]))
+    expect(fetchedUrls.some((url) => url.includes('/topics/angular'))).toBe(true)
+    expect(fetchedUrls.some((url) => url.includes('/references/nodejs'))).toBe(true)
+    expect(fetchedUrls.some((url) => url.includes('/references/angular'))).toBe(false)
+    expect(fetchedUrls.some((url) => url.includes('/topics/nodejs'))).toBe(false)
+    expect(fetchedUrls).toHaveLength(2)
+  })
+
+  test('re-mounting the page reuses the cache — no second round of fetches', async () => {
+    storage.create.question({
+      topic: { name: angularTopic.name, version: '1.0.0' },
+      target: { kind: 'question', id: angularQuestion.id },
+      selection: { text: 'some text', range: { start: 0, end: 9 } },
+      ask: 'What does this mean in practice?',
+    })
+
+    const { unmount } = renderPage()
+    await screen.findByText('What does this mean in practice?')
+    const callsAfterFirstMount = fetchMock.mock.calls.length
+    unmount()
+
+    renderPage()
+    await screen.findByText('What does this mean in practice?')
+
+    expect(fetchMock.mock.calls.length).toBe(callsAfterFirstMount)
   })
 })

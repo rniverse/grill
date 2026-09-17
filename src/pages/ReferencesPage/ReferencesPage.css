@@ -47,6 +47,17 @@
   gap: var(--space-md);
 }
 
+.references-page__reload {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: none;
+  padding: var(--space-xs);
+  border-radius: var(--radius-xs);
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
+}
+
 .references-page__title {
   margin: 0;
   font-family: var(--font-ui);

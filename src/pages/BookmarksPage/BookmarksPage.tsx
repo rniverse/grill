@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { content } from '@/services/content'
+import { contentCache } from '@/services/content-cache'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { Bookmark, LocalTargetRef } from '@/types/personal.types'
 import { storage } from '@/services/storage'
@@ -8,7 +8,7 @@ import { t } from '@/utils/i18n'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { CollapsibleSection } from '@/components/CollapsibleSection/CollapsibleSection'
-import { TopicBadge } from '@/components/TopicBadge/TopicBadge'
+import { TopicChip } from '@/components/TopicChip/TopicChip'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
 import './BookmarksPage.css'
 
@@ -52,8 +52,8 @@ function BookmarkItems({
         if (!topic) {
           return (
             <div key={bookmark.id} className="bookmarks-page__item bookmarks-page__item--static">
-              <TopicBadge>{bookmark.topic.name}</TopicBadge>
               <span className="bookmarks-page__item-label">{label}</span>
+              <TopicChip>{bookmark.topic.name}</TopicChip>
             </div>
           )
         }
@@ -69,8 +69,8 @@ function BookmarkItems({
               className="bookmarks-page__item"
               onClick={() => reference && onOpenReference(reference, topic)}
             >
-              <TopicBadge>{bookmark.topic.name}</TopicBadge>
               <span className="bookmarks-page__item-label">{label}</span>
+              <TopicChip>{bookmark.topic.name}</TopicChip>
             </button>
           )
         }
@@ -82,8 +82,8 @@ function BookmarkItems({
             to={`/topics/${topic.id}?question=${bookmark.target.id}`}
             className="bookmarks-page__item"
           >
-            <TopicBadge>{bookmark.topic.name}</TopicBadge>
             <span className="bookmarks-page__item-label">{label}</span>
+            <TopicChip>{bookmark.topic.name}</TopicChip>
           </Link>
         )
       })}
@@ -102,20 +102,41 @@ export function BookmarksPage() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadAllTopics() {
+    async function loadNeededTopics() {
+      const sources = storage.list.sources()
+
+      // Only the (topic, kind) pairs an actual bookmark needs get fetched —
+      // never every configured source, and never both kinds for a topic
+      // that only has one kind bookmarked.
+      const neededKinds = new Map<string, Set<'question' | 'reference'>>()
+      for (const bookmark of storage.list.personal.bookmarks()) {
+        const kinds = neededKinds.get(bookmark.topic.name) ?? new Set()
+        kinds.add(bookmark.target.kind)
+        neededKinds.set(bookmark.topic.name, kinds)
+      }
+
       const results = await Promise.all(
-        storage.list.sources().map(async (source) => {
+        Array.from(neededKinds.entries()).map(async ([topicName, kinds]) => {
+          const source = sources.find((candidate) => candidate.name === topicName)
+          if (!source) return null
+
           const [topicResult, referencesResult] = await Promise.all([
-            content.load.topic(source),
-            content.load.references(source),
+            kinds.has('question') ? contentCache.resolve.topic(source) : null,
+            kinds.has('reference') ? contentCache.resolve.references(source) : null,
           ])
-          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
+          if (topicResult?.status === 'error' || referencesResult?.status === 'error') return null
+
+          // At least one of the two ran an 'ok' fetch — kinds is never
+          // empty, and an 'error' result already returned above.
+          const meta = topicResult?.status === 'ok' ? topicResult.data.meta : referencesResult?.status === 'ok' ? referencesResult.data.meta : undefined
+          if (!meta) return null
+
           return {
-            id: topicResult.data.topic.id,
-            name: topicResult.data.topic.name,
-            meta: topicResult.data.meta,
-            questions: topicResult.data.questions,
-            references: referencesResult.data.references,
+            id: source.id,
+            name: source.name,
+            meta,
+            questions: topicResult?.status === 'ok' ? topicResult.data.questions : [],
+            references: referencesResult?.status === 'ok' ? referencesResult.data.references : [],
           }
         }),
       )
@@ -123,7 +144,7 @@ export function BookmarksPage() {
       if (!cancelled) setLoadedTopics(summaries)
     }
 
-    loadAllTopics()
+    loadNeededTopics()
     return () => {
       cancelled = true
     }

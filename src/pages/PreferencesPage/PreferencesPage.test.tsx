@@ -3,6 +3,7 @@ import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { PreferencesPage } from './PreferencesPage'
 import { storage } from '@/services/storage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -18,6 +19,7 @@ function fixtureFor(url: string): unknown {
 
 beforeEach(() => {
   localStorage.clear()
+  contentCache.clear()
 })
 
 function renderPage() {
@@ -103,13 +105,36 @@ describe('PreferencesPage', () => {
     const validateButtons = screen.getAllByRole('button', { name: 'Validate' })
     fireEvent.click(validateButtons[0])
 
-    await waitFor(() => expect(screen.getAllByText('Validated', { exact: false })).toHaveLength(2))
-    expect(screen.queryByText('Failed', { exact: false })).toBeNull()
+    await waitFor(() => expect(screen.getByText('Topic: checked at', { exact: false })).toBeDefined())
+    expect(screen.getByText('References: checked at', { exact: false })).toBeDefined()
+    expect(screen.queryByText('check failed', { exact: false })).toBeNull()
 
     const sources = storage.list.sources()
     const angular = sources.find((source) => source.id === 'angular')
     expect(angular?.validation?.topic?.status).toBe('success')
     expect(angular?.validation?.references?.status).toBe('success')
+  })
+
+  test('Validate writes through to the shared content cache — a later page read hits no new fetch', async () => {
+    const fetchMock = mock(async (input: RequestInfo | URL) => {
+      const url = typeof input === 'string' ? input : input.toString()
+      return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
+    })
+    globalThis.fetch = fetchMock as unknown as typeof fetch
+
+    renderPage()
+    await act(async () => {})
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'Validate' })[0])
+    await waitFor(() => expect(screen.getByText('References: checked at', { exact: false })).toBeDefined())
+    const callsAfterValidate = fetchMock.mock.calls.length
+
+    const angular = storage.list.sources().find((source) => source.id === 'angular')
+    if (!angular) throw new Error('expected the angular source to exist')
+    await contentCache.resolve.topic(angular)
+    await contentCache.resolve.references(angular)
+
+    expect(fetchMock.mock.calls.length).toBe(callsAfterValidate)
   })
 
   test('Add source opens a dialog and creates a new row on save', async () => {

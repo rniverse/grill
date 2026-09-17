@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
-import { content } from '@/services/content'
+import { contentCache } from '@/services/content-cache'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { LocalTargetRef, PendingQuestion } from '@/types/personal.types'
 import { storage } from '@/services/storage'
@@ -9,8 +9,9 @@ import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { CollapsibleSection } from '@/components/CollapsibleSection/CollapsibleSection'
 import { TopicBadge } from '@/components/TopicBadge/TopicBadge'
+import { TopicChip } from '@/components/TopicChip/TopicChip'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
-import { RemoveIcon } from '@/utils/icons'
+import { CloseIcon, RemoveIcon } from '@/utils/icons'
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import './QuestionsPage.css'
 
@@ -36,10 +37,12 @@ function QuestionItems({
   pendingQuestions,
   emptyText,
   onSelect,
+  topicByName,
 }: {
   pendingQuestions: PendingQuestion[]
   emptyText: string
   onSelect: (pending: PendingQuestion) => void
+  topicByName: (name: string) => LoadedTopicSummary | undefined
 }) {
   if (pendingQuestions.length === 0) {
     return <p className="questions-page__empty">{emptyText}</p>
@@ -47,17 +50,25 @@ function QuestionItems({
 
   return (
     <>
-      {pendingQuestions.map((pending) => (
-        <button
-          key={pending.id}
-          type="button"
-          className="questions-page__item"
-          onClick={() => onSelect(pending)}
-        >
-          <TopicBadge>{pending.topic.name}</TopicBadge>
-          <span className="questions-page__item-label">{pending.ask}</span>
-        </button>
-      ))}
+      {pendingQuestions.map((pending) => {
+        const topic = topicByName(pending.topic.name)
+        return (
+          <button
+            key={pending.id}
+            type="button"
+            className="questions-page__item"
+            onClick={() => onSelect(pending)}
+          >
+            <div className="questions-page__item-text">
+              {topic ? (
+                <span className="questions-page__item-target">{targetLabel(pending.target, topic)}</span>
+              ) : null}
+              <span className="questions-page__item-label">{pending.ask}</span>
+            </div>
+            <TopicChip>{pending.topic.name}</TopicChip>
+          </button>
+        )
+      })}
     </>
   )
 }
@@ -74,20 +85,41 @@ export function QuestionsPage() {
   useEffect(() => {
     let cancelled = false
 
-    async function loadAllTopics() {
+    async function loadNeededTopics() {
+      const sources = storage.list.sources()
+
+      // Only the (topic, kind) pairs an actual pending question needs get
+      // fetched — never every configured source, and never both kinds for a
+      // topic that only has one kind pending.
+      const neededKinds = new Map<string, Set<'question' | 'reference'>>()
+      for (const pending of storage.list.personal.questions()) {
+        const kinds = neededKinds.get(pending.topic.name) ?? new Set()
+        kinds.add(pending.target.kind)
+        neededKinds.set(pending.topic.name, kinds)
+      }
+
       const results = await Promise.all(
-        storage.list.sources().map(async (source) => {
+        Array.from(neededKinds.entries()).map(async ([topicName, kinds]) => {
+          const source = sources.find((candidate) => candidate.name === topicName)
+          if (!source) return null
+
           const [topicResult, referencesResult] = await Promise.all([
-            content.load.topic(source),
-            content.load.references(source),
+            kinds.has('question') ? contentCache.resolve.topic(source) : null,
+            kinds.has('reference') ? contentCache.resolve.references(source) : null,
           ])
-          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
+          if (topicResult?.status === 'error' || referencesResult?.status === 'error') return null
+
+          // At least one of the two ran an 'ok' fetch — kinds is never
+          // empty, and an 'error' result already returned above.
+          const meta = topicResult?.status === 'ok' ? topicResult.data.meta : referencesResult?.status === 'ok' ? referencesResult.data.meta : undefined
+          if (!meta) return null
+
           return {
-            id: topicResult.data.topic.id,
-            name: topicResult.data.topic.name,
-            meta: topicResult.data.meta,
-            questions: topicResult.data.questions,
-            references: referencesResult.data.references,
+            id: source.id,
+            name: source.name,
+            meta,
+            questions: topicResult?.status === 'ok' ? topicResult.data.questions : [],
+            references: referencesResult?.status === 'ok' ? referencesResult.data.references : [],
           }
         }),
       )
@@ -95,7 +127,7 @@ export function QuestionsPage() {
       if (!cancelled) setLoadedTopics(summaries)
     }
 
-    loadAllTopics()
+    loadNeededTopics()
     return () => {
       cancelled = true
     }
@@ -144,6 +176,7 @@ export function QuestionsPage() {
                 pendingQuestions={onQuestionTarget}
                 emptyText={t('personal.rail.empty.questions')}
                 onSelect={setOpenPending}
+                topicByName={topicByName}
               />
             </CollapsibleSection>
             <CollapsibleSection title={t('nav.references')}>
@@ -151,6 +184,7 @@ export function QuestionsPage() {
                 pendingQuestions={onReferenceTarget}
                 emptyText={t('references.empty.questions')}
                 onSelect={setOpenPending}
+                topicByName={topicByName}
               />
             </CollapsibleSection>
           </div>
@@ -163,7 +197,7 @@ export function QuestionsPage() {
               <div className="questions-page__dialog-header">
                 <TopicBadge>{openPending.topic.name}</TopicBadge>
                 <DialogClose className="questions-page__dialog-close" aria-label={t('reference.close')}>
-                  ×
+                  <CloseIcon size={16} />
                 </DialogClose>
               </div>
               <p className="questions-page__dialog-target">{targetLabel(openPending.target, openTopic)}</p>

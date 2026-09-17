@@ -3,13 +3,14 @@ import type { Question, Reference } from '@/types/topic.types'
 import type { PendingQuestion } from '@/types/personal.types'
 import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
-import { RemoveIcon } from '@/utils/icons'
+import { ChevronIcon, RemoveIcon } from '@/utils/icons'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
 import { SelectionPlusButton } from '@/components/SelectionPlusButton/SelectionPlusButton'
 import { PendingHighlight } from '@/components/PendingHighlight/PendingHighlight'
 import { BookmarkButton } from '@/components/BookmarkButton/BookmarkButton'
 import { NoteEditor } from '@/components/NoteEditor/NoteEditor'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import './QuestionCard.css'
 
 export interface QuestionCardProps {
@@ -96,9 +97,7 @@ export function QuestionCard({
               </span>
             ) : null}
           </span>
-          <span className="question-card__chevron" aria-hidden="true">
-            ⌄
-          </span>
+          <ChevronIcon className="question-card__chevron" size={16} aria-hidden="true" />
         </button>
         <BookmarkButton topic={topic} target={target} onToggle={onPersonalLayerChange} />
       </div>
@@ -124,15 +123,21 @@ export function QuestionCard({
                 >
                   {t('personal.note.expand')}
                 </button>
-                <button
-                  type="button"
-                  className="question-card__note-remove"
-                  aria-label={t('personal.note.delete')}
-                  title={t('personal.note.delete')}
-                  onClick={removeNote}
-                >
-                  <RemoveIcon size={14} />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="question-card__note-remove"
+                        aria-label={t('personal.note.delete')}
+                        onClick={removeNote}
+                      />
+                    }
+                  >
+                    <RemoveIcon size={14} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('personal.note.delete')}</TooltipContent>
+                </Tooltip>
               </div>
             ) : (
               <button type="button" className="question-card__note-toggle" onClick={() => setNoteDialog('edit')}>
@@ -174,15 +179,21 @@ export function QuestionCard({
                     >
                       {t('personal.note.edit')}
                     </button>
-                    <button
-                      type="button"
-                      className="question-card__note-dialog-remove"
-                      aria-label={t('personal.note.delete')}
-                      title={t('personal.note.delete')}
-                      onClick={removeNote}
-                    >
-                      <RemoveIcon size={16} />
-                    </button>
+                    <Tooltip>
+                      <TooltipTrigger
+                        render={
+                          <button
+                            type="button"
+                            className="question-card__note-dialog-remove"
+                            aria-label={t('personal.note.delete')}
+                            onClick={removeNote}
+                          />
+                        }
+                      >
+                        <RemoveIcon size={16} />
+                      </TooltipTrigger>
+                      <TooltipContent>{t('personal.note.delete')}</TooltipContent>
+                    </Tooltip>
                   </div>
                 </>
               ) : null}

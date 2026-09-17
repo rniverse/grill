@@ -15,4 +15,7 @@ export {
   X as CloseIcon,
   Trash2 as RemoveIcon,
   ChevronsLeft as CollapsePanelIcon,
+  ChevronDown as ChevronIcon,
+  RefreshCw as ReloadIcon,
+  SquarePen as EditIcon,
 } from 'lucide-react'

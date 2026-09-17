@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { ChevronIcon } from '@/utils/icons'
 import './CollapsibleSection.css'
 
 export interface CollapsibleSectionProps {
@@ -21,9 +22,7 @@ export function CollapsibleSection({ title, children }: CollapsibleSectionProps)
         onClick={() => setExpanded((current) => !current)}
       >
         <span className="collapsible-section__title">{title}</span>
-        <span className="collapsible-section__chevron" aria-hidden="true">
-          ⌄
-        </span>
+        <ChevronIcon className="collapsible-section__chevron" size={16} aria-hidden="true" />
       </button>
       <div
         className={

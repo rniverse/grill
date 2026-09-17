@@ -4,6 +4,7 @@ import { MemoryRouter, Route, Routes } from 'react-router'
 import { NotesPage } from './NotesPage'
 import { NoteDetailPage } from '@/pages/NoteDetailPage/NoteDetailPage'
 import { storage } from '@/services/storage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -11,8 +12,10 @@ import nodejsReferencesData from '@/references/nodejs.json'
 
 const angularTopic = { name: angularTopicData.meta.name }
 const angularQuestions = angularTopicData.questions
+const angularReferences = angularReferencesData.references
 
 const angularQuestion = angularQuestions[0]
+const angularReference = angularReferences[0]
 
 function fixtureFor(url: string): unknown {
   if (url.includes('/topics/angular')) return angularTopicData
@@ -22,12 +25,16 @@ function fixtureFor(url: string): unknown {
   throw new Error(`no fixture for ${url}`)
 }
 
+let fetchMock: ReturnType<typeof mock>
+
 beforeEach(() => {
   localStorage.clear()
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  contentCache.clear()
+  fetchMock = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
+  })
+  globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 function renderPage() {
@@ -132,5 +139,94 @@ describe('NotesPage', () => {
 
     expect(storage.list.personal.notes()).toEqual([])
     expect(await screen.findByText('No notes yet.')).toBeDefined()
+  })
+
+  test('a standalone note shows an "Out of box" chip and no target label', async () => {
+    storage.create.note('a freeform note')
+
+    renderPage()
+
+    expect(await screen.findByText('a freeform note')).toBeDefined()
+    expect(await screen.findByText('Out of box')).toBeDefined()
+  })
+
+  test('a note on a question shows a topic+type chip and resolves the real question text', async () => {
+    storage.create.note('my thoughts', {
+      target: { kind: 'question', id: angularQuestion.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Angular (Question)')).toBeDefined()
+    expect(await screen.findByText(angularQuestion.question)).toBeDefined()
+  })
+
+  test('a note on a reference shows a topic+type chip and resolves the real reference term', async () => {
+    storage.create.note('my thoughts', {
+      target: { kind: 'reference', id: angularReference.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    renderPage()
+
+    expect(await screen.findByText('Angular (Reference)')).toBeDefined()
+    expect(await screen.findByText(angularReference.term)).toBeDefined()
+  })
+
+  test('a note on a question only fetches the topic file, never references', async () => {
+    storage.create.note('my thoughts', {
+      target: { kind: 'question', id: angularQuestion.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    renderPage()
+    await screen.findByText(angularQuestion.question)
+
+    const fetchedUrls = fetchMock.mock.calls.map((call) => String(call[0]))
+    expect(fetchedUrls.some((url) => url.includes('/topics/angular'))).toBe(true)
+    expect(fetchedUrls.some((url) => url.includes('/references/angular'))).toBe(false)
+  })
+
+  test('the chip sits after the item content, not before it', async () => {
+    storage.create.note('my thoughts', {
+      target: { kind: 'question', id: angularQuestion.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    renderPage()
+
+    const label = await screen.findByText('my thoughts')
+    const chip = await screen.findByText('Angular (Question)')
+
+    expect(label.compareDocumentPosition(chip) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  test('the resolved question text sits above the note preview', async () => {
+    storage.create.note('my thoughts', {
+      target: { kind: 'question', id: angularQuestion.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    renderPage()
+
+    const label = await screen.findByText('my thoughts')
+    const target = await screen.findByText(angularQuestion.question)
+
+    expect(target.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  test('the resolved reference term sits above the note preview', async () => {
+    storage.create.note('my thoughts', {
+      target: { kind: 'reference', id: angularReference.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    renderPage()
+
+    const label = await screen.findByText('my thoughts')
+    const target = await screen.findByText(angularReference.term)
+
+    expect(target.compareDocumentPosition(label) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
   })
 })

@@ -1,0 +1,5 @@
+.topic-tag-filter__chips {
+  flex: 1;
+  min-width: 0;
+  max-width: 420px;
+}

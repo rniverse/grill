@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
-import { content } from '@/services/content'
+import { contentCache } from '@/services/content-cache'
 import { storage } from '@/services/storage'
 import type { FileMeta, Reference } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
+import { ReloadIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import './ReferencesPage.css'
 
 export function ReferencesPage() {
@@ -57,6 +59,7 @@ function TopicReferences({ topicId }: { topicId: string }) {
   // storage and reflect it. Never rendered itself.
   const [, bumpPersonalVersion] = useState(0)
   const onPersonalLayerChange = () => bumpPersonalVersion((version) => version + 1)
+  const [reloading, setReloading] = useState(false)
 
   // The name is already in local storage — this page never needs the topic
   // (questions) file, only the references file for this slug. Re-read on
@@ -83,7 +86,7 @@ function TopicReferences({ topicId }: { topicId: string }) {
       // source is narrowed non-null above, but that narrowing doesn't reach
       // into this nested function's closure — TS can't see across it.
       // biome-ignore lint/style/noNonNullAssertion: narrowed above; see comment
-      const result = await content.load.references(source!)
+      const result = await contentCache.resolve.references(source!)
       if (cancelled) {
         return
       }
@@ -101,6 +104,22 @@ function TopicReferences({ topicId }: { topicId: string }) {
       cancelled = true
     }
   }, [topicId])
+
+  async function handleReload() {
+    if (!source) return
+    setReloading(true)
+    try {
+      const result = await contentCache.resolve.references(source, { force: true })
+      if (result.status === 'error') {
+        setNotFound(true)
+        return
+      }
+      setMeta(result.data.meta)
+      setReferences(result.data.references)
+    } finally {
+      setReloading(false)
+    }
+  }
 
   if (notFound) {
     return (
@@ -131,6 +150,22 @@ function TopicReferences({ topicId }: { topicId: string }) {
               <span className="references-page__count">
                 {t('references.term.count', { count: references.length })}
               </span>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="references-page__reload"
+                      aria-label={t('reload.references')}
+                      onClick={handleReload}
+                      disabled={reloading}
+                    />
+                  }
+                >
+                  <ReloadIcon size={14} className={reloading ? 'icon-spin' : undefined} />
+                </TooltipTrigger>
+                <TooltipContent>{t('reload.references')}</TooltipContent>
+              </Tooltip>
             </div>
             <div className="references-page__chips">
               {references.map((reference) => (

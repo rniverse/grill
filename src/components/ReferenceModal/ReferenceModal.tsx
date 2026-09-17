@@ -3,6 +3,7 @@ import type { Reference } from '@/types/topic.types'
 import type { PendingQuestion } from '@/types/personal.types'
 import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
+import { CloseIcon } from '@/utils/icons'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
 import { BookmarkButton } from '@/components/BookmarkButton/BookmarkButton'
 import { SelectionPlusButton } from '@/components/SelectionPlusButton/SelectionPlusButton'
@@ -45,7 +46,7 @@ export function ReferenceModal({ reference, topic, onClose, onPersonalLayerChang
           <span className="reference-modal__eyebrow">{t('reference.eyebrow')}</span>
           <BookmarkButton topic={topic} target={target} onToggle={onPersonalLayerChange} />
           <DialogClose className="reference-modal__close" aria-label={t('reference.close')}>
-            ×
+            <CloseIcon size={16} />
           </DialogClose>
         </div>
         <DialogTitle className="reference-modal__term">{reference.term}</DialogTitle>

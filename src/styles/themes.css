@@ -36,18 +36,6 @@
   --text-label: var(--text-label);
   --text-mono-meta: var(--text-mono-meta);
 
-  --spacing-2xs: var(--space-2xs);
-  --spacing-xs: var(--space-xs);
-  --spacing-sm: var(--space-sm);
-  --spacing-ms: var(--space-ms);
-  --spacing-md: var(--space-md);
-  --spacing-base: var(--space-base);
-  --spacing-lg: var(--space-lg);
-  --spacing-xl: var(--space-xl);
-  --spacing-2xl: var(--space-2xl);
-  --spacing-3xl: var(--space-3xl);
-  --spacing-4xl: var(--space-4xl);
-
   --radius-xs: var(--radius-xs);
   --radius-logo-tile: var(--radius-logo-tile);
   --radius-icon: var(--radius-icon);

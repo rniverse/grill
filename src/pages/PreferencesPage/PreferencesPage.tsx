@@ -1,24 +1,36 @@
 import { useState, type FormEvent } from 'react'
 import type { ContentSourceConfig, SourceValidation } from '@/config/content-sources'
-import { content } from '@/services/content'
+import { contentCache } from '@/services/content-cache'
 import { storage } from '@/services/storage'
 import { generateId } from '@/utils/id'
 import { t } from '@/utils/i18n'
-import { RemoveIcon } from '@/utils/icons'
+import { EditIcon, ReloadIcon, RemoveIcon } from '@/utils/icons'
 import { IconRail } from '@/components/IconRail/IconRail'
 import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { PreferencesSection } from './preferences-section.enum'
 import './PreferencesPage.css'
 
 const CONFIRMATION_DURATION_MS = 2000
 
-function formatCheckedAt(at: string): string {
-  return t('preferences.source.validation.at', { time: new Date(at).toLocaleString() })
+function formatUpdatedAt(at: string): string {
+  return t('preferences.source.updated.at', { time: new Date(at).toLocaleString() })
 }
 
-function ValidationStatus({ validation }: { validation: SourceValidation | undefined }) {
+function SourceUrlCell({ url, validation }: { url: string; validation: SourceValidation | undefined }) {
+  return (
+    <div className="preferences-page__source-cell">
+      <span>{url}</span>
+      {validation ? <span className="preferences-page__source-updated">{formatUpdatedAt(validation.at)}</span> : null}
+    </div>
+  )
+}
+
+function ValidationStatus({ kind, validation }: { kind: 'topic' | 'references'; validation: SourceValidation | undefined }) {
   if (!validation) return null
+  const kindLabel = t(kind === 'topic' ? 'preferences.source.kind.topic' : 'preferences.source.kind.references')
+  const time = new Date(validation.at).toLocaleString()
   return (
     <p
       className={
@@ -27,10 +39,9 @@ function ValidationStatus({ validation }: { validation: SourceValidation | undef
           : 'preferences-page__source-status preferences-page__source-status--failed'
       }
     >
-      {t(validation.status === 'success' ? 'preferences.source.validation.success' : 'preferences.source.validation.failed')}
-      {validation.status === 'failed' && validation.error ? ` — ${validation.error.message}` : ''}
-      {' · '}
-      {formatCheckedAt(validation.at)}
+      {validation.status === 'success'
+        ? t('preferences.source.status.checked', { kind: kindLabel, time })
+        : t('preferences.source.status.failed', { kind: kindLabel, error: validation.error?.message ?? '' })}
     </p>
   )
 }
@@ -159,25 +170,16 @@ function SourcesPanel() {
   const refresh = () => bumpVersion((version) => version + 1)
 
   async function handleValidate(source: ContentSourceConfig) {
+    // contentCache.resolve.* itself records the checked/fetched timestamp
+    // (see content-cache.ts) — nothing to write here, just force the fetch
+    // and re-read storage once it settles.
     setValidatingId(source.id)
-    const at = new Date().toISOString()
-
     try {
       if (source.source.topic) {
-        const result = await content.load.topic(source)
-        storage.update.sourceValidation(
-          source.id,
-          'topic',
-          result.status === 'ok' ? { status: 'success', at } : { status: 'failed', at, error: result.error },
-        )
+        await contentCache.resolve.topic(source, { force: true })
       }
       if (source.source.references) {
-        const result = await content.load.references(source)
-        storage.update.sourceValidation(
-          source.id,
-          'references',
-          result.status === 'ok' ? { status: 'success', at } : { status: 'failed', at, error: result.error },
-        )
+        await contentCache.resolve.references(source, { force: true })
       }
     } finally {
       setValidatingId(null)
@@ -190,12 +192,12 @@ function SourcesPanel() {
       <table className="preferences-page__table">
         <thead>
           <tr>
-            <th>{t('preferences.source.field.id')}</th>
-            <th>{t('preferences.source.field.name')}</th>
+            <th className="preferences-page__table-col-fixed">{t('preferences.source.field.id')}</th>
+            <th className="preferences-page__table-col-fixed">{t('preferences.source.field.name')}</th>
             <th>{t('preferences.source.topic.label')}</th>
             <th>{t('preferences.source.references.label')}</th>
             <th>{t('preferences.source.table.status')}</th>
-            <th />
+            <th className="preferences-page__table-col-fixed">{t('preferences.source.table.actions')}</th>
           </tr>
         </thead>
         <tbody>
@@ -203,38 +205,74 @@ function SourcesPanel() {
             <tr key={source.id}>
               <td className="preferences-page__table-mono">{source.id}</td>
               <td>{source.name}</td>
-              <td className="preferences-page__table-mono">{source.source.topic ?? t('preferences.source.empty')}</td>
               <td className="preferences-page__table-mono">
-                {source.source.references ?? t('preferences.source.empty')}
+                {source.source.topic ? (
+                  <SourceUrlCell url={source.source.topic} validation={source.validation?.topic} />
+                ) : (
+                  t('preferences.source.empty')
+                )}
+              </td>
+              <td className="preferences-page__table-mono">
+                {source.source.references ? (
+                  <SourceUrlCell url={source.source.references} validation={source.validation?.references} />
+                ) : (
+                  t('preferences.source.empty')
+                )}
               </td>
               <td>
-                <ValidationStatus validation={source.validation?.topic} />
-                <ValidationStatus validation={source.validation?.references} />
+                <ValidationStatus kind="topic" validation={source.validation?.topic} />
+                <ValidationStatus kind="references" validation={source.validation?.references} />
               </td>
               <td className="preferences-page__table-actions">
-                <button
-                  type="button"
-                  className="preferences-page__source-validate"
-                  onClick={() => handleValidate(source)}
-                  disabled={validatingId === source.id}
-                >
-                  {t('preferences.source.validate')}
-                </button>
-                <button type="button" className="preferences-page__table-edit" onClick={() => setDialog({ mode: 'edit', source })}>
-                  {t('preferences.source.edit')}
-                </button>
-                <button
-                  type="button"
-                  className="preferences-page__table-remove"
-                  aria-label={t('preferences.source.delete')}
-                  title={t('preferences.source.delete')}
-                  onClick={() => {
-                    storage.delete.source(source.id)
-                    refresh()
-                  }}
-                >
-                  <RemoveIcon size={14} />
-                </button>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="preferences-page__source-validate"
+                        aria-label={t('preferences.source.validate')}
+                        onClick={() => handleValidate(source)}
+                        disabled={validatingId === source.id}
+                      />
+                    }
+                  >
+                    <ReloadIcon size={14} className={validatingId === source.id ? 'icon-spin' : undefined} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('preferences.source.validate')}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="preferences-page__table-edit"
+                        aria-label={t('preferences.source.edit')}
+                        onClick={() => setDialog({ mode: 'edit', source })}
+                      />
+                    }
+                  >
+                    <EditIcon size={14} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('preferences.source.edit')}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger
+                    render={
+                      <button
+                        type="button"
+                        className="preferences-page__table-remove"
+                        aria-label={t('preferences.source.delete')}
+                        onClick={() => {
+                          storage.delete.source(source.id)
+                          refresh()
+                        }}
+                      />
+                    }
+                  >
+                    <RemoveIcon size={14} />
+                  </TooltipTrigger>
+                  <TooltipContent>{t('preferences.source.delete')}</TooltipContent>
+                </Tooltip>
               </td>
             </tr>
           ))}

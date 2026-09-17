@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { TopicPage } from './TopicPage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -17,12 +18,16 @@ function fixtureFor(url: string): unknown {
   throw new Error(`no fixture for ${url}`)
 }
 
+let fetchMock: ReturnType<typeof mock>
+
 beforeEach(() => {
   localStorage.clear()
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  contentCache.clear()
+  fetchMock = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
+  })
+  globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 function renderAt(path: string) {
@@ -33,6 +38,35 @@ function renderAt(path: string) {
       </Routes>
     </MemoryRouter>,
   )
+}
+
+// Base UI's combobox opens its popup off pointer interaction, not a bare
+// click event — a real browser click carries focus + pointerdown + mousedown
+// with it, but fireEvent.click alone doesn't, so the popup never opens.
+function openTagFilter() {
+  const input = screen.getByRole('combobox')
+  fireEvent.focus(input)
+  fireEvent.pointerDown(input)
+  fireEvent.mouseDown(input)
+  fireEvent.click(input)
+  return input
+}
+
+// While the popup is open, Base UI marks the rest of the page inert/
+// aria-hidden (real screen-reader-correct behavior) — RTL's role queries
+// correctly can't see anything behind it until it closes, same as a real
+// user pressing Escape to dismiss the dropdown and look at the results.
+function closeTagFilter() {
+  fireEvent.keyDown(screen.getByRole('combobox'), { key: 'Escape' })
+}
+
+// The open popup's exit animation never completes under happy-dom, so its
+// option list stays mounted (duplicating chip text) well after Escape —
+// scoping to the chips box itself sidesteps that instead of waiting on it.
+function selectedTagChips() {
+  const chips = document.querySelector('.topic-tag-filter__chips')
+  if (!chips) throw new Error('expected the tag filter chips container to exist')
+  return within(chips as HTMLElement)
 }
 
 describe('TopicPage', () => {
@@ -55,10 +89,62 @@ describe('TopicPage', () => {
     await screen.findAllByText('Angular')
     const allButtons = await screen.findAllByRole('button')
     const initialCount = allButtons.filter((button) => button.className.includes('question-card__header')).length
-    const architectureChip = screen.getByRole('button', { name: 'Fundamentals & Architecture' })
-    fireEvent.click(architectureChip)
-    const filteredButtons = screen.getAllByRole('button').filter((button) => button.className.includes('question-card__header'))
-    expect(filteredButtons.length).toBeLessThan(initialCount)
+
+    openTagFilter()
+    fireEvent.click(await screen.findByRole('option', { name: 'Fundamentals & Architecture' }))
+    closeTagFilter()
+
+    const filteredButtons = await screen.findAllByRole('button')
+    const filteredCount = filteredButtons.filter((button) => button.className.includes('question-card__header')).length
+    expect(filteredCount).toBeGreaterThan(0)
+    expect(filteredCount).toBeLessThan(initialCount)
+  })
+
+  test('the filter placeholder reads "Showing all questions" until a tag is picked', async () => {
+    renderAt('/topics/angular')
+    await screen.findAllByText('Angular')
+
+    expect(screen.getByPlaceholderText('Showing all questions')).toBeDefined()
+
+    openTagFilter()
+    fireEvent.click(await screen.findByRole('option', { name: 'Fundamentals & Architecture' }))
+
+    expect(selectedTagChips().getByText('Fundamentals & Architecture')).toBeDefined()
+  })
+
+  test('picking more than one tag shows questions matching any of them', async () => {
+    renderAt('/topics/angular')
+    await screen.findAllByText('Angular')
+
+    openTagFilter()
+    fireEvent.click(await screen.findByRole('option', { name: 'Fundamentals & Architecture' }))
+    closeTagFilter()
+    const oneTagCount = (await screen.findAllByRole('button'))
+      .filter((button) => button.className.includes('question-card__header')).length
+
+    openTagFilter()
+    fireEvent.click(await screen.findByRole('option', { name: 'RxJS in Angular' }))
+    closeTagFilter()
+    const twoTagCount = (await screen.findAllByRole('button'))
+      .filter((button) => button.className.includes('question-card__header')).length
+
+    expect(twoTagCount).toBeGreaterThan(oneTagCount)
+  })
+
+  test('the clear button resets the tag filter back to every question', async () => {
+    renderAt('/topics/angular')
+    await screen.findAllByText('Angular')
+    const initialCount = (await screen.findAllByRole('button', { name: /standalone/i })).length
+
+    openTagFilter()
+    fireEvent.click(await screen.findByRole('option', { name: 'Fundamentals & Architecture' }))
+    closeTagFilter()
+    expect((await screen.findAllByRole('button', { name: /standalone/i })).length).toBeLessThan(initialCount)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear tag filter' }))
+
+    expect((await screen.findAllByRole('button', { name: /standalone/i })).length).toBe(initialCount)
+    expect(screen.getByPlaceholderText('Showing all questions')).toBeDefined()
   })
 
   test('a ?question= param opens that question on load', async () => {
@@ -186,17 +272,54 @@ describe('TopicPage', () => {
     expect(filteredButtons.length).toBe(1)
   })
 
-  test('turning on the bookmark filter clears the active state on every tag chip', async () => {
+  test('turning on the bookmark filter clears the visible tag chips', async () => {
     renderAt('/topics/angular')
     await screen.findAllByText('Angular')
 
-    // A tag chip is active (the default "All" filter) before the bookmark
-    // filter is turned on.
-    expect(document.querySelectorAll('.filter-chips__chip[aria-pressed="true"]').length).toBe(1)
+    openTagFilter()
+    fireEvent.click(await screen.findByRole('option', { name: 'Fundamentals & Architecture' }))
+    closeTagFilter()
+    expect(selectedTagChips().getByText('Fundamentals & Architecture')).toBeDefined()
 
     const bookmarkFilterToggle = screen.getByRole('button', { name: 'Show bookmarked questions only' })
     fireEvent.click(bookmarkFilterToggle)
 
-    expect(document.querySelectorAll('.filter-chips__chip[aria-pressed="true"]').length).toBe(0)
+    expect(selectedTagChips().queryByText('Fundamentals & Architecture')).toBeNull()
+    expect(screen.getByPlaceholderText('Showing all questions')).toBeDefined()
+  })
+
+  test('re-mounting the same topic reuses the cache — no second fetch', async () => {
+    const { unmount } = render(
+      <MemoryRouter initialEntries={['/topics/angular']}>
+        <Routes>
+          <Route path="/topics/:topicId" element={<TopicPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await screen.findAllByText('Angular')
+    unmount()
+
+    render(
+      <MemoryRouter initialEntries={['/topics/angular']}>
+        <Routes>
+          <Route path="/topics/:topicId" element={<TopicPage />} />
+        </Routes>
+      </MemoryRouter>,
+    )
+    await screen.findAllByText('Angular')
+
+    // 2 fetches (topic + references) for the whole test, not 4.
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  test('clicking the reload button forces a fresh fetch even though the topic is cached', async () => {
+    renderAt('/topics/angular')
+    await screen.findAllByText('Angular')
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reload topic' }))
+    await screen.findAllByText('Angular')
+
+    expect(fetchMock).toHaveBeenCalledTimes(4)
   })
 })

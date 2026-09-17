@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { RouterProvider } from 'react-router'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import './index.css'
 import { router } from './routes'
 
@@ -9,6 +10,8 @@ import { router } from './routes'
 // biome-ignore lint/style/noNonNullAssertion: see comment
 createRoot(document.getElementById('root')!).render(
   // <StrictMode>
-    <RouterProvider router={router} />
+    <TooltipProvider>
+      <RouterProvider router={router} />
+    </TooltipProvider>
   // </StrictMode>,
 )

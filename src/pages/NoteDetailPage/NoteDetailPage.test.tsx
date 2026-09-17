@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router'
 import { NoteDetailPage } from './NoteDetailPage'
 import { storage } from '@/services/storage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -19,16 +20,20 @@ function fixtureFor(url: string): unknown {
   throw new Error(`no fixture for ${url}`)
 }
 
+let fetchMock: ReturnType<typeof mock>
+
 beforeEach(() => {
   localStorage.clear()
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  contentCache.clear()
+  fetchMock = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
+  })
+  globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 function renderAt(path: string) {
-  render(
+  return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/notes/:noteId" element={<NoteDetailPage />} />
@@ -73,6 +78,21 @@ describe('NoteDetailPage', () => {
     expect(goto.getAttribute('href')).toBe(`/topics/angular?question=${angularQuestion.id}`)
   })
 
+  test('a note on a question only fetches the topic file, never references', async () => {
+    const note = storage.create.note('a note about a question', {
+      target: { kind: 'question', id: angularQuestion.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+    renderAt(`/notes/${note.id}`)
+
+    await screen.findByText(angularQuestion.question)
+
+    const fetchedUrls = fetchMock.mock.calls.map((call) => String(call[0]))
+    expect(fetchedUrls.some((url) => url.includes('/topics/angular'))).toBe(true)
+    expect(fetchedUrls.some((url) => url.includes('/references/angular'))).toBe(false)
+    expect(fetchedUrls).toHaveLength(1)
+  })
+
   test('a note with a local ref shows the topic chip and the question it was made on', async () => {
     const note = storage.create.note('a note about a question', {
       target: { kind: 'question', id: angularQuestion.id },
@@ -82,6 +102,23 @@ describe('NoteDetailPage', () => {
 
     expect(await screen.findByText('Angular')).toBeDefined()
     expect(await screen.findByText(angularQuestion.question)).toBeDefined()
+  })
+
+  test('re-mounting the page reuses the cache — no second round of fetches', async () => {
+    const note = storage.create.note('a note about a question', {
+      target: { kind: 'question', id: angularQuestion.id },
+      topic: { name: angularTopic.name, version: '1.0.0' },
+    })
+
+    const { unmount } = renderAt(`/notes/${note.id}`)
+    await screen.findByText(angularQuestion.question)
+    const callsAfterFirstMount = fetchMock.mock.calls.length
+    unmount()
+
+    renderAt(`/notes/${note.id}`)
+    await screen.findByText(angularQuestion.question)
+
+    expect(fetchMock.mock.calls.length).toBe(callsAfterFirstMount)
   })
 
   test('a standalone note shows no topic chip or target label', async () => {

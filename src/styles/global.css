@@ -2,6 +2,17 @@ html {
   font-family: var(--font-ui);
 }
 
+/* App-wide focus ring — subtle, token-based, replaces the browser's thick
+   default UA outline everywhere (buttons, chips, links, etc.), including
+   focus returned to a dialog's trigger element after closing it (e.g.
+   Escape). :focus-visible (not :focus) so a mouse click never shows it,
+   only keyboard/programmatic focus. */
+:focus-visible {
+  outline: 1px solid var(--color-surface-tinted-alt);
+  outline-offset: 1px;
+  border-radius: inherit;
+}
+
 body {
   margin: 0;
   background: var(--color-ground);
@@ -44,6 +55,21 @@ body {
   to {
     transform: translateY(0);
   }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* App-wide loading spinner — apply to an icon while its triggering action
+   is in flight (reload buttons, Preferences' Validate icon, etc). */
+.icon-spin {
+  animation: spin 0.8s linear infinite;
 }
 
 /*

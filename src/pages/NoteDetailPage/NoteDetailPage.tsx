@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router'
-import { content } from '@/services/content'
+import { contentCache } from '@/services/content-cache'
 import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import { personalNoteHasTarget } from '@/types/personal.types'
 import { storage } from '@/services/storage'
@@ -13,6 +13,7 @@ import { NoteEditor } from '@/components/NoteEditor/NoteEditor'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
 import { TopicBadge } from '@/components/TopicBadge/TopicBadge'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import './NoteDetailPage.css'
 
 interface LoadedTopicSummary {
@@ -38,41 +39,44 @@ export function NoteDetailPage() {
   // storage below picks up the change.
   const [, bumpVersion] = useState(0)
 
+  const note = storage.list.personal.notes().find((candidate) => candidate.id === noteId)
+
+  // note is intentionally excluded from the deps below — it's re-derived
+  // from storage every render (see above), so a new object identity each
+  // time would re-run this effect every render. noteId is the real
+  // trigger; a note's topic/target never change after creation (only its
+  // text can, via Edit), so nothing else needs to retrigger this.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see comment above
   useEffect(() => {
     let cancelled = false
 
-    async function loadAllTopics() {
-      const results = await Promise.all(
-        storage.list.sources().map(async (source) => {
-          const [topicResult, referencesResult] = await Promise.all([
-            content.load.topic(source),
-            content.load.references(source),
-          ])
-          if (topicResult.status === 'error' || referencesResult.status === 'error') return null
-          return {
-            id: topicResult.data.topic.id,
-            name: topicResult.data.topic.name,
-            meta: topicResult.data.meta,
-            questions: topicResult.data.questions,
-            references: referencesResult.data.references,
-          }
-        }),
-      )
-      const summaries = results.filter((summary) => summary !== null)
-      if (!cancelled) setLoadedTopics(summaries)
+    async function loadNeededTopic() {
+      if (!note || !personalNoteHasTarget(note)) return
+      const source = storage.list.sources().find((candidate) => candidate.name === note.topic.name)
+      if (!source) return
+
+      // Only the one kind this note actually needs gets fetched — never
+      // both, and never any other configured source.
+      if (note.target.kind === 'question') {
+        const result = await contentCache.resolve.topic(source)
+        if (cancelled || result.status === 'error') return
+        setLoadedTopics([{ id: result.data.topic.id, name: result.data.topic.name, meta: result.data.meta, questions: result.data.questions, references: [] }])
+      } else {
+        const result = await contentCache.resolve.references(source)
+        if (cancelled || result.status === 'error') return
+        setLoadedTopics([{ id: source.id, name: source.name, meta: result.data.meta, questions: [], references: result.data.references }])
+      }
     }
 
-    loadAllTopics()
+    loadNeededTopic()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [noteId])
 
   function topicByName(name: string): LoadedTopicSummary | undefined {
     return loadedTopics.find((topic) => topic.name === name)
   }
-
-  const note = storage.list.personal.notes().find((candidate) => candidate.id === noteId)
 
   if (!note) {
     return (
@@ -137,18 +141,24 @@ export function NoteDetailPage() {
               <button type="button" className="note-detail-page__edit" onClick={() => setEditing(true)}>
                 {t('personal.note.edit')}
               </button>
-              <button
-                type="button"
-                className="note-detail-page__remove"
-                aria-label={t('personal.note.delete')}
-                title={t('personal.note.delete')}
-                onClick={() => {
-                  storage.delete.note(note.id)
-                  navigate('/notes')
-                }}
-              >
-                <RemoveIcon size={16} />
-              </button>
+              <Tooltip>
+                <TooltipTrigger
+                  render={
+                    <button
+                      type="button"
+                      className="note-detail-page__remove"
+                      aria-label={t('personal.note.delete')}
+                      onClick={() => {
+                        storage.delete.note(note.id)
+                        navigate('/notes')
+                      }}
+                    />
+                  }
+                >
+                  <RemoveIcon size={16} />
+                </TooltipTrigger>
+                <TooltipContent>{t('personal.note.delete')}</TooltipContent>
+              </Tooltip>
             </div>
           </div>
           {topic && targetLabel ? (

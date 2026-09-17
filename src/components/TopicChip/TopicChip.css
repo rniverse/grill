@@ -1,0 +1,10 @@
+.topic-chip {
+  flex-shrink: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 500;
+  color: var(--color-ink-tertiary);
+  background: var(--color-ground);
+  border-radius: var(--radius-chip);
+  padding: var(--space-2xs) var(--space-sm);
+}

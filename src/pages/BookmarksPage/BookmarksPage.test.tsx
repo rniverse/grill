@@ -3,6 +3,7 @@ import { render, screen, act, within, fireEvent } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 import { BookmarksPage } from './BookmarksPage'
 import { storage } from '@/services/storage'
+import { contentCache } from '@/services/content-cache'
 import angularTopicData from '@/topics/angular.json'
 import angularReferencesData from '@/references/angular.json'
 import nodejsTopicData from '@/topics/nodejs.json'
@@ -11,9 +12,12 @@ import nodejsReferencesData from '@/references/nodejs.json'
 const angularTopic = { name: angularTopicData.meta.name }
 const angularQuestions = angularTopicData.questions
 const angularReferences = angularReferencesData.references
+const nodejsTopic = { name: nodejsTopicData.meta.name }
+const nodejsReferences = nodejsReferencesData.references
 
 const angularQuestion = angularQuestions[0]
 const angularReference = angularReferences[0]
+const nodejsReference = nodejsReferences[0]
 
 function fixtureFor(url: string): unknown {
   if (url.includes('/topics/angular')) return angularTopicData
@@ -23,16 +27,20 @@ function fixtureFor(url: string): unknown {
   throw new Error(`no fixture for ${url}`)
 }
 
+let fetchMock: ReturnType<typeof mock>
+
 beforeEach(() => {
   localStorage.clear()
-  globalThis.fetch = mock(async (input: RequestInfo | URL) => {
+  contentCache.clear()
+  fetchMock = mock(async (input: RequestInfo | URL) => {
     const url = typeof input === 'string' ? input : input.toString()
     return { ok: true, status: 200, json: async () => fixtureFor(url) } as Response
-  }) as unknown as typeof fetch
+  })
+  globalThis.fetch = fetchMock as unknown as typeof fetch
 })
 
 function renderPage() {
-  render(
+  return render(
     <MemoryRouter>
       <BookmarksPage />
     </MemoryRouter>,
@@ -122,5 +130,49 @@ describe('BookmarksPage', () => {
 
     const bookmarksLink = await screen.findByRole('link', { name: 'Bookmarks' })
     expect(bookmarksLink.getAttribute('aria-current')).toBe('true')
+  })
+
+  test('the topic chip sits after the item label, not before it', async () => {
+    storage.toggle.bookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
+
+    renderPage()
+
+    const label = await screen.findByText(angularQuestion.question)
+    const row = label.closest('.bookmarks-page__item')
+    if (!row) throw new Error('expected a row ancestor')
+    const children = Array.from(row.children)
+    const labelIndex = children.indexOf(label)
+    const chipIndex = children.findIndex((child) => child.className.includes('topic-chip'))
+    expect(chipIndex).toBeGreaterThan(labelIndex)
+  })
+
+  test('one question bookmark on angular + one reference bookmark on nodejs: only fetches angular topic + nodejs references, nothing else', async () => {
+    storage.toggle.bookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
+    storage.toggle.bookmark({ kind: 'reference', id: nodejsReference.id }, { name: nodejsTopic.name, version: '1.0.0' })
+
+    renderPage()
+    await screen.findByText(angularQuestion.question)
+    await screen.findByText(nodejsReference.term)
+
+    const fetchedUrls = fetchMock.mock.calls.map((call) => String(call[0]))
+    expect(fetchedUrls.some((url) => url.includes('/topics/angular'))).toBe(true)
+    expect(fetchedUrls.some((url) => url.includes('/references/nodejs'))).toBe(true)
+    expect(fetchedUrls.some((url) => url.includes('/references/angular'))).toBe(false)
+    expect(fetchedUrls.some((url) => url.includes('/topics/nodejs'))).toBe(false)
+    expect(fetchedUrls).toHaveLength(2)
+  })
+
+  test('re-mounting the page reuses the cache — no second round of fetches', async () => {
+    storage.toggle.bookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
+
+    const { unmount } = renderPage()
+    await screen.findByText(angularQuestion.question)
+    const callsAfterFirstMount = fetchMock.mock.calls.length
+    unmount()
+
+    renderPage()
+    await screen.findByText(angularQuestion.question)
+
+    expect(fetchMock.mock.calls.length).toBe(callsAfterFirstMount)
   })
 })

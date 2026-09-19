@@ -65,11 +65,6 @@ describe('ReferencesPage', () => {
       expect(screen.getByRole('button', { name: 'NgRx' })).toBeDefined()
     })
 
-    test('renders a MobileNav trigger for phone widths', () => {
-      renderAt('/references')
-
-      expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
-    })
   })
 
   describe('topic references (/references/:topicId)', () => {
@@ -108,17 +103,6 @@ describe('ReferencesPage', () => {
       renderAt('/references/does-not-exist')
       expect(await screen.findByText('Topic not found.')).toBeDefined()
       expect(screen.getByRole('link', { name: 'Back to references' })).toBeDefined()
-    })
-
-    test('renders a MobileNav trigger for phone widths, including on the not-found screen', async () => {
-      mockFetch()
-      renderAt('/references/nodejs')
-      await screen.findByRole('button', { name: 'Event Loop' })
-      expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
-
-      renderAt('/references/does-not-exist')
-      expect(await screen.findByText('Topic not found.')).toBeDefined()
-      expect(screen.getAllByRole('button', { name: 'Menu' }).length).toBeGreaterThan(0)
     })
 
     test('re-mounting the same topic reuses the cache — no second fetch', async () => {

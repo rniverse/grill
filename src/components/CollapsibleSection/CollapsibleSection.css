@@ -3,10 +3,12 @@
   flex-direction: column;
   gap: var(--space-sm);
   min-width: 0;
+  min-height: 0;
   flex: 1;
 }
 
 .collapsible-section__toggle {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -56,5 +58,13 @@
 
   .collapsible-section__chevron {
     display: none;
+  }
+
+  /* Each section (Questions / References, side by side) scrolls on its
+     own, independent of the other — the toggle above stays put. */
+  .collapsible-section__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
   }
 }

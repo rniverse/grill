@@ -4,9 +4,7 @@ import { contentCache } from '@/services/content-cache'
 import type { FileMeta, Question, Reference, Topic } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { storage } from '@/services/storage'
-import { BookmarksIcon, ReferencesIcon, ReloadIcon, SearchIcon } from '@/utils/icons'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
+import { BookmarksIcon, ReferencesIcon, ReloadIcon } from '@/utils/icons'
 import { TopicTagFilter } from '@/components/TopicTagFilter/TopicTagFilter'
 import { QuestionCard } from '@/components/QuestionCard/QuestionCard'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
@@ -134,7 +132,6 @@ export function TopicPage() {
   if (notFound) {
     return (
       <div className="topic-page">
-        <IconRail />
         <div className="topic-page__not-found">
           <p>{t('error.notfound.topics')}</p>
           <Link to="/">{t('backto.topics')}</Link>
@@ -165,7 +162,6 @@ export function TopicPage() {
 
   return (
     <div className="topic-page">
-      <IconRail />
       <main className="topic-page__main">
         {topic && meta ? (
           <div className="topic-page__content">
@@ -191,7 +187,6 @@ export function TopicPage() {
               </div>
               <div className="topic-page__mobile-header">
                 <div className="topic-page__mobile-header-left">
-                  <MobileNav />
                   <div className="topic-page__mobile-title-group">
                     <h1 className="topic-page__mobile-title">{topic.name}</h1>
                     <span className="topic-page__mobile-meta">
@@ -209,7 +204,7 @@ export function TopicPage() {
                   >
                     <ReferencesIcon size={16} />
                   </button>
-                  <button
+                  {/* <button
                     type="button"
                     className="topic-page__mobile-icon-button"
                     aria-pressed={bookmarkFilter}
@@ -217,10 +212,7 @@ export function TopicPage() {
                     onClick={toggleBookmarkFilter}
                   >
                     <BookmarksIcon size={16} />
-                  </button>
-                  <button type="button" className="topic-page__mobile-icon-button" aria-label={t('landing.search')}>
-                    <SearchIcon size={16} />
-                  </button>
+                  </button> */}
                 </div>
               </div>
             </div>

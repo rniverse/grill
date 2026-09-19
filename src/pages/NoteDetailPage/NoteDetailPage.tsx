@@ -6,8 +6,6 @@ import { personalNoteHasTarget } from '@/types/personal.types'
 import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
 import { RemoveIcon } from '@/utils/icons'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { AnswerBody } from '@/components/AnswerBody/AnswerBody'
 import { NoteEditor } from '@/components/NoteEditor/NoteEditor'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
@@ -81,7 +79,6 @@ export function NoteDetailPage() {
   if (!note) {
     return (
       <div className="note-detail-page">
-        <IconRail />
         <div className="note-detail-page__not-found">
           <p>{t('error.notfound.notes')}</p>
           <Link to="/notes">{t('backto.notes')}</Link>
@@ -104,12 +101,8 @@ export function NoteDetailPage() {
 
   return (
     <div className="note-detail-page">
-      <IconRail />
       <div className="note-detail-page__content">
         <div className="note-detail-page__card">
-          <div className="note-detail-page__mobile-header">
-            <MobileNav />
-          </div>
           <div className="note-detail-page__toolbar">
             <Link to="/notes" className="note-detail-page__back">
               {t('backto.notes')}
@@ -167,7 +160,9 @@ export function NoteDetailPage() {
               <p className="note-detail-page__target">{targetLabel}</p>
             </div>
           ) : null}
-          <AnswerBody text={note.text} references={[]} onReferenceSelect={() => {}} />
+          <div className="note-detail-page__body">
+            <AnswerBody text={note.text} references={[]} onReferenceSelect={() => {}} />
+          </div>
         </div>
       </div>
 

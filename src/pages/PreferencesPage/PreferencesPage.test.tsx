@@ -38,13 +38,6 @@ describe('PreferencesPage', () => {
     expect(screen.getByRole('heading', { name: 'Preferences' })).toBeDefined()
   })
 
-  test('renders a MobileNav trigger for phone widths', async () => {
-    renderPage()
-    await act(async () => {})
-
-    expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
-  })
-
   test('renders left nav with Content sources and Developer, Content sources active by default', async () => {
     renderPage()
     await act(async () => {})
@@ -80,16 +73,83 @@ describe('PreferencesPage', () => {
     expect(copied).toHaveLength(26)
   })
 
-  test('renders an IconRail with the Preferences section current', async () => {
-    render(
-      <MemoryRouter initialEntries={['/preferences']}>
-        <PreferencesPage />
-      </MemoryRouter>,
-    )
-    await act(async () => {})
+  test('clicking export downloads the current personal layer as a JSON blob', async () => {
+    storage.create.note('a note', { target: { kind: 'question', id: 'q1' }, topic: { name: 'nodejs', version: '1.0.0' } })
 
-    const preferencesLink = await screen.findByRole('link', { name: 'Preferences' })
-    expect(preferencesLink.getAttribute('aria-current')).toBe('true')
+    const createdUrls: string[] = []
+    const revokedUrls: string[] = []
+    const originalCreateObjectURL = URL.createObjectURL
+    const originalRevokeObjectURL = URL.revokeObjectURL
+    let capturedBlob: Blob | null = null
+
+    URL.createObjectURL = (blob: Blob) => {
+      capturedBlob = blob
+      const url = 'blob:mock-url'
+      createdUrls.push(url)
+      return url
+    }
+    URL.revokeObjectURL = (url: string) => {
+      revokedUrls.push(url)
+    }
+
+    try {
+      renderPage()
+      await act(async () => {})
+      fireEvent.click(screen.getByRole('button', { name: 'Developer' }))
+
+      fireEvent.click(screen.getByRole('button', { name: 'Export' }))
+
+      expect(createdUrls).toHaveLength(1)
+      expect(capturedBlob).not.toBeNull()
+      expect((capturedBlob as unknown as Blob).type).toBe('application/json')
+
+      // revokeObjectURL is deferred with setTimeout — let it fire.
+      await new Promise((resolve) => setTimeout(resolve, 0))
+      expect(revokedUrls).toEqual(createdUrls)
+    } finally {
+      URL.createObjectURL = originalCreateObjectURL
+      URL.revokeObjectURL = originalRevokeObjectURL
+    }
+  })
+
+  test('selecting a valid file imports it into the personal layer', async () => {
+    renderPage()
+    await act(async () => {})
+    fireEvent.click(screen.getByRole('button', { name: 'Developer' }))
+
+    const snapshot = {
+      pendingQuestions: [],
+      personalNotes: [],
+      bookmarks: [
+        {
+          id: 'b1',
+          topic: { name: 'nodejs', version: '1.0.0' },
+          target: { kind: 'question', id: 'q1' },
+          createdAt: '2024-01-01T00:00:00.000Z',
+        },
+      ],
+    }
+    const file = new File([JSON.stringify(snapshot)], 'export.json', { type: 'application/json' })
+
+    fireEvent.change(screen.getByLabelText('Import', { selector: 'input' }), {
+      target: { files: [file] },
+    })
+
+    await waitFor(() => expect(storage.list.personal.bookmarks()).toHaveLength(1))
+    expect(screen.queryByText('Could not import — check the file and try again.')).toBeNull()
+  })
+
+  test('selecting an invalid file shows an import error', async () => {
+    renderPage()
+    await act(async () => {})
+    fireEvent.click(screen.getByRole('button', { name: 'Developer' }))
+
+    const file = new File(['not json'], 'export.json', { type: 'application/json' })
+    fireEvent.change(screen.getByLabelText('Import', { selector: 'input' }), {
+      target: { files: [file] },
+    })
+
+    expect(await screen.findByText('Could not import — check the file and try again.')).toBeDefined()
   })
 
   test('clicking Validate on a row shows success after a successful check', async () => {

@@ -5,8 +5,6 @@ import { storage } from '@/services/storage'
 import type { FileMeta, Reference } from '@/types/topic.types'
 import { t } from '@/utils/i18n'
 import { ReloadIcon } from '@/utils/icons'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { TopicRow } from '@/components/TopicRow/TopicRow'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -25,10 +23,6 @@ function ReferencesPicker() {
 
   return (
     <div className="references-page">
-      <IconRail />
-      <div className="references-page__mobile-header">
-        <MobileNav />
-      </div>
       <div className="references-page__content">
         <div className="references-page__card">
           <h1 className="references-page__label">{t('page.references.title')}</h1>
@@ -124,10 +118,6 @@ function TopicReferences({ topicId }: { topicId: string }) {
   if (notFound) {
     return (
       <div className="references-page">
-        <IconRail />
-        <div className="references-page__mobile-header">
-          <MobileNav />
-        </div>
         <div className="references-page__not-found">
           <p>{t('error.notfound.references')}</p>
           <Link to="/references">{t('backto.references')}</Link>
@@ -138,10 +128,6 @@ function TopicReferences({ topicId }: { topicId: string }) {
 
   return (
     <div className="references-page">
-      <IconRail />
-      <div className="references-page__mobile-header">
-        <MobileNav />
-      </div>
       <div className="references-page__content">
         {source ? (
           <div className="references-page__card">

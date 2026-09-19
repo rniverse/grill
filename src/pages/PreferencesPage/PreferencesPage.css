@@ -1,4 +1,6 @@
 .preferences-page {
+  flex: 1;
+  min-width: 0;
   display: flex;
   height: 100vh;
   background: var(--color-ground);
@@ -10,18 +12,20 @@
   padding: var(--space-xl) var(--space-xl) var(--space-xl) var(--space-sm);
 }
 
+/* Card no longer scrolls itself — .preferences-page__panel does, so the
+   title and section nav above/beside it stay put. */
 .preferences-page__card {
   height: 100%;
-  background: var(--color-surface);
-  border-radius: var(--radius-card);
+  min-height: 0;
   padding: var(--space-4xl) var(--space-card-inline);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
 }
 
 .preferences-page__title {
+  flex-shrink: 0;
   margin: 0;
   font-family: var(--font-ui);
   font-size: var(--text-page-title);
@@ -57,29 +61,59 @@
   color: var(--color-ink-tertiary);
 }
 
-/* @media conditions can't reference custom properties, so this mirrors the
-   --bp-mobile value (700px) in variables.css literally — same as IconRail's
-   own hide rule. Below it, IconRail is gone and this bar's MobileNav is the
-   only way to navigate. */
-.preferences-page__mobile-header {
-  display: none;
+.preferences-page__dev-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
 }
 
+.preferences-page__dev-label {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-tertiary);
+}
+
+.preferences-page__dev-actions {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.preferences-page__dev-button {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  border: var(--size-hairline) solid var(--color-hairline);
+  border-radius: var(--radius-control);
+  padding: var(--space-sm) var(--space-lg);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.preferences-page__dev-button:hover {
+  background: var(--color-ground);
+}
+
+/* @media conditions can't reference custom properties, so this mirrors the
+   --bp-mobile value (700px) in variables.css literally. */
 @media (max-width: 700px) {
   .preferences-page__content {
     padding: 0;
   }
 
+  /* Top padding clears MobileNav's floating trigger (rendered by
+     AppLayout, fixed top-left) instead of a padding-bottom on a header row
+     that used to hold it here. */
   .preferences-page__card {
-    border-radius: 0;
-    background: transparent;
-    padding: var(--space-xl) var(--space-xl) var(--space-ms);
-  }
-
-  .preferences-page__mobile-header {
-    display: flex;
-    align-items: center;
-    padding-bottom: var(--space-md);
+    padding: calc(var(--space-xl) + var(--space-4xl)) var(--space-xl) var(--space-ms);
   }
 }
 
@@ -124,6 +158,8 @@
   gap: var(--space-lg);
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .preferences-page__table {

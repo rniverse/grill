@@ -63,13 +63,6 @@ describe('QuestionsPage', () => {
     expect(screen.getByRole('button', { name: 'References' })).toBeDefined()
   })
 
-  test('renders a MobileNav trigger for phone widths', async () => {
-    renderPage()
-    await act(async () => {})
-
-    expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
-  })
-
   test('shows the empty state in both sections with no pending questions', async () => {
     renderPage()
 

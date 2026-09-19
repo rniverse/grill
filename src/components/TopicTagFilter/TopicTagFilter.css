@@ -1,5 +1,89 @@
+/* Reskins the shadcn/Tailwind combobox primitives (src/components/ui/combobox.tsx)
+   to this app's own design tokens — see global.css's dialog-overlay comment
+   for why plain unlayered rules here reliably beat the component's
+   `@layer utilities` classes regardless of specificity. */
+
 .topic-tag-filter__chips {
   flex: 1;
   min-width: 0;
-  max-width: 420px;
+  width: 100%;
+  border: 0;
+  /* border: var(--size-hairline) solid var(--color-hairline); */
+  border-radius: var(--radius-xs);
+  background: var(--color-surface);
+  padding: var(--space-sm) var(--space-md);
+  min-height: 0;
+}
+
+.topic-tag-filter__chips:focus-within {
+  border-color: var(--color-accent);
+}
+
+.topic-tag-filter__chips [data-slot='combobox-chip'] {
+  flex-shrink: 0;
+  height: auto;
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  font-weight: 500;
+  color: var(--color-ink-tertiary);
+  background: var(--color-ground);
+  border-radius: var(--radius-chip);
+  padding: var(--space-2xs) var(--space-2xs) var(--space-2xs) var(--space-sm);
+}
+
+.topic-tag-filter__chips [data-slot='combobox-chip-remove'] {
+  color: var(--color-ink-tertiary);
+  border-radius: var(--radius-chip);
+}
+
+.topic-tag-filter__chips [data-slot='combobox-chip-input'] {
+  border: none;
+  outline: none;
+  min-height: 22px;
+  font-family: var(--font-ui);
+  font-size: var(--text-secondary);
+  color: var(--color-ink);
+}
+
+.topic-tag-filter__chips [data-slot='combobox-chip-input']::placeholder {
+  color: var(--color-ink-tertiary);
+}
+
+.topic-tag-filter__chips [data-slot='combobox-clear'] {
+  color: var(--color-ink-tertiary);
+}
+
+.topic-tag-filter__chips [data-slot='combobox-clear']:hover {
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
+.topic-tag-filter__content {
+  background: var(--color-surface);
+  border: 0;
+  top: -2px;
+  border-radius: var(--radius-xs);
+  box-shadow: var(--shadow-popup);
+}
+
+.topic-tag-filter__content [data-slot='combobox-item'] {
+  font-family: var(--font-ui);
+  font-size: var(--text-secondary);
+  color: var(--color-ink);
+  border-radius: var(--radius-xs);
+}
+
+.topic-tag-filter__content [data-slot='combobox-item'][data-highlighted] {
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
+.topic-tag-filter__content [data-slot='combobox-item'] svg {
+  color: var(--color-accent-icon);
+}
+
+.topic-tag-filter__content [data-slot='combobox-empty'] {
+  font-family: var(--font-ui);
+  font-size: var(--text-mono-meta);
+  color: var(--color-ink-tertiary);
 }

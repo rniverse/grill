@@ -1,14 +1,16 @@
 .question-card {
-  background: var(--color-surface);
-  border-radius: var(--radius-card-collapsed);
-  padding: var(--space-card-pad-block) var(--space-card-pad-inline);
+  background: transparent;
+  border-radius: 0;
+  padding: var(--space-base) 0;
   box-shadow: none;
+  border-bottom: var(--size-hairline) solid var(--color-hairline-mobile);
   transition: box-shadow var(--duration-pop) ease;
 }
 
 .question-card--open {
-  border-radius: var(--radius-card-open);
-  box-shadow: var(--shadow-card-raised);
+  border-radius: 0;
+  box-shadow: none;
+  border-bottom-color: transparent;
 }
 
 .question-card__header-row {
@@ -75,6 +77,10 @@
   letter-spacing: 0.02em;
 }
 
+.question-card--open .question-card__tag {
+  color: var(--color-accent);
+}
+
 .question-card__chevron {
   display: flex;
   padding: var(--space-xs);
@@ -91,9 +97,8 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-base);
-  padding-top: var(--space-lg);
-  margin-top: var(--space-base);
-  border-top: var(--size-hairline) solid var(--color-hairline);
+  padding-top: var(--space-md);
+  padding-left: var(--space-3xl);
 }
 
 .question-card__answer {
@@ -193,34 +198,4 @@
   font-size: var(--text-question);
   font-weight: 600;
   color: var(--color-ink);
-}
-
-/* Mobile ("Quiet list" / "1a" in the design handoff): no card, hairline rows
-   instead. @media conditions can't reference custom properties, so this
-   mirrors --bp-mobile (700px) from variables.css literally. */
-@media (max-width: 700px) {
-  .question-card {
-    background: transparent;
-    border-radius: 0;
-    padding: var(--space-base) 0;
-    box-shadow: none;
-    border-bottom: var(--size-hairline) solid var(--color-hairline-mobile);
-  }
-
-  .question-card--open {
-    border-radius: 0;
-    box-shadow: none;
-    border-bottom-color: transparent;
-  }
-
-  .question-card--open .question-card__tag {
-    color: var(--color-accent);
-  }
-
-  .question-card__body {
-    padding-top: var(--space-md);
-    margin-top: 0;
-    border-top: none;
-    padding-left: var(--space-3xl);
-  }
 }

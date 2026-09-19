@@ -114,24 +114,6 @@ describe('BookmarksPage', () => {
     expect(await screen.findByRole('button', { name: 'Close' })).toBeDefined()
   })
 
-  test('renders a MobileNav trigger for phone widths', async () => {
-    renderPage()
-    await act(async () => {})
-
-    expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
-  })
-
-  test('renders an IconRail with the Bookmarks section current', async () => {
-    render(
-      <MemoryRouter initialEntries={['/bookmarks']}>
-        <BookmarksPage />
-      </MemoryRouter>,
-    )
-
-    const bookmarksLink = await screen.findByRole('link', { name: 'Bookmarks' })
-    expect(bookmarksLink.getAttribute('aria-current')).toBe('true')
-  })
-
   test('the topic chip sits after the item label, not before it', async () => {
     storage.toggle.bookmark({ kind: 'question', id: angularQuestion.id }, { name: angularTopic.name, version: '1.0.0' })
 

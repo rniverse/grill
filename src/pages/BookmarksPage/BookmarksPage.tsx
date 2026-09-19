@@ -5,11 +5,10 @@ import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { Bookmark, LocalTargetRef } from '@/types/personal.types'
 import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { CollapsibleSection } from '@/components/CollapsibleSection/CollapsibleSection'
 import { TopicChip } from '@/components/TopicChip/TopicChip'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
+import { ListLoading } from '@/components/ListLoading/ListLoading'
 import './BookmarksPage.css'
 
 interface LoadedTopicSummary {
@@ -93,6 +92,7 @@ function BookmarkItems({
 
 export function BookmarksPage() {
   const [loadedTopics, setLoadedTopics] = useState<LoadedTopicSummary[]>([])
+  const [loading, setLoading] = useState(true)
   const [openReference, setOpenReference] = useState<Reference | null>(null)
   const [openReferenceTopic, setOpenReferenceTopic] = useState<LoadedTopicSummary | null>(null)
   // Bumped whenever the reference modal's bookmark button changes something,
@@ -141,7 +141,10 @@ export function BookmarksPage() {
         }),
       )
       const summaries = results.filter((summary) => summary !== null)
-      if (!cancelled) setLoadedTopics(summaries)
+      if (!cancelled) {
+        setLoadedTopics(summaries)
+        setLoading(false)
+      }
     }
 
     loadNeededTopics()
@@ -165,28 +168,30 @@ export function BookmarksPage() {
 
   return (
     <div className="bookmarks-page">
-      <IconRail />
       <div className="bookmarks-page__content">
         <div className="bookmarks-page__card">
-          <div className="bookmarks-page__mobile-header">
-            <MobileNav />
-          </div>
           <h1 className="bookmarks-page__title">{t('page.bookmarks.title')}</h1>
           <div className="bookmarks-page__sections">
-            <CollapsibleSection title={t('personal.rail.tab.questions')}>
-              <BookmarkItems
-                bookmarks={questionBookmarks}
-                topicByName={topicByName}
-                onOpenReference={openReferenceInTopic}
-              />
-            </CollapsibleSection>
-            <CollapsibleSection title={t('nav.references')}>
-              <BookmarkItems
-                bookmarks={referenceBookmarks}
-                topicByName={topicByName}
-                onOpenReference={openReferenceInTopic}
-              />
-            </CollapsibleSection>
+            {loading ? (
+              <ListLoading />
+            ) : (
+              <>
+                <CollapsibleSection title={t('personal.rail.tab.questions')}>
+                  <BookmarkItems
+                    bookmarks={questionBookmarks}
+                    topicByName={topicByName}
+                    onOpenReference={openReferenceInTopic}
+                  />
+                </CollapsibleSection>
+                <CollapsibleSection title={t('nav.references')}>
+                  <BookmarkItems
+                    bookmarks={referenceBookmarks}
+                    topicByName={topicByName}
+                    onOpenReference={openReferenceInTopic}
+                  />
+                </CollapsibleSection>
+              </>
+            )}
           </div>
         </div>
       </div>

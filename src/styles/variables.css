@@ -1,10 +1,10 @@
 :root {
   /* Color — ground & surface */
-  --color-ground: #f4f6f8;
+  --color-ground: #f8f9fa;
   --color-surface: #ffffff;
   --color-surface-recessed: #fafbfc;
-  --color-surface-tinted: #eaf0f6;
-  --color-surface-tinted-alt: #eef2f6;
+  --color-surface-tinted: #e9ecef;
+  --color-surface-tinted-alt: #e9ecef;
 
   /* Color — ink */
   --color-ink: #1c1d22;
@@ -13,12 +13,12 @@
   --color-ink-tertiary: #a8b4c0;
   --color-ink-faint: #9aa0a8; /* question tag labels */
 
-  /* Color — accent */
-  --color-accent: #82a4bd;
-  --color-accent-icon: #5c7d9e;
-  --color-accent-text: #3f6285;
-  --color-accent-link: #4a7fb5;
-  --color-accent-link-hover: #2f5d86;
+  /* Color — accent (Midnight Navy, weighted heavy) */
+  --color-accent: #0c2c55;
+  --color-accent-icon: #1d436b;
+  --color-accent-text: #092140;
+  --color-accent-link: #2a5474;
+  --color-accent-link-hover: #071830;
 
   /* Color — reference pill, personal highlight */
   --color-reference-pill-bg: #e9f0f7;
@@ -29,7 +29,7 @@
   --color-code-ink: #39414a;
 
   /* Color — hairlines & scrim */
-  --color-hairline: #eef1f4;
+  --color-hairline: #dee2e6;
   --color-hairline-alt: #f0f3f6;
   --color-hairline-mobile: #e6eaee;
   --color-scrim: rgba(28, 29, 34, 0.16);
@@ -144,6 +144,7 @@
   --bp-nav-panel: 980px;
 
   /* Z-index */
+  --z-floating: 20;
   --z-overlay: 40;
   --z-drawer: 50;
   --z-modal: 70;

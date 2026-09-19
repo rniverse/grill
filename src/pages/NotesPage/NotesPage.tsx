@@ -4,13 +4,12 @@ import { personalNoteHasTarget, type LocalTargetRef, type PersonalNote } from '@
 import { storage } from '@/services/storage'
 import { contentCache } from '@/services/content-cache'
 import { t } from '@/utils/i18n'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { NoteEditor } from '@/components/NoteEditor/NoteEditor'
 import { TopicChip } from '@/components/TopicChip/TopicChip'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { ListLoading } from '@/components/ListLoading/ListLoading'
+import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { RemoveIcon } from '@/utils/icons'
+import { CloseIcon, RemoveIcon } from '@/utils/icons'
 import './NotesPage.css'
 
 const NOTE_PREVIEW_LENGTH = 80
@@ -31,10 +30,10 @@ export function NotesPage() {
   // Bumped after a create/delete, so the list re-reads storage and the
   // label-resolution effect below re-runs against the new set of notes.
   const [version, bumpVersion] = useState(0)
-  // Note id -> resolved question/reference text, filled in progressively as
-  // each lookup resolves. A note whose id has no entry here just doesn't
-  // show a target label yet (or ever, if the lookup fails) — the topic+type
-  // chip alone is never blocked on this.
+  const [loading, setLoading] = useState(true)
+  // Note id -> resolved question/reference text. A note whose id has no
+  // entry here just doesn't show a target label (or ever, if the lookup
+  // fails) — the topic+type chip alone is never blocked on this.
   const [targetLabels, setTargetLabels] = useState<Record<string, string>>({})
 
   const notes: PersonalNote[] = storage.list.personal.notes()
@@ -51,28 +50,37 @@ export function NotesPage() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: see comment above
   useEffect(() => {
     let cancelled = false
+    setLoading(true)
 
-    async function resolveLabel(note: PersonalNote & { topic: LocalTargetRef['topic']; target: LocalTargetRef['target'] }) {
+    async function resolveLabel(
+      note: PersonalNote & { topic: LocalTargetRef['topic']; target: LocalTargetRef['target'] },
+    ): Promise<[string, string] | null> {
       const source = storage.list.sources().find((candidate) => candidate.name === note.topic.name)
-      if (!source) return
+      if (!source) return null
 
       if (note.target.kind === 'question') {
         const result = await contentCache.resolve.topic(source)
-        if (cancelled || result.status === 'error') return
+        if (result.status === 'error') return null
         const label = result.data.questions.find((candidate) => candidate.id === note.target.id)?.question
-        if (label) setTargetLabels((current) => ({ ...current, [note.id]: label }))
-        return
+        return label ? [note.id, label] : null
       }
 
       const result = await contentCache.resolve.references(source)
-      if (cancelled || result.status === 'error') return
+      if (result.status === 'error') return null
       const label = result.data.references.find((candidate) => candidate.id === note.target.id)?.term
-      if (label) setTargetLabels((current) => ({ ...current, [note.id]: label }))
+      return label ? [note.id, label] : null
     }
 
-    for (const note of storage.list.personal.notes()) {
-      if (personalNoteHasTarget(note)) resolveLabel(note)
+    async function resolveAll() {
+      const entries = await Promise.all(
+        storage.list.personal.notes().filter(personalNoteHasTarget).map(resolveLabel),
+      )
+      if (cancelled) return
+      setTargetLabels(Object.fromEntries(entries.filter((entry) => entry !== null)))
+      setLoading(false)
     }
+
+    resolveAll()
 
     return () => {
       cancelled = true
@@ -81,12 +89,8 @@ export function NotesPage() {
 
   return (
     <div className="notes-page">
-      <IconRail />
       <div className="notes-page__content">
         <div className="notes-page__card">
-          <div className="notes-page__mobile-header">
-            <MobileNav />
-          </div>
           <div className="notes-page__title-row">
             <h1 className="notes-page__title">{t('page.notes.title')}</h1>
             <button type="button" className="notes-page__add" onClick={() => setCreating(true)}>
@@ -94,7 +98,9 @@ export function NotesPage() {
             </button>
           </div>
           <div className="notes-page__items">
-            {notes.length === 0 ? (
+            {loading ? (
+              <ListLoading />
+            ) : notes.length === 0 ? (
               <p className="notes-page__empty">{t('personal.rail.empty.notes')}</p>
             ) : (
               notes.map((note) => (
@@ -149,7 +155,12 @@ export function NotesPage() {
 
       <Dialog open={creating} onOpenChange={setCreating}>
         <DialogContent className="notes-page__dialog" showCloseButton={false}>
-          <DialogTitle className="notes-page__dialog-title">{t('personal.note.add')}</DialogTitle>
+          <div className="notes-page__dialog-header">
+            <DialogTitle className="notes-page__dialog-title">{t('personal.note.add')}</DialogTitle>
+            <DialogClose className="notes-page__dialog-close" aria-label={t('personal.note.close')}>
+              <CloseIcon size={16} />
+            </DialogClose>
+          </div>
           <NoteEditor
             initialValue=""
             onSave={(text) => {

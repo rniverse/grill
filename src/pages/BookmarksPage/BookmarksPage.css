@@ -1,4 +1,6 @@
 .bookmarks-page {
+  flex: 1;
+  min-width: 0;
   display: flex;
   height: 100vh;
   background: var(--color-ground);
@@ -10,18 +12,21 @@
   padding: var(--space-xl) var(--space-xl) var(--space-xl) var(--space-sm);
 }
 
+/* Card no longer scrolls itself — .bookmarks-page__sections (or, on
+   desktop, each CollapsibleSection inside it) owns its own scroll, so the
+   title above stays put. */
 .bookmarks-page__card {
   height: 100%;
-  background: var(--color-surface);
-  border-radius: var(--radius-card);
+  min-height: 0;
   padding: var(--space-4xl) var(--space-card-inline);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
 }
 
 .bookmarks-page__title {
+  flex-shrink: 0;
   margin: 0;
   font-family: var(--font-ui);
   font-size: var(--text-page-title);
@@ -31,9 +36,15 @@
 }
 
 .bookmarks-page__sections {
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
+  /* Mobile: sections stack as a single accordion column, so this is the
+     one scrolling region. Desktop overrides this back to hidden below —
+     there, each CollapsibleSection scrolls independently instead. */
+  overflow-y: auto;
 }
 
 .bookmarks-page__item {
@@ -81,18 +92,12 @@
   color: var(--color-ink-quaternary);
 }
 
-/* @media conditions can't reference custom properties, so this mirrors the
-   --bp-mobile value (700px) in variables.css literally — same as IconRail's
-   own hide rule. Below it, IconRail is gone and this bar's MobileNav is the
-   only way to navigate. */
-.bookmarks-page__mobile-header {
-  display: none;
-}
-
 @media (min-width: 701px) {
   .bookmarks-page__sections {
     flex-direction: row;
     gap: var(--space-2xl);
+    /* Each CollapsibleSection column scrolls on its own instead. */
+    overflow-y: hidden;
   }
 }
 
@@ -101,15 +106,10 @@
     padding: 0;
   }
 
+  /* Top padding clears MobileNav's floating trigger (rendered by
+     AppLayout, fixed top-left) instead of a padding-bottom on a header row
+     that used to hold it here. */
   .bookmarks-page__card {
-    border-radius: 0;
-    background: transparent;
-    padding: var(--space-xl) var(--space-xl) var(--space-ms);
-  }
-
-  .bookmarks-page__mobile-header {
-    display: flex;
-    align-items: center;
-    padding-bottom: var(--space-md);
+    padding: calc(var(--space-xl) + var(--space-4xl)) var(--space-xl) var(--space-ms);
   }
 }

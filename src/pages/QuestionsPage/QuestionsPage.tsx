@@ -5,12 +5,11 @@ import type { FileMeta, Question, Reference } from '@/types/topic.types'
 import type { LocalTargetRef, PendingQuestion } from '@/types/personal.types'
 import { storage } from '@/services/storage'
 import { t } from '@/utils/i18n'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
 import { CollapsibleSection } from '@/components/CollapsibleSection/CollapsibleSection'
 import { TopicBadge } from '@/components/TopicBadge/TopicBadge'
 import { TopicChip } from '@/components/TopicChip/TopicChip'
 import { ReferenceModal } from '@/components/ReferenceModal/ReferenceModal'
+import { ListLoading } from '@/components/ListLoading/ListLoading'
 import { CloseIcon, RemoveIcon } from '@/utils/icons'
 import { Dialog, DialogClose, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import './QuestionsPage.css'
@@ -75,6 +74,7 @@ function QuestionItems({
 
 export function QuestionsPage() {
   const [loadedTopics, setLoadedTopics] = useState<LoadedTopicSummary[]>([])
+  const [loading, setLoading] = useState(true)
   const [openPending, setOpenPending] = useState<PendingQuestion | null>(null)
   const [openReference, setOpenReference] = useState<Reference | null>(null)
   const [openReferenceTopic, setOpenReferenceTopic] = useState<LoadedTopicSummary | null>(null)
@@ -124,7 +124,10 @@ export function QuestionsPage() {
         }),
       )
       const summaries = results.filter((summary) => summary !== null)
-      if (!cancelled) setLoadedTopics(summaries)
+      if (!cancelled) {
+        setLoadedTopics(summaries)
+        setLoading(false)
+      }
     }
 
     loadNeededTopics()
@@ -163,30 +166,32 @@ export function QuestionsPage() {
 
   return (
     <div className="questions-page">
-      <IconRail />
       <div className="questions-page__content">
         <div className="questions-page__card">
-          <div className="questions-page__mobile-header">
-            <MobileNav />
-          </div>
           <h1 className="questions-page__title">{t('page.questions.title')}</h1>
           <div className="questions-page__sections">
-            <CollapsibleSection title={t('personal.rail.tab.questions')}>
-              <QuestionItems
-                pendingQuestions={onQuestionTarget}
-                emptyText={t('personal.rail.empty.questions')}
-                onSelect={setOpenPending}
-                topicByName={topicByName}
-              />
-            </CollapsibleSection>
-            <CollapsibleSection title={t('nav.references')}>
-              <QuestionItems
-                pendingQuestions={onReferenceTarget}
-                emptyText={t('references.empty.questions')}
-                onSelect={setOpenPending}
-                topicByName={topicByName}
-              />
-            </CollapsibleSection>
+            {loading ? (
+              <ListLoading />
+            ) : (
+              <>
+                <CollapsibleSection title={t('personal.rail.tab.questions')}>
+                  <QuestionItems
+                    pendingQuestions={onQuestionTarget}
+                    emptyText={t('personal.rail.empty.questions')}
+                    onSelect={setOpenPending}
+                    topicByName={topicByName}
+                  />
+                </CollapsibleSection>
+                <CollapsibleSection title={t('nav.references')}>
+                  <QuestionItems
+                    pendingQuestions={onReferenceTarget}
+                    emptyText={t('references.empty.questions')}
+                    onSelect={setOpenPending}
+                    topicByName={topicByName}
+                  />
+                </CollapsibleSection>
+              </>
+            )}
           </div>
         </div>
       </div>

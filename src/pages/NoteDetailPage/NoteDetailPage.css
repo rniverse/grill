@@ -1,4 +1,6 @@
 .note-detail-page {
+  flex: 1;
+  min-width: 0;
   display: flex;
   height: 100vh;
   background: var(--color-ground);
@@ -10,22 +12,30 @@
   padding: var(--space-xl) var(--space-xl) var(--space-xl) var(--space-sm);
 }
 
+/* Card no longer scrolls itself — .note-detail-page__body does, so the
+   toolbar/meta above it stay put. */
 .note-detail-page__card {
   height: 100%;
-  background: var(--color-surface);
-  border-radius: var(--radius-card);
+  min-height: 0;
   padding: var(--space-4xl) var(--space-card-inline);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-lg);
 }
 
 .note-detail-page__toolbar {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-md);
+}
+
+.note-detail-page__body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .note-detail-page__back {
@@ -74,6 +84,7 @@
 }
 
 .note-detail-page__meta {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-2xs);
@@ -110,28 +121,17 @@
 }
 
 /* @media conditions can't reference custom properties, so this mirrors the
-   --bp-mobile value (700px) in variables.css literally — same as IconRail's
-   own hide rule. Below it, IconRail is gone and this bar's MobileNav is the
-   only way to navigate. */
-.note-detail-page__mobile-header {
-  display: none;
-}
-
+   --bp-mobile value (700px) in variables.css literally. */
 @media (max-width: 700px) {
   .note-detail-page__content {
     padding: 0;
   }
 
+  /* Top padding clears MobileNav's floating trigger (rendered by
+     AppLayout, fixed top-left) instead of a padding-bottom on a header row
+     that used to hold it here. */
   .note-detail-page__card {
-    border-radius: 0;
-    background: transparent;
-    padding: var(--space-xl) var(--space-xl) var(--space-ms);
-  }
-
-  .note-detail-page__mobile-header {
-    display: flex;
-    align-items: center;
-    padding-bottom: var(--space-md);
+    padding: calc(var(--space-xl) + var(--space-4xl)) var(--space-xl) var(--space-ms);
   }
 
   .note-detail-page__not-found {

@@ -1,25 +1,37 @@
 .topic-page {
+  flex: 1;
+  min-width: 0;
   display: flex;
   height: 100vh;
   background: var(--color-ground);
 }
 
+/* No longer the scroll owner — .topic-page__cards (or, at mobile, whichever
+   of it/.topic-page__mobile-references is active) scrolls on its own now,
+   so the title row and tag filter above it can stay put. */
 .topic-page__main {
   flex: 1;
   min-width: 0;
-  overflow-y: auto;
-  padding: var(--space-2xl) var(--space-3xl) var(--space-topic-content-bottom);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: var(--space-2xl) var(--space-3xl) 0;
 }
 
 .topic-page__content {
+  flex: 1;
+  min-height: 0;
   max-width: var(--size-topic-content-max-width);
   margin: 0 auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
 }
 
 .topic-page__header {
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-topic-header);
@@ -54,9 +66,15 @@
 }
 
 .topic-page__cards {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: var(--space-topic-content-bottom);
   display: flex;
   flex-direction: column;
-  gap: var(--space-ms);
+  /* Each row carries its own hairline + vertical padding as separation
+     (see QuestionCard.css) — no extra gap needed between them. */
+  gap: 0;
 }
 
 .topic-page__not-found {
@@ -124,6 +142,7 @@
 }
 
 .topic-page__filter-row {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: var(--space-sm);
@@ -155,6 +174,10 @@
    this view is toggled on can never strand the desktop question list. */
 .topic-page__mobile-references {
   display: none;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: var(--space-topic-content-bottom);
   flex-direction: column;
   gap: var(--space-md);
 }
@@ -189,10 +212,11 @@
 /* @media conditions can't reference custom properties, so this mirrors
    --bp-mobile (700px) from variables.css literally. */
 @media (max-width: 700px) {
-  /* IconRail already hides itself below --bp-mobile (see IconRail.css);
-     MobileNav (rendered inside .topic-page__mobile-header) takes over. */
+  /* Top padding clears MobileNav's floating trigger (rendered by
+     AppLayout, fixed top-left) instead of it sitting inline in the title
+     row here. */
   .topic-page__main {
-    padding: var(--space-lg) 0 var(--space-topic-content-bottom);
+    padding: calc(var(--space-lg) + var(--space-4xl)) 0 0;
   }
 
   .topic-page__content {
@@ -222,12 +246,6 @@
   .topic-page__saved-chip {
     display: flex;
     flex-shrink: 0;
-  }
-
-  /* Hairline rows (see QuestionCard.css's own mobile variant) already carry
-     their own vertical padding as separation — no extra gap between them. */
-  .topic-page__cards {
-    gap: 0;
   }
 
   /* The References toggle only swaps content within mobile widths — these

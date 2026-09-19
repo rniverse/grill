@@ -2,6 +2,8 @@
    reference chips) — same full-height rail + content-card shell as
    LandingPage/TopicPage. */
 .references-page {
+  flex: 1;
+  min-width: 0;
   display: flex;
   height: 100vh;
   background: var(--color-ground);
@@ -13,12 +15,13 @@
   padding: var(--space-xl) var(--space-xl) var(--space-xl) var(--space-sm);
 }
 
+/* Card no longer scrolls itself — the rows/chips list below the label or
+   header does, so that top row stays put. */
 .references-page__card {
   height: 100%;
-  background: var(--color-surface);
-  border-radius: var(--radius-card);
+  min-height: 0;
   padding: var(--space-4xl) var(--space-card-inline);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
@@ -26,6 +29,7 @@
 
 /* Topic-picker state */
 .references-page__label {
+  flex-shrink: 0;
   margin: 0;
   font-family: var(--font-ui);
   font-size: var(--text-meta);
@@ -36,12 +40,16 @@
 }
 
 .references-page__rows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
 
 /* Topic-selected state */
 .references-page__header {
+  flex-shrink: 0;
   display: flex;
   align-items: baseline;
   gap: var(--space-md);
@@ -74,8 +82,12 @@
 }
 
 .references-page__chips {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-wrap: wrap;
+  align-content: flex-start;
   gap: var(--space-sm);
 }
 
@@ -103,36 +115,24 @@
 }
 
 /* @media conditions can't reference custom properties, so this mirrors the
-   --bp-mobile value (700px) in variables.css literally — same as IconRail's
-   own hide rule. Below it, IconRail is gone and this bar's MobileNav is the
-   only way to navigate. */
-.references-page__mobile-header {
-  display: none;
-}
-
+   --bp-mobile value (700px) in variables.css literally. */
 @media (max-width: 700px) {
   /* .references-page is display:flex (row) so IconRail and __content sit
      side by side on desktop. Below --bp-mobile, IconRail hides itself and
-     __mobile-header takes over as a full-width bar instead of a second
-     column — same flattening LandingPage/TopicPage do for their own
-     mobile headers. */
+     __content becomes a full-width column instead of a second column —
+     same flattening LandingPage/TopicPage do. */
   .references-page {
     flex-direction: column;
   }
 
-  .references-page__mobile-header {
-    display: flex;
-    align-items: center;
-    padding: var(--space-lg);
-  }
-
+  /* Top padding clears MobileNav's floating trigger (rendered by
+     AppLayout, fixed top-left) instead of a padding on a header row that
+     used to hold it here. */
   .references-page__content {
-    padding: 0 var(--space-xl) var(--space-xl);
+    padding: calc(var(--space-xl) + var(--space-4xl)) var(--space-xl) var(--space-xl);
   }
 
   .references-page__card {
-    border-radius: 0;
-    background: transparent;
     padding: 0;
   }
 

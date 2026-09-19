@@ -29,10 +29,12 @@ export function TopicTagFilter({ tags, selected, onChange }: TopicTagFilterProps
         <ComboboxValue>
           {(value: string[]) => value.map((tag) => <ComboboxChip key={tag}>{tag}</ComboboxChip>)}
         </ComboboxValue>
-        <ComboboxChipsInput placeholder={t('topic.filter.placeholder')} />
+        <ComboboxChipsInput
+          placeholder={selected.length === 0 ? t('topic.filter.placeholder') : t('topic.filter.placeholder.selected')}
+        />
         <ComboboxClear aria-label={t('topic.filter.clear')} />
       </ComboboxChips>
-      <ComboboxContent anchor={anchor}>
+      <ComboboxContent anchor={anchor} className="topic-tag-filter__content">
         <ComboboxList>{(tag: string) => <ComboboxItem key={tag} value={tag}>{tag}</ComboboxItem>}</ComboboxList>
         <ComboboxEmpty>{t('topic.filter.empty')}</ComboboxEmpty>
       </ComboboxContent>

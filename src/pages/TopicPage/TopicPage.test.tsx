@@ -100,7 +100,7 @@ describe('TopicPage', () => {
     expect(filteredCount).toBeLessThan(initialCount)
   })
 
-  test('the filter placeholder reads "Showing all questions" until a tag is picked', async () => {
+  test('the filter placeholder reads "Showing all questions" until a tag is picked, then switches to "Select"', async () => {
     renderAt('/topics/angular')
     await screen.findAllByText('Angular')
 
@@ -110,6 +110,8 @@ describe('TopicPage', () => {
     fireEvent.click(await screen.findByRole('option', { name: 'Fundamentals & Architecture' }))
 
     expect(selectedTagChips().getByText('Fundamentals & Architecture')).toBeDefined()
+    expect(screen.getByPlaceholderText('Select')).toBeDefined()
+    expect(screen.queryByPlaceholderText('Showing all questions')).toBeNull()
   })
 
   test('picking more than one tag shows questions matching any of them', async () => {
@@ -194,12 +196,6 @@ describe('TopicPage', () => {
     fireEvent.click(bookmarkButton)
 
     expect(screen.getAllByRole('button', { name: 'Bookmarked' })[0]).toBeDefined()
-  })
-
-  test('renders a MobileNav trigger in the mobile header', async () => {
-    renderAt('/topics/angular')
-    await screen.findAllByText('Angular')
-    expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
   })
 
   test('the References icon shows the mobile reference chip list, and back, without unmounting the question list', async () => {

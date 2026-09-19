@@ -1,12 +1,11 @@
-import { useState, type FormEvent } from 'react'
+import { useRef, useState, type ChangeEvent, type FormEvent } from 'react'
 import type { ContentSourceConfig, SourceValidation } from '@/config/content-sources'
 import { contentCache } from '@/services/content-cache'
 import { storage } from '@/services/storage'
 import { generateId } from '@/utils/id'
+import { downloadPersonalLayer } from '@/utils/download-personal-layer'
 import { t } from '@/utils/i18n'
-import { EditIcon, ReloadIcon, RemoveIcon } from '@/utils/icons'
-import { IconRail } from '@/components/IconRail/IconRail'
-import { MobileNav } from '@/components/MobileNav/MobileNav'
+import { EditIcon, ExportIcon, ImportIcon, ReloadIcon, RemoveIcon } from '@/utils/icons'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { PreferencesSection } from './preferences-section.enum'
@@ -223,56 +222,58 @@ function SourcesPanel() {
                 <ValidationStatus kind="topic" validation={source.validation?.topic} />
                 <ValidationStatus kind="references" validation={source.validation?.references} />
               </td>
-              <td className="preferences-page__table-actions">
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        className="preferences-page__source-validate"
-                        aria-label={t('preferences.source.validate')}
-                        onClick={() => handleValidate(source)}
-                        disabled={validatingId === source.id}
-                      />
-                    }
-                  >
-                    <ReloadIcon size={14} className={validatingId === source.id ? 'icon-spin' : undefined} />
-                  </TooltipTrigger>
-                  <TooltipContent>{t('preferences.source.validate')}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        className="preferences-page__table-edit"
-                        aria-label={t('preferences.source.edit')}
-                        onClick={() => setDialog({ mode: 'edit', source })}
-                      />
-                    }
-                  >
-                    <EditIcon size={14} />
-                  </TooltipTrigger>
-                  <TooltipContent>{t('preferences.source.edit')}</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <button
-                        type="button"
-                        className="preferences-page__table-remove"
-                        aria-label={t('preferences.source.delete')}
-                        onClick={() => {
-                          storage.delete.source(source.id)
-                          refresh()
-                        }}
-                      />
-                    }
-                  >
-                    <RemoveIcon size={14} />
-                  </TooltipTrigger>
-                  <TooltipContent>{t('preferences.source.delete')}</TooltipContent>
-                </Tooltip>
+              <td>
+                <div className="preferences-page__table-actions">
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="preferences-page__source-validate"
+                          aria-label={t('preferences.source.validate')}
+                          onClick={() => handleValidate(source)}
+                          disabled={validatingId === source.id}
+                        />
+                      }
+                    >
+                      <ReloadIcon size={14} className={validatingId === source.id ? 'icon-spin' : undefined} />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('preferences.source.validate')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="preferences-page__table-edit"
+                          aria-label={t('preferences.source.edit')}
+                          onClick={() => setDialog({ mode: 'edit', source })}
+                        />
+                      }
+                    >
+                      <EditIcon size={14} />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('preferences.source.edit')}</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger
+                      render={
+                        <button
+                          type="button"
+                          className="preferences-page__table-remove"
+                          aria-label={t('preferences.source.delete')}
+                          onClick={() => {
+                            storage.delete.source(source.id)
+                            refresh()
+                          }}
+                        />
+                      }
+                    >
+                      <RemoveIcon size={14} />
+                    </TooltipTrigger>
+                    <TooltipContent>{t('preferences.source.delete')}</TooltipContent>
+                  </Tooltip>
+                </div>
               </td>
             </tr>
           ))}
@@ -295,6 +296,8 @@ function SourcesPanel() {
 
 function DeveloperPanel() {
   const [copied, setCopied] = useState(false)
+  const [importError, setImportError] = useState(false)
+  const importInputRef = useRef<HTMLInputElement>(null)
 
   async function handleGenerate() {
     const id = generateId()
@@ -308,12 +311,53 @@ function DeveloperPanel() {
     }
   }
 
+  async function handleImportFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    try {
+      const text = await file.text()
+      storage.personalLayer.import(text)
+      setImportError(false)
+    } catch {
+      setImportError(true)
+    }
+  }
+
   return (
     <div className="preferences-page__panel">
       <button type="button" className="preferences-page__generate" onClick={handleGenerate}>
         {t('preferences.generate.label')}
       </button>
       {copied ? <p className="preferences-page__confirmation">{t('preferences.generate.copied')}</p> : null}
+
+      <div className="preferences-page__dev-group">
+        <h2 className="preferences-page__dev-label">{t('preferences.personal.layer.label')}</h2>
+        <div className="preferences-page__dev-actions">
+          <button type="button" className="preferences-page__dev-button" onClick={downloadPersonalLayer}>
+            <ExportIcon size={14} />
+            {t('preferences.export.label')}
+          </button>
+          <button
+            type="button"
+            className="preferences-page__dev-button"
+            onClick={() => importInputRef.current?.click()}
+          >
+            <ImportIcon size={14} />
+            {t('preferences.import.label')}
+          </button>
+        </div>
+        <input
+          ref={importInputRef}
+          type="file"
+          accept=".json"
+          hidden
+          onChange={handleImportFile}
+          aria-label={t('preferences.import.label')}
+        />
+        {importError ? <p className="preferences-page__confirmation">{t('preferences.import.error')}</p> : null}
+      </div>
     </div>
   )
 }
@@ -323,12 +367,8 @@ export function PreferencesPage() {
 
   return (
     <div className="preferences-page">
-      <IconRail />
       <div className="preferences-page__content">
         <div className="preferences-page__card">
-          <div className="preferences-page__mobile-header">
-            <MobileNav />
-          </div>
           <h1 className="preferences-page__title">{t('page.preferences.title')}</h1>
 
           <div className="preferences-page__body">

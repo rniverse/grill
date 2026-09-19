@@ -134,31 +134,4 @@ describe('MobileNav', () => {
     expect(screen.queryByText('Topics')).toBeNull()
   })
 
-  test('clicking export downloads the current personal layer as a JSON blob', async () => {
-    const createdUrls: string[] = []
-    const originalCreateObjectURL = URL.createObjectURL
-    const originalRevokeObjectURL = URL.revokeObjectURL
-    let capturedBlob: Blob | null = null
-
-    URL.createObjectURL = (blob: Blob) => {
-      capturedBlob = blob
-      const url = 'blob:mock-url'
-      createdUrls.push(url)
-      return url
-    }
-    URL.revokeObjectURL = () => {}
-
-    try {
-      renderNav()
-      fireEvent.click(screen.getByRole('button', { name: 'Menu' }))
-      fireEvent.click(await screen.findByText('Export personal layer'))
-
-      expect(createdUrls).toHaveLength(1)
-      expect(capturedBlob).not.toBeNull()
-      expect((capturedBlob as unknown as Blob).type).toBe('application/json')
-    } finally {
-      URL.createObjectURL = originalCreateObjectURL
-      URL.revokeObjectURL = originalRevokeObjectURL
-    }
-  })
 })

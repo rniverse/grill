@@ -5,8 +5,17 @@
 /* @media conditions can't reference custom properties, so this mirrors the
    --bp-mobile value (700px) in variables.css literally. */
 @media (max-width: 700px) {
+  /* Rendered once from AppLayout (not per-page) — floats over whichever
+     page is showing instead of sitting inline in that page's own header
+     row, so it works the same regardless of what that row contains.
+     z-index sits below --z-overlay so the drawer's own scrim still covers
+     it while open. */
   .mobile-nav {
     display: block;
+    position: fixed;
+    top: var(--space-xl);
+    left: var(--space-xl);
+    z-index: var(--z-floating);
   }
 }
 
@@ -156,19 +165,3 @@
   color: var(--color-ink-quaternary);
 }
 
-.mobile-nav__export {
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-sm);
-  padding: var(--space-md);
-  border-radius: var(--radius-row);
-  border: none;
-  background: var(--color-surface-tinted-alt);
-  color: var(--color-accent-icon);
-  font-family: var(--font-ui);
-  font-size: var(--text-panel-title);
-  font-weight: 600;
-  cursor: pointer;
-}

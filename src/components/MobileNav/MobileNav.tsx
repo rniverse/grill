@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { storage } from '@/services/storage'
-import { downloadPersonalLayer } from '@/utils/download-personal-layer'
 import { t } from '@/utils/i18n'
 import {
   BookmarksIcon,
   CloseIcon,
-  ExportIcon,
   LogoIcon,
   MenuIcon,
   NotesIcon,
@@ -120,11 +118,6 @@ export function MobileNav() {
                 </Link>
               ))}
             </div>
-
-            <button type="button" className="mobile-nav__export" onClick={downloadPersonalLayer}>
-              <ExportIcon size={15} />
-              <span>{t('nav.export.label')}</span>
-            </button>
           </div>
         </>
       ) : null}

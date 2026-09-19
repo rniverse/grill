@@ -1,7 +1,6 @@
 import { Link, useLocation } from 'react-router'
 import {
   BookmarksIcon,
-  ExportIcon,
   LogoIcon,
   NotesIcon,
   PreferencesIcon,
@@ -10,7 +9,6 @@ import {
   TopicsIcon,
 } from '@/utils/icons'
 import { t } from '@/utils/i18n'
-import { downloadPersonalLayer } from '@/utils/download-personal-layer'
 import './IconRail.css'
 
 interface RailLink {
@@ -54,10 +52,6 @@ export function IconRail() {
           <Icon size={18} />
         </Link>
       ))}
-
-      <button type="button" className="icon-rail__export" aria-label={t('nav.export.label')} onClick={downloadPersonalLayer}>
-        <ExportIcon size={18} />
-      </button>
     </nav>
   )
 }

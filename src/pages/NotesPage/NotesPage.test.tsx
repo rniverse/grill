@@ -64,13 +64,6 @@ describe('NotesPage', () => {
     expect(screen.getByRole('heading', { name: 'My notes' })).toBeDefined()
   })
 
-  test('renders a MobileNav trigger for phone widths', async () => {
-    renderPage()
-    await act(async () => {})
-
-    expect(screen.getByRole('button', { name: 'Menu' })).toBeDefined()
-  })
-
   test('renders an Add note button', async () => {
     renderPage()
     await act(async () => {})

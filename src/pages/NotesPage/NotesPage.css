@@ -1,4 +1,6 @@
 .notes-page {
+  flex: 1;
+  min-width: 0;
   display: flex;
   height: 100vh;
   background: var(--color-ground);
@@ -10,18 +12,20 @@
   padding: var(--space-xl) var(--space-xl) var(--space-xl) var(--space-sm);
 }
 
+/* Card no longer scrolls itself — .notes-page__items does, so the title
+   row above stays put. */
 .notes-page__card {
   height: 100%;
-  background: var(--color-surface);
-  border-radius: var(--radius-card);
+  min-height: 0;
   padding: var(--space-4xl) var(--space-card-inline);
-  overflow-y: auto;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   gap: var(--space-xl);
 }
 
 .notes-page__title-row {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -51,6 +55,9 @@
 }
 
 .notes-page__items {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -125,28 +132,17 @@
 }
 
 /* @media conditions can't reference custom properties, so this mirrors the
-   --bp-mobile value (700px) in variables.css literally — same as IconRail's
-   own hide rule. Below it, IconRail is gone and this bar's MobileNav is the
-   only way to navigate. */
-.notes-page__mobile-header {
-  display: none;
-}
-
+   --bp-mobile value (700px) in variables.css literally. */
 @media (max-width: 700px) {
   .notes-page__content {
     padding: 0;
   }
 
+  /* Top padding clears MobileNav's floating trigger (rendered by
+     AppLayout, fixed top-left) instead of a padding-bottom on a header row
+     that used to hold it here. */
   .notes-page__card {
-    border-radius: 0;
-    background: transparent;
-    padding: var(--space-xl) var(--space-xl) var(--space-ms);
-  }
-
-  .notes-page__mobile-header {
-    display: flex;
-    align-items: center;
-    padding-bottom: var(--space-md);
+    padding: calc(var(--space-xl) + var(--space-4xl)) var(--space-xl) var(--space-ms);
   }
 }
 
@@ -165,9 +161,29 @@
   z-index: var(--z-modal);
 }
 
+.notes-page__dialog-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
 .notes-page__dialog-title {
   font-family: var(--font-ui);
   font-size: var(--text-question);
   font-weight: 600;
   color: var(--color-ink);
+}
+
+.notes-page__dialog-close {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--size-close-button);
+  height: var(--size-close-button);
+  border: none;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  color: var(--color-ink-tertiary);
+  cursor: pointer;
 }

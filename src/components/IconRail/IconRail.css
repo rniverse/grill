@@ -46,14 +46,3 @@
   background: var(--color-surface);
   color: var(--color-accent-icon);
 }
-
-.icon-rail__export {
-  margin-top: auto;
-  display: flex;
-  padding: var(--space-ms);
-  border-radius: var(--radius-icon);
-  color: var(--color-ink-tertiary);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-}
